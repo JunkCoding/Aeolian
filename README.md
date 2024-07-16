@@ -29,12 +29,13 @@ I have used some FastLED functions, "as is", and modified others. I had a reason
 # Screenshots.
 # Console
 ![Console](https://github.com/JunkCoding/axrgb/blob/main/screenshots/console1.png)
-# Main Status Screen
-![Status](https://github.com/JunkCoding/axrgb/blob/main/screenshots/status.png)
+
 # Tasks (running processes)
 ![Tasks](https://github.com/JunkCoding/axrgb/blob/main/screenshots/tasks.png)
 # Wireless configuration
 ![WiFi](https://github.com/JunkCoding/axrgb/blob/main/screenshots/WiFi.png)
 
+# Main Status Screen
+![Status](https://github.com/JunkCoding/axrgb/blob/main/screenshots/status.png)
 # Zones
-There are currently 6 zones, 4 of which are used by the light display. Essentially, you can split the lights into four zones, such as the four sides of a building. Only a few, maybe two patterns use zones at the moment; 'blocky' and 'rachels'. Rachels is broken and is meant to display a different pattern in each zone whilst blocky displays a different colour in each zone and rotates them around.
+There are currently 6 zones, 4 of which are used by the light display. Essentially, you can split the lights into four zones, such as the four sides of a building. Only a few, maybe two patterns use zones at the moment; 'blocky' and 'rachels'. Rachels is broken and is meant to display a different pattern in each zone whilst 'blocky' displays a different colour in each zone and rotates them around.
