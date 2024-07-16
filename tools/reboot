@@ -1,0 +1,7 @@
+#!/bin/bash
+
+HOST="172.16.2.65"
+
+[ -n "${1}" ] && HOST="${1}"
+
+curl -X GET http://${HOST}/flash/reboot

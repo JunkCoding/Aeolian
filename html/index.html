@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Wireless LEDs</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="/css/siimple.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
+  <script type="text/javascript" src="/js/common.js"></script>
+  <script type="text/javascript" src="/js/index.js"></script>
+  <script language="javascript">
+    document.addEventListener("DOMContentLoaded", function (event)
+    {
+      document.leds.state.value = "%led_switch%";
+      set_switch("light_switch", "%light_switch%");
+    });
+  </script>
+</head>
+
+<body onload="page_onload()">
+  <div class="navbar" id="myTopnav">
+    <a class="active" href="/index.html">Status</a>
+    <a href="/patterns.html">Patterns</a>
+    <a href="/themes.html">Themes</a>
+    <a href="/schedule.html">Schedule</a>
+    <a href="/mqttconfig.html">MQTT</a>
+    <a href="/wifi.html">WiFi</a>
+    <a href="/tasks.html">Tasks</a>
+    <a href="/flash.html">Flash</a>
+    <a href="/console.html">Console</a>
+    <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
+  </div>
+  <div class="main">
+    <h1>Device Status</h1>
+    <table class="status_table">
+      <tbody>
+        <tr>
+          <th>Date &amp; Time:</th>
+          <td id="date_time"><br></td>
+        </tr>
+        <tr>
+          <th>Sunrise / Sunset:</th>
+          <td id="sunrise">%sunrise% / %sunset%<br></td>
+        </tr>
+        <tr>
+          <th>Moon Cycle:</th>
+          <td id="moonphase">%moonphase%<br></td>
+        </tr>
+        <tr>
+          <th>Uptime:</th>
+          <td id="uptime">%uptime%<br></td>
+        </tr>
+        <tr>
+          <th>Free Heap:</th>
+          <td><span id="memory">%memory%</span> bytes<br></td>
+        </tr>
+        <tr>
+          <th>LED Count:</th>
+          <td><input type="text" id="led_count" name="led_count" size="20" value="%led_count%" onchange="updateControl(this.id, this.value)"></td>
+        </tr>
+        <tr>
+          <th>LED GPIO Pin:</th>
+          <td><input type="text" id="led_gpio_pin" name="led_gpio_pin" size="20" value="%led_gpio_pin%" onchange="updateControl(this.id, this.value)"></td>
+        </tr>
+        <tr>
+          <th>LED Lights:</th>
+          <td style="padding: 0px 0px 0px 15px;">
+            <div class="parent">
+              <div class='led_status child'><label id="led_status"></label></div>
+              <div class="led_lights child">
+                <form name="leds" class="led_lights child">
+                  <input type="radio" name="state" class="on" id="on" value="0" onchange="switchLeds(this);" />
+                  <svg viewBox="0 0 24 24" width="24px" height="24px">
+                    <path d="M20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5M17,9.5C17,10.3 16.3,11 15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5M12,17.23C10.25,17.23 8.71,16.5 7.81,15.42L9.23,14C9.68,14.72 10.75,15.23 12,15.23C13.25,15.23 14.32,14.72 14.77,14L16.19,15.42C15.29,16.5 13.75,17.23 12,17.23Z" />
+                  </svg>
+                  <input type="radio" name="state" class="auto" id="auto" value="1" onchange="switchLeds(this);"
+                    checked />
+                  <svg viewBox="0 0 24 24" width="24px" height="24px">
+                    <path d="M8.5,11A1.5,1.5 0 0,1 7,9.5A1.5,1.5 0 0,1 8.5,8A1.5,1.5 0 0,1 10,9.5A1.5,1.5 0 0,1 8.5,11M15.5,11A1.5,1.5 0 0,1 14,9.5A1.5,1.5 0 0,1 15.5,8A1.5,1.5 0 0,1 17,9.5A1.5,1.5 0 0,1 15.5,11M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M9,14H15A1,1 0 0,1 16,15A1,1 0 0,1 15,16H9A1,1 0 0,1 8,15A1,1 0 0,1 9,14Z" />
+                  </svg>
+                  <input type="radio" name="state" class="off" id="off" value="2" onchange="switchLeds(this);" />
+                  <svg viewBox="0 0 24 24" width="24px" height="24px">
+                    <path d="M20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8M10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5M12,14C13.75,14 15.29,14.72 16.19,15.81L14.77,17.23C14.32,16.5 13.25,16 12,16C10.75,16 9.68,16.5 9.23,17.23L7.81,15.81C8.71,14.72 10.25,14 12,14Z" />
+                  </svg>
+                </form>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Brightness:</th>
+          <td style="padding:0px 0px 0px 15px">
+            <div class="dd-wrapper">
+              <div id="dim" class="ddlist" tabindex="1">
+                <span id="selDim">Brightness...</span>
+                <ul class="dropdown">
+                  <li value="0"><a href="#">Max</a></li>
+                  <li value="1"><a href="#">High</a></li>
+                  <li value="2"><a href="#">Medium</a></li>
+                  <li value="3"><a href="#">Low</a></li>
+                  <li value="4"><a href="#">Minimum</a></li>
+                </ul>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Current Theme:</th>
+          <td style="padding:0px 0px 0px 15px">
+            <div class="dd-wrapper">
+              <div id="theme" class="ddlist" tabindex="2">
+                <span id="selTheme">Theme...</span>
+                <ul id="tdropdown" class="dropdown">
+                </ul>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Current Pattern:</th>
+          <td style="padding:0px 0px 0px 15px">
+            <div class="dd-wrapper">
+              <div id="pattern" class="ddlist" tabindex="3">
+                <span id="selPattern">Pattern...</span>
+                <ul id="pdropdown" class="dropdown">
+                </ul>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Security Light:</th>
+          <td style="padding:0px 0px 0px 15px">
+            <div class="onoffswitch">
+              <input type="hidden" id="hidden_light_switch" name="light_switch" value="0">
+              <input type="checkbox" name="light_switch" class="onoffswitch-checkbox" id="light_switch" onClick="checkboxToggle('light_switch')">
+              <label class="onoffswitch-label" for="light_switch">
+                <span class="onoffswitch-inner"></span>
+                <span class="onoffswitch-switch"></span>
+              </label>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Security Light GPIO Pin:</th>
+          <td><input type="text" id="light_gpio_pin" name="light_gpio_pin" size="20" value="%light_gpio_pin%" onchange="updateControl(this.id, this.value)"></td>
+        </tr>
+        <tr>
+          <th>Zones:</th>
+          <td>
+            <div class="container-fluid">
+              <div class="table-row header">
+                <div class="column zone_hdr">#</div>
+                <div class="column zone_hdr">Start</div>
+                <div class="column zone_hdr">Count</div>
+                <div class="column zone_hdr">Status</div>
+              </div>
+              <div class="table-row row">
+                <div class="column zone_hdr">1</div>
+                <div class="column zone_start"><input class="zone_num" type="text" id="z0s" name="z0s" size="20" value="%z0s%" onchange="updateControl(this.id, this.value)"></div>
+                <div class="column zone_count"><input class="zone_num" type="text" id="z0c" name="z0c" size="20" value="%z0c%" onchange="updateControl(this.id, this.value)"></div>
+                <div class="column zone_status" id="zone0"></div>
+              </div>
+              <div class="table-row row">
+                <div class="column zone_hdr">2</div>
+                <div class="column zone_start"><input class="zone_num" type="text" id="z1s" name="z1s" size="20" value="%z1s%" onchange="updateControl(this.id, this.value)"></div>
+                <div class="column zone_count"><input class="zone_num" type="text" id="z1c" name="z1c" size="20" value="%z1c%" onchange="updateControl(this.id, this.value)"></div>
+                <div class="column zone_status" id="zone1"></div>
+              </div>
+              <div class="table-row row">
+                <div class="column zone_hdr">3</div>
+                <div class="column zone_start"><input class="zone_num" type="text" id="z2s" name="z2s" size="20" value="%z2s%" onchange="updateControl(this.id, this.value)"></div>
+                <div class="column zone_count"><input class="zone_num" type="text" id="z2c" name="z2c" size="20" value="%z2c%" onchange="updateControl(this.id, this.value)"></div>
+                <div class="column zone_status" id="zone2"></div>
+              </div>
+              <div class="table-row row">
+                <div class="column zone_hdr">4</div>
+                <div class="column zone_start"><input class="zone_num" type="text" id="z3s" name="z3s" size="20" value="%z3s%" onchange="updateControl(this.id, this.value)"></div>
+                <div class="column zone_count"><input class="zone_num" type="text" id="z3c" name="z3c" size="20" value="%z3c%" onchange="updateControl(this.id, this.value)"></div>
+                <div class="column zone_status" id="zone3"></div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Last Reset Cause:</th>
+          <td>%sys_rst_info%<br></td>
+        </tr>
+        <tr>
+          <th>Boot Count:</th>
+          <td id="uptime">%boot_count%<br></td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h1>Server/Client Status</h1>
+    <table class="status_table">
+      <tbody>
+        <tr>
+          <th>Hostname:</th>
+          <td><a href="http://%hostname%/">%hostname%</a><br></td>
+        </tr>
+        <tr>
+          <th>IP Address:</th>
+          <td><a href="http://%ip_address%/">%ip_address%</a><br></td>
+        </tr>
+        <tr>
+          <th>MAC Address</th>
+          <td>%mac_address%<br></td>
+        </tr>
+        <tr>
+          <th>WLAN Domain:</th>
+          <td>%ap_ssid%<br></td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <div id="status_box" class="alert alert-info">Loading..</div>
+    <br>
+    <div><small>Firmware: %build_options%, %version_date%. (IDF %idf_version%) (Target: %build_target%)</small></div>
+    <div>
+</body>
+
+</html>

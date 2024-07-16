@@ -1,0 +1,22 @@
+#ESP-IDF Kconfig configuration file. Not used for ESP8266 RTOS/non-RTOS SDKs.
+
+menu "libespfs"
+
+config ESPFS_ENABLED
+    bool "espfs"
+    help
+        Select this option to enable libespfs and show the submodule with libespfs configuration
+
+config ESPFS_MAX_PARTITIONS
+        int "Maximum Number of Partitions"
+        default 1
+        range 1 10
+        help
+                Define maximum number of partitions that can be mounted.
+
+config ESPFS_HTMLDIR
+        string "Directory (on the build machine) where the static files served by the webserver are"
+        depends on ESPFS_ENABLED
+        default "html/"
+
+endmenu

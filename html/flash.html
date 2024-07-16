@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Upgrade Firmware</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="/css/siimple.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
+  <script type="text/javascript" src="/js/common.js"></script>
+  <script type="text/javascript" src="/js/flash.js"></script>
+</head>
+
+<body onload="page_onload()">
+  <div class="navbar" id="myTopnav">
+    <a href="/index.html">Status</a>
+    <a href="/patterns.html">Patterns</a>
+    <a href="/themes.html">Themes</a>
+    <a href="/schedule.html">Schedule</a>
+    <a href="/mqttconfig.html">MQTT</a>
+    <a href="/wifi.html">WiFi</a>
+    <a href="/tasks.html">Tasks</a>
+    <a class="active" href="/flash.html">Flash</a>
+    <a href="/console.html">Console</a>
+    <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
+  </div>
+  <div class="main">
+    <h1>App Partitions</h1>
+    <p><b>&nbsp;Binary firmware&nbsp;</b><input type="file" id="firmware" /></p>
+    <br />
+    <table id="tblApp" class="hdr_table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Size</th>
+          <th>Version</th>
+          <th>Valid</th>
+          <th>Running</th>
+          <th>Boot</th>
+          <th>Firmware</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <br />
+    <h1>Data Partitions</h1>
+    <table id="tblData" class="hdr_table">
+      <thead>
+        <tr>
+          <th>Partition Name</th>
+          <th>Partition Size</th>
+          <th>Data Type</th>
+          <th>Erase</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <br />
+    <div class="credentials"><input type="submit" value="Reboot!" onclick="doReboot()" /></div>
+    <div id="status" class="alert remark">Loading...</div>
+    <div id="spinner"></div>
+    <div id="progbar" class="html5-progress-bar">
+      <div class="prog-wrapper">
+        <progress id="progressBar" value="0" max="100"></progress>
+        <h3 id="status"></h3>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

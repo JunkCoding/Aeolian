@@ -1,0 +1,14 @@
+[
+  {
+    "key": "ctrl+alt+f4",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Flash - App",
+    "when": "editorTextFocus" 
+  },
+  {
+    "key": "ctrl+alt+f5",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Flash - All",
+    "when": "editorTextFocus" 
+  }
+]

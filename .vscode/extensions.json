@@ -1,0 +1,19 @@
+{
+    // See http://go.microsoft.com/fwlink/?LinkId=827846
+    // for the documentation about the extensions.json format
+    "recommendations": [
+        "platformio.platformio-ide",
+        "nimda.deepdark-material",
+        "mhutchie.git-graph",
+        "oderwat.indent-rainbow",
+        "daylerees.rainglow",
+        "lihui.vs-color-picker",
+        "mechatroner.rainbow-csv",
+        "mcu-debug.memory-view",
+        "eamodio.gitlens",
+        "anseki.vscode-color"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools-extension-pack"
+    ]
+}

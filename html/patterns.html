@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LED Pattern Settings</title>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
+  <link rel="stylesheet" type="text/css" href="/css/siimple.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <script type="text/javascript" src="/js/common.js"></script>
+  <script type="text/javascript">
+    function page_onload()
+    {
+      fetchData(0);
+    }
+    function fillTable(jsonData)
+    {
+      let l = jsonData.items.length;
+      for (var i = 0; i < l; i++)
+      {
+        var pattern = jsonData.items[i];
+
+        var row = document.createElement('TR');
+
+        var cell = document.createElement('TD');
+        cell.appendChild(document.createTextNode(pattern.name));
+        row.appendChild(cell);
+
+        var cell = document.createElement('TD');
+        cell.className = "nopadding";
+        var selectList = document.createElement("select");
+        selectList.id = pattern.id;
+        selectList.setAttribute("onchange", 'toggleEnabled(this.id, this.value)');
+
+        var option = document.createElement("option");
+        option.value = 0;
+        option.text = "No";
+        selectList.appendChild(option);
+
+        var option = document.createElement("option");
+        option.value = 1;
+        option.text = "Yes";
+        selectList.appendChild(option);
+
+        selectList.selectedIndex = pattern.enabled;
+        cell.appendChild(selectList);
+        row.appendChild(cell);
+
+        var cell = document.createElement('TD');
+        cell.className = "nopadding";
+        var input = document.createElement("input");
+        input.id = pattern.id;
+        input.setAttribute("onChange", 'updateStars(this.id, this.value)');
+        input.setAttribute("type", "range");
+        input.setAttribute("min", "0");
+        input.setAttribute("max", "6");
+        input.setAttribute("value", pattern.stars);
+        cell.appendChild(input);
+        row.appendChild(cell);
+
+        var cell = document.createElement('TD');
+        cell.appendChild(document.createTextNode(pattern.mask));
+        row.appendChild(cell);
+
+        pbody.appendChild(row);
+      }
+
+      if (jsonData.next > 0)
+      {
+        fetchData(jsonData.next);
+      }
+    }
+    function fetchData(start)
+    {
+      var req = new XMLHttpRequest();
+      req.overrideMimeType("application/json");
+      req.open("get", "pattern.json?start=" + start, true);
+
+      req.onload = function ()
+      {
+        var jsonResponse = JSON.parse(req.responseText);
+        fillTable(jsonResponse);
+      };
+      req.send(null);
+    }
+    function toggleEnabled(id, value)
+    {
+      updateControl('set_pattern', "p" + id + "e" + value);
+    }
+    function updateStars(id, value)
+    {
+      updateControl('set_pattern', "p" + id + "s" + value);
+    }
+  </script>
+</head>
+
+<body onload="page_onload()">
+  <div class="navbar" id="myTopnav">
+    <a href="/index.html">Status</a>
+    <a class="active" href="/patterns.html">Patterns</a>
+    <a href="/themes.html">Themes</a>
+    <a href="/schedule.html">Schedule</a>
+    <a href="/mqttconfig.html">MQTT</a>
+    <a href="/wifi.html">WiFi</a>
+    <a href="/tasks.html">Tasks</a>
+    <a href="/flash.html">Flash</a>
+    <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
+  </div>
+  <div class="main">
+    <h1>LED Pattern Settings</h1>
+    <table id="patterns" class="hdr_table">
+      <thead>
+        <tr>
+          <th id="name">Name</th>
+          <th id="enabled">Enabled</th>
+          <th id="stars"># Stars</th>
+          <th id="mask">Mask</th>
+        </tr>
+      </thead>
+      <tbody id="pbody">
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>

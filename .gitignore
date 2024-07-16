@@ -1,0 +1,13 @@
+build/*
+.DS_Store
+#dependencies.lock
+debug.log
+*.bin
+*.trace
+sdkconfig
+sdkconfig.old
+.vscode/BROWSE.VC.DB
+.vscode/BROWSE.VC.DB-shm
+.vscode/browse.vc.db-wal
+.vscode/c_cpp_properties.json
+.vscode/browse.vc.db

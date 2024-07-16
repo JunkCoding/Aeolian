@@ -1,0 +1,83 @@
+.year {
+  margin: 66px 0px 0px 0px;
+  /*width: 960px;*/
+  padding: 10px;
+  border: 1px solid #E0E0E0;
+  border-radius: 10px;
+  display: flex;
+  background: #FFF;
+  box-shadow: 0 10px 50px -15px rgba(0, 0, 0, 0.75);
+  position: relative;
+}
+.year:before {
+  position: absolute;
+  content: attr(data-title);
+  color: #E0E0E0;
+  top: -60px;
+  left: 10px;
+  font-family: sans-serif;
+  font-weight: 700;
+  font-size: 64px;
+}
+.year ul {
+  display: inline-block;
+  padding: 0;
+  margin: 0 1px;
+  list-style: none;
+  flex: 1;
+  position: relative;
+}
+.year ul:before {
+  position: absolute;
+  content: attr(data-month);
+  color: #1756a850;
+  text-shadow: 0 0 0 rgba(0, 0, 0, 0.25);
+  font-family: sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  transform-origin: 0 100%;
+  transform: rotate(90deg) translateX(-20px) translateY(0px);
+  top: 0px;
+  left: 0px;
+  pointer-events: none;
+}
+.year ul:first-child {
+  margin-left: 0;
+}
+.year ul:last-child {
+  margin-right: 0;
+}
+.year ul li {
+  padding: 0;
+  margin: 0;
+  height: 22px;
+  box-shadow: inset 0 0 0 1px #f0f0f0;
+  /*background: #F8F8F8;*/
+}
+.year ul li:before {
+  content: attr(data-date);
+  color: #1756a899;
+  text-shadow: 0 0 0 rgba(0, 0, 0, 0.25);
+  text-align: right;
+  margin-right: 5px;
+  right: 2px;
+  position: absolute;
+  line-height: 24px;
+  font-size: 12px;
+}
+.year ul li[data-day="0"], .year ul li[data-day="6"] {
+  background: #40404010;
+  box-shadow: inset 0 0 0 1px #E0E0E0;
+}
+.year ul li[data-dd="0904"] {
+  background: #3397b694;
+  box-shadow: inset 0 0 0 1px #E0E0E0;
+}
+.today {
+  background: #df572194;
+  box-shadow: inset 0 0 0 1px #E0E0E0;
+}
+.day-selected {
+  color: #10A0F436;
+  border-left: 65px solid #10A0F436;
+}

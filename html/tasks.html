@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Running Tasks</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="/css/siimple.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="stylesheet" type="text/css" href="/css/signalbars.css">
+  <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
+  <script type="text/javascript" src="/js/common.js"></script>
+  <script type="text/javascript" src="/js/tasks.js"></script>
+</head>
+
+<body onload="page_onload()">
+  <div class="navbar" id="myTopnav">
+    <a href="/index.html">Status</a>
+    <a href="/patterns.html">Patterns</a>
+    <a href="/themes.html">Themes</a>
+    <a href="/schedule.html">Schedule</a>
+    <a href="/mqttconfig.html">MQTT</a>
+    <a href="/wifi.html">WiFi</a>
+    <a class="active" href="/tasks.html">Tasks</a>
+    <a href="/flash.html">Flash</a>
+    <a href="/console.html">Console</a>
+    <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
+  </div>
+  <div class="main">
+    <div>
+      <h5>&nbsp;Task List</h5>
+      <table id="taskList" class="hdr_table">
+        <thead id="taskHdr">
+          <tr>
+            <th id="pid" title="Process Identity">PID</th>
+            <th id="bp" title="Base Priority">BP</th>
+            <th id="cp" title="Current priority">CP</th>
+            <th id="tn" title="Name of the task">Name</th>
+            <th id="hwm" title="High water mark">HWM</th>
+            <th id="c8" title="8 bit memory utilisation">8 Bit</th>
+            <th id="c32" title="32 bit memory utilisation">32 Bit</th>
+            <th id="rt" title="Time spent on the CPU">Run Time</th>
+            <th id="st" title="Current run state">State</th>
+            <th id="core" title="CPU affinity">Core</th>
+            <th id="use" title="CPU utilisation">% CPU</th>
+          </tr>
+        </thead>
+        <tbody id="tasks"></tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>
