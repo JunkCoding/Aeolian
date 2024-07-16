@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Welsh Space Agency</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="/css/siimple.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
+  <script type="text/javascript" src="/js/common.js"></script>
+  <script type="text/javascript" src="/js/index.js"></script>
+  <script language="javascript">
+    function page_onload()
+    {
+      for ( var c = 0; (allow_launch(c, false)); c++ );
+    }
+    function allow_launch( rocketNum, setOff )
+    {
+      var safety = document.getElementById("safety_switch" + rocketNum.toString());
+      if (safety)
+      {
+        var toggle = document.getElementById("hidden_switch" + rocketNum.toString());
+        var button = document.getElementById("launch_button" + rocketNum.toString());
+        safety.checked = !setOff;
+        toggle.checked = safety.checked;
+        button.disabled = !setOff;
+      }
+      return safety;
+    }
+    function launch_rocket( rocketID )
+    {
+      updateControl("launch_rocket", rocketID.toString());
+    }
+  </script>
+  <style type="text/css">
+    .launch_button {
+      padding: 2px 10px;
+      border: none;
+      outline: none;
+      color: rgb(255, 255, 255);
+      background: #111;
+      cursor: pointer;
+      position: relative;
+      z-index: 0;
+      border-radius: 10px;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .launch_button:enabled:before {
+      content: "";
+      background: linear-gradient(
+        45deg,
+        #ff0000,
+        #ff7300,
+        #fffb00,
+        #48ff00,
+        #00ffd5,
+        #002bff,
+        #7a00ff,
+        #ff00c8,
+        #ff0000
+      );
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      background-size: 400%;
+      z-index: -1;
+      filter: blur(5px);
+      -webkit-filter: blur(5px);
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      animation: launch_button 20s linear infinite;
+      transition: opacity 0.3s ease-in-out;
+      border-radius: 10px;
+    }
+    @keyframes launch_button {
+      0% {
+        background-position: 0 0;
+      }
+      50% {
+        background-position: 400% 0;
+      }
+      100% {
+        background-position: 0 0;
+      }
+    }
+    .launch_button:after {
+      z-index: -1;
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #601010;
+      left: 0;
+      top: 0;
+      border-radius: 10px;
+    }
+    .launch_button:disabled,
+    .launch_button[disabled]{
+      cursor: not-allowed;
+      pointer-events: none;
+      border: 1px solid #999999;
+      background-color: #cccccc;
+      color: #666666;
+    }
+  </style>
+</head>
+<body onload="page_onload()">
+  <div class="navbar" id="myTopnav">
+    <a href="/index.html">Status</a>
+    <a href="/patterns.html">Patterns</a>
+    <a href="/themes.html">Themes</a>
+    <a href="/schedule.html">Schedule</a>
+    <a href="/mqttconfig.html">MQTT</a>
+    <a href="/wifi.html">WiFi</a>
+    <a href="/tasks.html">Tasks</a>
+    <a href="/flash.html">Flash</a>
+    <a href="/console.html">Console</a>
+    <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
+  </div>
+  <div class="main">
+    <h1>Welsh Space Agency: Mission Control</h1>
+    <table class="status_table">
+      <tbody>
+        <tr>
+          <th>Rockets:</th>
+          <td>
+            <div class="container-fluid">
+              <div class="table-row header">
+                <div class="column zone_hdr">#</div>
+                <div class="column zone_hdr">Safety</div>
+                <div class="column zone_hdr">Launch</div>
+              </div>
+              <div class="table-row row">
+                <div class="column zone_hdr">1</div>
+                <div class="column zone_start">
+                  <div class="onoffswitch">
+                    <input type="hidden" id="hidden_switch0" value="1">
+                    <input type="checkbox" id="safety_switch0" class="onoffswitch-checkbox" checked="True" onClick="allow_launch(0, !this.checked)">
+                    <label class="onoffswitch-label" for="safety_switch0">
+                      <span class="onoffswitch-inner"></span>
+                      <span class="onoffswitch-switch"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="column zone_status" id="zone0">
+                  <button class="launch_button" id="launch_button0" role="button" disabled onClick="launch_rocket(0)">Launch!</button>
+                </div>
+              </div>
+              <div class="table-row row">
+                <div class="column zone_hdr">2</div>
+                <div class="column zone_start">
+                  <div class="onoffswitch">
+                    <input type="hidden" id="hidden_switch1" value="1">
+                    <input type="checkbox" id="safety_switch1" class="onoffswitch-checkbox" checked="True" onClick="allow_launch(1, !this.checked)">
+                    <label class="onoffswitch-label" for="safety_switch1">
+                      <span class="onoffswitch-inner"></span>
+                      <span class="onoffswitch-switch"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="column zone_status" id="zone1">
+                  <button class="launch_button" id="launch_button1" role="button" disabled onClick="launch_rocket(1)">Launch!</button>
+                </div>
+              </div>
+              <div class="table-row row">
+                <div class="column zone_hdr">3</div>
+                <div class="column zone_start">
+                  <div class="onoffswitch">
+                    <input type="hidden" id="hidden_switch2" value="1">
+                    <input type="checkbox" id="safety_switch2" class="onoffswitch-checkbox" checked="True" onClick="allow_launch(2, !this.checked)">
+                    <label class="onoffswitch-label" for="safety_switch2">
+                      <span class="onoffswitch-inner"></span>
+                      <span class="onoffswitch-switch"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="column zone_status" id="zone2">
+                    <button class="launch_button" id="launch_button2" role="button" disabled onClick="launch_rocket(2)">Launch!</button>
+                </div>
+              </div>
+              <div class="table-row row">
+                <div class="column zone_hdr">4</div>
+                <div class="column zone_start">
+                  <div class="onoffswitch">
+                    <input type="hidden" id="hidden_switch3" value="1">
+                    <input type="checkbox" id="safety_switch3" class="onoffswitch-checkbox" checked="True" onClick="allow_launch(3, !this.checked)">
+                    <label class="onoffswitch-label" for="safety_switch3">
+                      <span class="onoffswitch-inner"></span>
+                      <span class="onoffswitch-switch"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="column zone_status" id="zone3">
+                  <button class="launch_button" id="launch_button3" role="button" disabled onClick="launch_rocket(3)">Launch!</button>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>

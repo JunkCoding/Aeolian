@@ -1,0 +1,68 @@
+# --------------------
+# AXRGB csv file
+# --------------------
+key,type,encoding,value
+# --------------------
+# Boot tracking
+# --------------------
+boot,namespace,,
+boot_count,data,u32,0
+ota_update,data,u32,0
+# --------------------
+# Light zones
+# --------------------
+light_zones,namespace,,
+# --------------------
+# Light config
+# --------------------
+light_config,namespace,,
+schedule,data,u8,01
+led_count,data,u16,50
+dim_level,data,u8,4
+led_gpio_pin,data,u8,23
+light_gpio_pin,data,u8,21
+zone_00,data,hex2bin,0000030000003F3F3F00
+zone_01,data,hex2bin,0300030000003F3F3F00
+zone_02,data,hex2bin,0600030000003F3F3F00
+zone_03,data,hex2bin,0900030000003F3F3F00
+# --------------------
+# Wireless config
+# --------------------
+wifi_settings,namespace,,
+mode,data,u8,01
+powersave,data,u8,01
+sta_ssid,data,string,WaveLan
+sta_password,data,string,Fl0r3nce
+# --------------------
+# Weekly schedule
+# --------------------
+sched_weekly,namespace,,
+200002,data,hex2bin,1400141E010180
+200004,data,hex2bin,1400141E040280
+# --------------------
+# Annual schedule
+# --------------------
+sched_annual,namespace,,
+# /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+# Default events
+# \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+#
+# <keyname>     <hex2bin>   hhmmhhmmddddMMTTFF
+# --------------------
+00000000013101,data,hex2bin,0700151E011F000131
+# Tweltfh Night
+# --------------------
+00000000050601,data,hex2bin,000000000506000202
+# Jess
+# --------------------
+00000000101004,data,hex2bin,0700151E0A0A040011
+# All-Hallows Eve
+# --------------------
+00000000313109,data,hex2bin,0700151E0F1F090311
+# Christmas (normal schedule)
+# --------------------
+00000000013111,data,hex2bin,0700151E011F0B0291
+# Christmas (3 days in deference to Ukraine)
+# --------------------
+00000000242611,data,hex2bin,0700151E19190B0211
+# /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\

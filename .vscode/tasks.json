@@ -1,0 +1,521 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // Flash OTA0
+    // ================================================
+    {
+      "label": "Flash - ota0",
+      "type": "shell",
+      "isBackground": false,
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "${env:PATH};${config:idf.customExtraPaths}"
+        }
+      },
+      "linux": {
+        "command": "openocd",
+        "args": [
+          "-f",
+          "board/esp32s3-builtin.cfg",
+          "-c",
+          "program_esp build/${command:espIdf.getProjectName}.bin 0x020000 verify reset exit"
+        ]
+      },
+      "osx": {
+        "command": "openocd",
+        "args": [
+          "-f",
+          "board/esp32s3-builtin.cfg",
+          "-c",
+          "program_esp build/${command:espIdf.getProjectName}.bin 0x020000 verify reset exit"
+        ]
+      },
+      "windows": {
+        "command": "openocd.exe",
+        "env": {
+          "PATH": "${env:PATH};${config:idf.customExtraPaths}"
+        },
+        "args": [
+          "-f",
+          "openocd/esp-prog.cfg",
+          "-f",
+          "target/esp32.cfg",
+          "-c",
+          "program_esp build\\${command:espIdf.getProjectName}.bin 0x020000 verify reset exit"
+        ]
+      },
+      "problemMatcher": []
+    },
+    // Flash OTA1
+    // ================================================
+    {
+      "label": "Flash - ota1",
+      "type": "shell",
+      "isBackground": false,
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "${env:PATH};${config:idf.customExtraPaths}"
+        }
+      },
+      "linux": {
+        "command": "openocd",
+        "args": [
+          "-f",
+          "${workspaceFolder}/openocd/olimex.cfg",
+          "-f",
+          "target/esp32.cfg",
+          "-c",
+          "program_esp build/${command:espIdf.getProjectName}.bin 0x1D0000 verify reset exit"
+        ]
+      },
+      "osx": {
+        "command": "openocd",
+        "args": [
+          "-f",
+          "${workspaceFolder}/openocd/olimex.cfg",
+          "-f",
+          "target/esp32.cfg",
+          "-c",
+          "program_esp build/${command:espIdf.getProjectName}.bin 0x1D0000 verify reset exit"
+        ]
+      },
+      "windows": {
+        "command": "openocd.exe",
+        "env": {
+          "PATH": "${env:PATH};${config:idf.customExtraPaths}"
+        },
+        "args": [
+          "-f",
+          "${workspaceFolder}\\openocd\\segger.cfg",
+          "-f",
+          "target/esp32.cfg",
+          "-c",
+          "program_esp build\\${command:espIdf.getProjectName}.bin 0x1D0000 verify reset exit"
+        ]
+      },
+      "problemMatcher": []
+    },
+    // OpenOCD using Segger J-Link
+    // ================================================
+    {
+      "label": "ocd:segger",
+      "type": "shell",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "revealProblems": "onProblem",
+        "clear": false
+      },
+      "linux": {
+        "command": "openocd -f ${workspaceFolder}/openocd/segger.cfg -f target/esp32.cfg"
+      },
+      "osx": {
+        "command": "openocd -f ${workspaceFolder}/openocd/segger.cfg -f target/esp32.cfg"
+      },
+      "windows": {
+        "command": "openocd.exe -f ${workspaceFolder}\\openocd\\segger.cfg -f target/esp32.cfg",
+        "options": {
+          "env": {
+            "PATH": "${env:PATH};${config:idf.customExtraPaths}"
+          }
+        }
+      },
+      "options": {
+        "env": {
+          "PATH": "${env:PATH}:${config:idf.customExtraPaths}"
+        }
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(Info) *: *(.*)$",
+          "file": 0,
+          "location": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Listening on port .*",
+          "endsPattern": "\\d+"
+        }
+      }
+    },
+    // OpenOCD using esp-prog
+    // ================================================
+    {
+      "label": "ocd:esp-prog",
+      "type": "shell",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "revealProblems": "onProblem",
+        "clear": false
+      },
+      "linux": {
+        "command": "openocd -f openocd/esp-prog.cfg -f target/esp32.cfg"
+      },
+      "osx": {
+        "command": "openocd -f openocd/esp-prog.cfg -f target/esp32.cfg"
+      },
+      "windows": {
+        "command": "openocd.exe -f openocd/esp-prog.cfg -f target/esp32.cfg",
+        "options": {
+          "env": {
+            "PATH": "${env:PATH};${config:idf.customExtraPaths}"
+          }
+        }
+      },
+      "options": {
+        "env": {
+          "PATH": "${env:PATH}:${config:idf.customExtraPaths}"
+        }
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(Info) *: *(.*)$",
+          "file": 0,
+          "location": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Listening on port .*",
+          "endsPattern": "\\d+"
+        }
+      }
+    },
+    // OpenOCD ESP32S3 using builtin JTAG
+    // ================================================
+    {
+      "label": "ocd:esp32s3",
+      "type": "shell",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "revealProblems": "onProblem",
+        "clear": false
+      },
+      "linux": {
+        "command": "openocd -f board/esp32s3-builtin.cfg"
+      },
+      "osx": {
+        "command": "openocd -f board/esp32s3-builtin.cfg"
+      },
+      "windows": {
+        "command": "openocd.exe -s ${command:espIdf.getOpenOcdScriptValue} ${command:espIdf.getOpenOcdConfigs}",
+        "options": {
+          "env": {
+            "PATH": "${env:PATH};${config:idf.customExtraPaths}"
+          }
+        }
+      },
+      "options": {
+        "env": {
+          "PATH": "${env:PATH}:${config:idf.customExtraPaths}"
+        }
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(Info) *: *(.*)$",
+          "file": 0,
+          "location": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Listening on port .*",
+          "endsPattern": "\\d+"
+        }
+      }
+    },
+    // OpenOCD ESP32 using builtin USB JTAG
+    // ================================================
+    {
+      "label": "ocd:usb-jtag",
+      "type": "shell",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "${env:PATH}:${config:idf.customExtraPaths}"
+        }
+      },
+      "linux": {
+        "command": "openocd",
+        "args": [
+          "-f",
+          "board/esp_usb_jtag.cfg"
+        ]
+      },
+      "osx": {
+        "command": "openocd",
+        "args": [
+          "-f",
+          "board/esp_usb_jtag.cfg"
+        ]
+      },
+      "windows": {
+        "command": "openocd.exe",
+        "args": [
+          "-f",
+          "board/esp_usb_jtag.cfg"
+        ]
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(Info) *: *(.*)$",
+          "file": 0,
+          "location": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Listening on port .*",
+          "endsPattern": "\\d+"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    // OpenOCD ESP32 using FT232 (e.g. M5Stamp Pico)
+    // ================================================
+    {
+      "label": "ocd:ft232r",
+      "type": "shell",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "${env:PATH}:${config:idf.customExtraPaths}"
+        }
+      },
+      "linux": {
+        "command": "openocd",
+        "args": [
+          "-f",
+          "interface/ft232r.cfg"
+        ]
+      },
+      "osx": {
+        "command": "openocd",
+        "args": [
+          "-f",
+          "interface/ft232r.cfg"
+        ]
+      },
+      "windows": {
+        "command": "openocd.exe",
+        "args": [
+          "-f",
+          "interface/ft232r.cfg"
+        ]
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(Info) *: *(.*)$",
+          "file": 0,
+          "location": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Listening on port .*",
+          "endsPattern": "\\d+"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    // Build using idf.py
+    // ================================================
+    {
+      "label": "Build",
+      "type": "shell",
+      "args": [
+        "-DWIFI_SSID=${env:WIFI_SSID:-}"
+      ],
+      "windows": {
+        "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\tools\\idf.py build",
+        "options": {
+          "env": {
+            "PATH": "${env:PATH};${config:idf.customExtraPaths}",
+            "WIFI_SSID": "${env:WIFI_SSID:-}",
+            "WIFI_PASS": "${env:WIFI_PASS:-}"
+          }
+        }
+      },
+      "osx": {
+        "command": "${config:idf.pythonBinPath} ${config:idf.espIdfPath}/tools/idf.py build",
+        "options": {
+          "env": {
+            "PATH": "${env:PATH}:${config:idf.customExtraPaths}"
+          }
+        }
+      },
+      "linux": {
+        "command": "${config:idf.pythonBinPath} ${config:idf.espIdfPath}/tools/idf.py build",
+        "options": {
+          "env": {
+            "PATH": "${env:PATH}:${config:idf.customExtraPaths}"
+          }
+        }
+      },
+      "problemMatcher": [
+        {
+          "owner": "cpp",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": {
+            "regexp": "^\\.\\.(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
+          }
+        },
+        {
+          "owner": "cpp",
+          "fileLocation": "absolute",
+          "pattern": {
+            "regexp": "^[^\\.](.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
+          }
+        }
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    // Set target using idf.py
+    // ================================================
+    {
+      "label": "Set ESP-IDF Target",
+      "type": "shell",
+      "command": "${command:espIdf.setTarget}",
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": "absolute",
+        "pattern": {
+          "regexp": "^(.*):(//d+):(//d+)://s+(warning|error)://s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    },
+    // Full clean using idf.py
+    // ================================================
+    {
+      "label": "Full Clean",
+      "type": "shell",
+      "command": "${config:idf.pythonBinPath} ${config:idf.espIdfPath}/tools/idf.py fullclean",
+      "windows": {
+        "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\tools\\idf.py fullclean",
+        "options": {
+          "env": {
+            "PATH": "${env:PATH};${config:idf.customExtraPaths}"
+          }
+        }
+      },
+      "options": {
+        "env": {
+          "PATH": "${env:PATH}:${config:idf.customExtraPaths}"
+        }
+      },
+      "problemMatcher": [
+        {
+          "owner": "cpp",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": {
+            "regexp": "^\\.\\.(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
+          }
+        },
+        {
+          "owner": "cpp",
+          "fileLocation": "absolute",
+          "pattern": {
+            "regexp": "^[^\\.](.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
+          }
+        }
+      ]
+    },
+    // Debug: Display environment
+    // ================================================
+    {
+      "label": "echo",
+      "type": "shell",
+      "command": "echo ${workspaceFolder} ${env:WIFI_SSID:-}"
+    },
+    // OpenOCD Terminate
+    // ================================================
+    {
+      "label": "ocd:stop",
+      "command": "echo ${input:terminate}",
+      "type": "shell",
+    }
+  ],
+  "inputs": [
+    {
+      "id": "terminate",
+      "type": "command",
+      "command": "workbench.action.tasks.terminate",
+      "args": "terminateAll"
+    }
+  ]
+}
