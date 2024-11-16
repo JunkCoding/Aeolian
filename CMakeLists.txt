@@ -6,41 +6,47 @@ project(axrgb)
 # #####################################################
 # # Git stuff
 # #####################################################
-execute_process(
-  COMMAND git log --pretty=format:%h -n 1
-  OUTPUT_VARIABLE GIT_REV
-  ERROR_QUIET
-)
-if ("${GIT_REV}" STREQUAL "")
-    set(GIT_BRANCH "N/A")
-    set(GIT_REV "N/A")
-    set(GIT_DIRTY "")
-else()
-  execute_process(
-    COMMAND git rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-  execute_process(
-    COMMAND git describe --exact-match --tags
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_TAG
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-  execute_process(
-    COMMAND git diff-index --quiet HEAD --
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    RESULT_VARIABLE VERSION_COMMIT_DIRTY
-  )
-  if(VERSION_COMMIT_DIRTY)
-    set(GIT_DIRTY "-dirty")
-  else()
-    set(GIT_DIRTY "")
+if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+  find_package(Git)
+  if (Git_FOUND)
+    execute_process(
+      COMMAND git rev-list --count HEAD
+      OUTPUT_VARIABLE GIT_COMMIT_REVISION
+      ERROR_QUIET
+    )
+    execute_process(
+      COMMAND git rev-parse --short --verify HEAD
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_COMMIT_HASH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
+      COMMAND git describe --exact-match --tags
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_COMMIT_TAG
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
+      COMMAND git diff-index --quiet HEAD --
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      RESULT_VARIABLE VERSION_COMMIT_DIRTY
+    )
+    if(VERSION_COMMIT_DIRTY)
+      set(GIT_DIRTY "-dirty")
+    else()
+      set(GIT_DIRTY "")
+    endif()
   endif()
+else()
+  set(GIT_COMMIT_REVISION "")
+  set(GIT_COMMIT_HASH "<unknown dev>")
+  set(GIT_COMMIT_TAG "")
+  set(GIT_DIRTY "")
 endif()
-idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_HASH=\"${GIT_REV}${GIT_DIRTY}\"" APPEND)
-idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_BRANCH=\"${GIT_BRANCH}\"" APPEND)
+#string(TIMESTAMP TODAY "%Y%m%d")
+#set(VERSION_REVISION "-${TODAY}-${GIT_COMMIT_HASH}${GIT_DIRTY}")
+idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_HASH=\"${GIT_COMMIT_HASH}${GIT_DIRTY}\"" APPEND)
+idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_BRANCH=\"${GIT_COMMIT_BRANCH}\"" APPEND)
 # #####################################################
 
 set(BUILD_DIR ${CMAKE_BINARY_DIR})
