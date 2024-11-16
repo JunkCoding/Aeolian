@@ -1,6 +1,8 @@
 
 
 
+#include <iostream>
+#include <string>
 
 #include <string.h>
 #include <sys/time.h>
@@ -106,7 +108,13 @@ void print_app_info (void)
   F_LOGI(true, true, LC_GREY, "%25s = CPU0: %d, CPU1: %d", "Reset reasons", (uint16_t)rtc_get_reset_reason (0), (uint16_t)rtc_get_reset_reason (1));
   F_LOGI(true, true, LC_GREY, "%25s = %s", "Firmware", app_info.version);
   F_LOGI(true, true, LC_GREY, "%25s = %s", "Project name", app_info.project_name);
-  F_LOGI(true, true, LC_GREY, "%25s = %s", "IDF version", app_info.idf_ver);
+  //This started failing!?
+  //F_LOGI(true, true, LC_GREY, "%25s = %s", "IDF version", app_info.idf_ver);
+  // -std=c++20 
+  //F_LOGI(true, true, LC_GREY, "%25s = %s", "IDF version", std::format("{} {} {}", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH));
+  char tmpbuf[64] = {};
+  snprintf(tmpbuf, 63, "v%d.%d.%d", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH);
+  F_LOGI(true, true, LC_GREY, "%25s = %s", "IDF version", tmpbuf);
   // ESP_LOGI("%25s = %s", "SHA256", app_info.app_elf_sha256);
   F_LOGI(true, true, LC_GREY, "%25s = %s %s", "Last full build", app_info.time, app_info.date);
   F_LOGI(true, true, LC_GREY, "%25s = %s %s", "Last part build", __TIME__, __DATE__);
