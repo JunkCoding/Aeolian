@@ -294,7 +294,7 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
       eventList = pvPortMalloc (itc * eventLen);
       if ( eventList == NULL )
       {
-        F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'eventList'");
+        F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'eventList' (%d bytes)", (itc * eventLen));
       }
 
       // Iterate through the event list

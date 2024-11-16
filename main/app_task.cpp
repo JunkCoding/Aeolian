@@ -101,7 +101,7 @@ void execRuntimeStats (void)
   TaskStatus_t *pTaskArray = (TaskStatus_t *)pvPortMalloc(nTasks * sizeof (TaskStatus_t));
   if ( pTaskArray == NULL )
   {
-    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'config_list'");
+    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'config_list'", (nTasks * sizeof (TaskStatus_t)));
     return;
   }
 
@@ -235,7 +235,7 @@ void stats_task (void *pvParameters)
   jsonTasksBuffer = (char *)pvPortMalloc(JSON_BUFSIZE);
   if ( jsonTasksBuffer == NULL )
   {
-    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'jsonTasksBuffer'");
+    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'jsonTasksBuffer'", JSON_BUFSIZE);
   }
   else
   {

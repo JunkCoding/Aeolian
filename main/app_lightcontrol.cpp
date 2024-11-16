@@ -386,11 +386,11 @@ esp_err_t lights_init(void)
   // *****************************************
   if ( (rgbBuffer = (cRGB *)pvPortMalloc (sizeof (cRGB) * control_vars.pixel_count)) == NULL )
   {
-    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'rgbBuffer'");
+    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'rgbBuffer'", (sizeof (cRGB) * control_vars.pixel_count));
   }
   else if ( (outBuffer = (cRGB *)pvPortMalloc (sizeof (cRGB) * control_vars.pixel_count)) == NULL )
   {
-    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'outBuffer'");
+    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'outBuffer'", (sizeof (cRGB) * control_vars.pixel_count));
   }
   else
   {

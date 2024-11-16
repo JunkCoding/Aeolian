@@ -55,7 +55,7 @@ weekly_event_t _initial_weekly_events[] = {
 annual_event_t _initial_annual_events[] = {
 //     Start   |       End      | Start |  End  |
 //  Hour   Min |   Hour   Min   |  Day  |  Day  | Month | Theme            |  Brightness  |  Flags
-  {{07,    00},   {21,    30},     01,     31,    0,      THEME_UKRAINE,      DIM_MED,       EVENT_AUTONOMOUS | EVENT_DEFAULT},    // Default event
+  {{07,    00},   {22,    00},     01,     31,    0,      THEME_UKRAINE,      DIM_MED,       EVENT_AUTONOMOUS | EVENT_DEFAULT},    // Default event
   {{00,    00},   {00,    00},     05,     06,    0,      THEME_CHRISTMAS,    DIM_MED,       EVENT_LIGHTSOFF},                     // Off for Twelfth Night
 //{{07,    00},   {21,    30},     12,     12,    0,      THEME_COCO,         DIM_MED,       EVENT_AUTONOMOUS},                    // Coco commemorative
 //{{07,    00},   {21,    30},     10,     10,    4,      THEME_JESS,         DIM_MED,       EVENT_AUTONOMOUS},                    // Jess commemorative

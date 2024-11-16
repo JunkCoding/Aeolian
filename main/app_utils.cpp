@@ -222,7 +222,7 @@ uint32_t get_log_messages(char **buf, uint32_t *logstart)
     tmpbuf = (char *)pvPortMalloc(buflen);
     if ( NULL == tmpbuf )
     {
-      F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'tmpbuf'");
+      F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating %d bytes for 'tmpbuf'", buflen);
     }
     else
     {

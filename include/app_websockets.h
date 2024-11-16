@@ -35,6 +35,7 @@ typedef struct wss_keep_alive_storage *wss_keep_alive_t;
 typedef enum
 {
   WS_NONE,
+  WS_SCHED,
   WS_STATUS,
   WS_TASKS,
   WS_APSCAN,

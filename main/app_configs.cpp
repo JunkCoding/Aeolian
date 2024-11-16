@@ -204,7 +204,7 @@ void _config_build_list (Configuration_List_t* cfg_list, int num_cfgs)
   config_list = (settings_t*)pvPortMalloc (sizeof (settings_t) * ID_MAX);
   if ( config_list == NULL )
   {
-    F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'config_list'");
+    F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'config_list' (%d bytes)", (sizeof (settings_t) * ID_MAX));
     return;
   }
   Configuration_List = cfg_list;
@@ -299,7 +299,7 @@ static int _config_get_defaults (const_settings_t* defaults)
           char *buf = (char *)pvPortMalloc (len4);
           if ( buf == NULL )
           {
-            F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'buf'");
+            F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'buf' (%d bytes)", len4);
           }
           else
           {
@@ -341,7 +341,7 @@ static int _config_get_defaults (const_settings_t* defaults)
                   val_array = (int *)pvPortMalloc (sizeof (int) * cnt);
                   if ( val_array == NULL )
                   {
-                    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'val_array'");
+                    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'val_array' (%d bytes)", (sizeof (int) * cnt));
                   }
                 }
 
@@ -641,7 +641,7 @@ static int _config_get_user (void)
     user_settings.buf = (uint32_t*)pvPortMalloc (SPI_FLASH_SEC_SIZE);
     if ( user_settings.buf == NULL )
     {
-      F_LOGW(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'user_settings.buf'");
+      F_LOGW(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'user_settings.buf' (%d bytes)", SPI_FLASH_SEC_SIZE);
     }
   }
 
@@ -1376,7 +1376,7 @@ int user_config_print (void)
     user_settings.buf = (uint32_t*)pvPortMalloc (SPI_FLASH_SEC_SIZE);
     if ( user_settings.buf == NULL )
     {
-      F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'user_settings.buf'");
+      F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'user_settings.buf' (%d bytes)", SPI_FLASH_SEC_SIZE);
     }
   }
 

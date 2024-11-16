@@ -259,9 +259,9 @@ IRAM_ATTR static  void  dynamic_request (httpd_req_t *req, char *buffer, uint16_
         if ( (i - buf_pos) > 0 )
         {
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-          httpd_socket_send (resp_arg->hd, resp_arg->fd, &buffer[buf_pos], i - buf_pos, 0);
+          httpd_socket_send(resp_arg->hd, resp_arg->fd, &buffer[buf_pos], i - buf_pos, 0);
 #else
-          httpd_resp_send_chunk (req, &buffer[buf_pos], i - buf_pos);
+          httpd_resp_send_chunk(req, &buffer[buf_pos], i - buf_pos);
 #endif
         }
         buf_pos = i + 1;
@@ -279,9 +279,9 @@ IRAM_ATTR static  void  dynamic_request (httpd_req_t *req, char *buffer, uint16_
         if ( err != ESP_OK )
         {
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-          httpd_socket_send (resp_arg->hd, resp_arg->fd, &buffer[pct_pos], ((i + 1) - pct_pos), 0);
+          httpd_socket_send(resp_arg->hd, resp_arg->fd, &buffer[pct_pos], ((i + 1) - pct_pos), 0);
 #else
-          httpd_resp_send_chunk (req, &buffer[pct_pos], ((i + 1) - pct_pos));
+          httpd_resp_send_chunk(req, &buffer[pct_pos], ((i + 1) - pct_pos));
 #endif
         }
         buf_pos = i + 1;
@@ -298,7 +298,7 @@ IRAM_ATTR static  void  dynamic_request (httpd_req_t *req, char *buffer, uint16_
       else
       {
         // Is this a valid token character?
-        if ( isValidTokenChar (&buffer[i]) )
+        if ( isValidTokenChar(&buffer[i]) )
         {
           tokenStr[tok_pos++] = buffer[i];
         }
@@ -315,9 +315,9 @@ IRAM_ATTR static  void  dynamic_request (httpd_req_t *req, char *buffer, uint16_
   if ( (buflen - buf_pos) > 0 )
   {
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-    httpd_socket_send (resp_arg->hd, resp_arg->fd, &buffer[buf_pos], buflen - buf_pos, 0);
+    httpd_socket_send(resp_arg->hd, resp_arg->fd, &buffer[buf_pos], buflen - buf_pos, 0);
 #else
-    httpd_resp_send_chunk (req, &buffer[buf_pos], buflen - buf_pos);
+    httpd_resp_send_chunk(req, &buffer[buf_pos], buflen - buf_pos);
 #endif
   }
 }
@@ -338,27 +338,32 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 
   //F_LOGW(true, true, LC_BRIGHT_YELLOW, "sendEspFs() %s\n", req->uri);
 
-  if ( espfs_stat (fs, req->uri, &stat) )
+  if ( espfs_stat(fs, req->uri, &stat) )
   {
     if ( stat.type == ESPFS_TYPE_FILE )
     {
-      espfs_file_t *f = espfs_fopen (fs, req->uri);
+      espfs_file_t *f = espfs_fopen(fs, req->uri);
       if ( f == NULL )
       {
-        F_LOGE(true, true, LC_YELLOW, "Error opening file");
+        F_LOGE(true, true, LC_YELLOW, "Error opening file: '%s'", req->uri);
+      }
+      else if ( stat.size == 0 )
+      {
+        F_LOGE(true, true, LC_YELLOW, "stat.size reported 0 bytes for '%s'", req->uri);
+        espfs_fclose(f);
       }
       else
       {
         // Try an allocate some work space
-        char *tmpBuffer = (char *)pvPortMalloc (stat.size);
+        char *tmpBuffer = (char *)pvPortMalloc(stat.size);
         if ( tmpBuffer == NULL )
         {
           F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'tmpBuffer' (%d bytes)", stat.size);
         }
         else
         {
-          int bytes = espfs_fread (f, tmpBuffer, stat.size);
-          espfs_fclose (f);
+          int bytes = espfs_fread(f, tmpBuffer, stat.size);
+          espfs_fclose(f);
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
           // Set our content type
@@ -374,29 +379,29 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
           if ( req->user_ctx )
 #endif
           {
-            dynamic_request (req, tmpBuffer, bytes);
+            dynamic_request(req, tmpBuffer, bytes);
           }
           // Else, just send the file...
           else
           {
             // After sending the appropriate header....
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-            httpd_socket_send (req->hd, req->fd, tmpBuffer, bytes, 0);
+            httpd_socket_send(req->hd, req->fd, tmpBuffer, bytes, 0);
 #else
-            httpd_resp_send_chunk (req, tmpBuffer, bytes);
+            httpd_resp_send_chunk(req, tmpBuffer, bytes);
 #endif
           }
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
           // Terminate the connection
-          httpd_sess_trigger_close (req->hd, req->fd);
+          httpd_sess_trigger_close(req->hd, req->fd);
 #else
           // Signal completion
-          httpd_resp_send_chunk (req, NULL, 0);
+          httpd_resp_send_chunk(req, NULL, 0);
 #endif
 
           // Free our work space
-          vPortFree (tmpBuffer);
+          vPortFree(tmpBuffer);
           tmpBuffer = NULL;
         }
       }
@@ -418,8 +423,8 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 
   // Clean up our mess
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-  vPortFree (req->uri);
-  vPortFree (arg);
+  vPortFree(req->uri);
+  vPortFree(arg);
 #else
   return err;
 #endif
@@ -431,10 +436,10 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 #if defined (CONFIG_HTTPD_USE_ASYNC)
 IRAM_ATTR static  esp_err_t  async_espfs_handler (httpd_req_t * req)
 {
-  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc (sizeof (struct async_resp_arg));
+  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc (sizeof(struct async_resp_arg));
   if ( resp_arg == NULL )
   {
-    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'resp_arg'");
+    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'resp_arg'", sizeof(struct async_resp_arg));
   }
   else
   {
@@ -488,10 +493,10 @@ IRAM_ATTR static esp_err_t  async_cgi_handler (httpd_req_t *req)
 static esp_err_t  async_cgi_handler (httpd_req_t *req)
 #endif
 {
-  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc (sizeof (struct async_resp_arg));
+  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc(sizeof(struct async_resp_arg));
   if ( resp_arg == NULL )
   {
-    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'resp_arg'");
+    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'resp_arg'", sizeof(struct async_resp_arg));
   }
   else
   {
@@ -540,6 +545,7 @@ static const httpd_uri_t basic_handlers[] = {
     {.uri = "/wifi/setmode",        .method = HTTP_POST,    .handler = cgiWifiSetMode,        .user_ctx = NULL,                         .is_websocket = false, },
 
     {.uri = "/config.cgi",          .method = HTTP_GET,     .handler = cgiConfig,             .user_ctx = NULL,                         .is_websocket = false, },
+    {.uri = "/websocket/schedule",  .method = HTTP_GET,     .handler = ws_handler,            .user_ctx = (uint32_t *)WS_SCHED,         .is_websocket = true,  .handle_ws_control_frames = true },
     {.uri = "/websocket/status",    .method = HTTP_GET,     .handler = ws_handler,            .user_ctx = (uint32_t *)WS_STATUS,        .is_websocket = true,  .handle_ws_control_frames = true },
     {.uri = "/websocket/tasks",     .method = HTTP_GET,     .handler = ws_handler,            .user_ctx = (uint32_t *)WS_TASKS,         .is_websocket = true,  .handle_ws_control_frames = true },
     {.uri = "/websocket/apscan",    .method = HTTP_GET,     .handler = ws_handler,            .user_ctx = (uint32_t *)WS_APSCAN,        .is_websocket = true,  .handle_ws_control_frames = true },
@@ -569,6 +575,7 @@ static const httpd_uri_t basic_handlers[] = {
     {.uri = "/wifi/setmode",        .method = HTTP_POST,    .handler = cgiWifiSetMode,        .user_ctx = NULL,                         .is_websocket = false, },
 
     {.uri = "/config.cgi",          .method = HTTP_GET,     .handler = cgiConfig,             .user_ctx = NULL,                         .is_websocket = false, },
+    {.uri = "/websocket/schedule",  .method = HTTP_GET,     .handler = ws_handler,            .user_ctx = (uint32_t *)WS_SCHED,         .is_websocket = true,  .handle_ws_control_frames = true },
     {.uri = "/websocket/status",    .method = HTTP_GET,     .handler = ws_handler,            .user_ctx = (uint32_t *)WS_STATUS,        .is_websocket = true,  .handle_ws_control_frames = true },
     {.uri = "/websocket/tasks",     .method = HTTP_GET,     .handler = ws_handler,            .user_ctx = (uint32_t *)WS_TASKS,         .is_websocket = true,  .handle_ws_control_frames = true },
     {.uri = "/websocket/apscan",    .method = HTTP_GET,     .handler = ws_handler,            .user_ctx = (uint32_t *)WS_APSCAN,        .is_websocket = true,  .handle_ws_control_frames = true },
