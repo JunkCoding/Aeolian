@@ -15,6 +15,14 @@ setx WIFI_PASS "&lt;password&gt;"<br />
 setx MQTT_SERVER "mqtt://&lt;mqtt server&gt;/"<br />
 setx MQTT_USER "&lt;mqtt username&gt;"<br />
 setx MQTT_PASS "&lt;mqtt password&gt;"<br />
+<br />On Unix type systems, you can add then environment variables with:<br>
+export WIFI_SSID="&lt;Your SSID"&gt;<br>
+export WIFI_PASS="&lt;password&gt;"<br />
+export MQTT_SERVER="mqtt://&lt;mqtt server&gt;/"<br />
+export MQTT_USER="&lt;mqtt username&gt;"<br />
+export MQTT_PASS="&lt;mqtt password&gt;"<br />
+
+These will be picked up during the compilation and will allow the device to connect without further configuration required.<br />
 
 # Working:
 A unit can be a master or slave (two masters is possible, but unknown results).
