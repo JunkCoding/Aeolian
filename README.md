@@ -9,12 +9,12 @@ The lights have several control modes, allowing them to be forced on/off at fixe
 
 # Before compiling
 On windows, configure environment variables for connecting your ESP32 to your IOT network. I have included an example script in the tools directory.
-Essentially, you will need to run
-setx WIFI_SSID "<Your SSID>"
-setx WIFI_PASS "<password>"
-setx MQTT_SERVER "mqtt://<mqtt server>/"
-setx MQTT_USER "<mqtt username>"
-setx MQTT_PASS "<mqtt password>"
+Essentially, you will need to run:<br />
+setx WIFI_SSID "&lt;Your SSID"&gt;<br>
+setx WIFI_PASS "&lt;password&gt;"<br />
+setx MQTT_SERVER "mqtt://&lt;mqtt server&gt;/"<br />
+setx MQTT_USER "&lt;mqtt username&gt;"<br />
+setx MQTT_PASS "&lt;mqtt password&gt;"<br />
 
 # Working:
 A unit can be a master or slave (two masters is possible, but unknown results).
