@@ -102,6 +102,20 @@ static int prepareSystemStatusMsg (char **buf)
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
+IRAM_ATTR static void send_schedule (async_resp_arg *resp_arg)
+#else
+static void send_schedule (async_resp_arg *resp_arg)
+#endif
+{
+  char  *buf = NULL;
+  int buflen = 0;
+  send_async_frame(resp_arg, (uint8_t *)buf, buflen);
+  vPortFree (resp_arg);
+}
+
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+#if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
 IRAM_ATTR static void send_status_update (async_resp_arg *resp_arg)
 #else
 static void send_status_update (async_resp_arg *resp_arg)
@@ -622,7 +636,7 @@ void wss_server_send_messages(void *data)
         struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc(sizeof (struct async_resp_arg));
         if ( resp_arg == NULL )
         {
-          F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'resp_arg'");
+          F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'resp_arg'", sizeof (struct async_resp_arg));
         }
         else
         {
@@ -633,8 +647,12 @@ void wss_server_send_messages(void *data)
           F_LOGV(true, true, LC_BRIGHT_GREEN, "Active client (hd=%p fd=%d) -> sending async message", resp_arg->hd, resp_arg->fd);
 
           // Check what information we are sending
-          switch ( keep_alive_storage->clients[i].ws_info )
+          switch ( (ws_info_type_t)keep_alive_storage->clients[i].ws_info )
           {
+            case WS_SCHED:
+              //send_status_update(resp_arg, keep_alive_storage->clients[i].ws_info);
+              ptr = (void *)send_schedule;
+              break;
             case WS_STATUS:
               //send_status_update(resp_arg, keep_alive_storage->clients[i].ws_info);
               ptr = (void *)send_status_update;
@@ -648,7 +666,7 @@ void wss_server_send_messages(void *data)
               if ( !scan_queued )
               {
                 scan_queued = true;
-                wifi_startScan ();
+                wifi_startScan();
               }
               // Have we checked and received from the scan queue already?
               if ( apScanResPtr == NULL )
@@ -658,7 +676,7 @@ void wss_server_send_messages(void *data)
               // If we have a message, send it to the client
               if ( apScanResLen > 0 )
               {
-                send_async_frame (resp_arg, (uint8_t *)apScanResPtr, apScanResLen);
+                send_async_frame(resp_arg, (uint8_t *)apScanResPtr, apScanResLen);
                 vPortFree(resp_arg);
               }
               break;
@@ -736,7 +754,7 @@ static esp_err_t trigger_async_send (httpd_handle_t handle, httpd_req_t *req)
   struct async_resp_arg* resp_arg = (async_resp_arg *)pvPortMalloc(sizeof (struct async_resp_arg));
   if ( resp_arg == NULL )
   {
-    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'resp_arg'");
+    F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'resp_arg'", sizeof(struct async_resp_arg));
     resp_arg->hd = req->handle;
     resp_arg->fd = httpd_req_to_sockfd (req);
     err = httpd_queue_work (handle, ws_async_send, resp_arg);

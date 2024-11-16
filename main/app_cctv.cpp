@@ -56,7 +56,7 @@
 #define STR_HLC         "hlc"
 #define STR_DAYNIGHT    "daynight"
 
-#define RAND_ACTIVITY   false
+#define RAND_ACTIVITY   true
 #define CCTV_PTZ        false
 #define SMOOTHING       false
 

@@ -74,7 +74,7 @@ typedef struct
   int       retain;
 } mqtt_mesg_t;
 
-void process_mqtt_event_data (esp_mqtt_event_handle_t event);
+void proc_mqtt_data (esp_mqtt_event_handle_t event);
 void mqtt_publish (char *topic, const char *data, int len, int qos, int retain);
 int  mqtt_subscribe (char *topic, int qos);
 void stop_mqtt_client(esp_mqtt_client_handle_t MQTTClient);
@@ -165,12 +165,13 @@ esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
       }
     case MQTT_EVENT_SUBSCRIBED:
       {
-        F_LOGV(true, true, LC_GREEN, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
+        F_LOGV(true, true, LC_WHITE, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
+        //F_LOGW(true, true, LC_WHITE, "MQTT Subscribed to '%.*s'", event->data_len, event->data);
         break;
       }
     case MQTT_EVENT_UNSUBSCRIBED:
       {
-        F_LOGV(true, true, LC_GREEN, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
+        F_LOGV(true, true, LC_YELLOW, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
         break;
       }
     case MQTT_EVENT_PUBLISHED:
@@ -184,12 +185,42 @@ esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
         F_LOGV(true, true, LC_GREEN, "TOPIC = %.*s", event->topic_len, event->topic);
         F_LOGV(true, true, LC_GREEN, "DATA = %.*s", event->data_len, event->data);
 
-        process_mqtt_event_data (event);
+        proc_mqtt_data(event);
         break;
       }
     case MQTT_EVENT_ERROR:
       {
-        F_LOGE(true, true, LC_RED, "MQTT_EVENT_ERROR");
+        esp_mqtt_error_codes_t *error_handle = event->error_handle;
+        switch ( error_handle->error_type )
+        {
+          case MQTT_ERROR_TYPE_TCP_TRANSPORT:
+            F_LOGE(true, true, LC_RED, "Transport error");
+            break;
+          case MQTT_ERROR_TYPE_CONNECTION_REFUSED:
+            switch ( error_handle->connect_return_code )
+            {
+              case MQTT_CONNECTION_REFUSE_PROTOCOL: /*!< MQTT connection refused reason: Wrong protocol */
+                F_LOGE(true, true, LC_RED, "Connection refused: Wrong protocol");
+                break;
+              case MQTT_CONNECTION_REFUSE_ID_REJECTED: /*!< MQTT connection refused reason: ID rejected */
+                F_LOGE(true, true, LC_RED, "Connection refused: ID rejected");
+                break;
+              case MQTT_CONNECTION_REFUSE_SERVER_UNAVAILABLE: /*!< MQTT connection refused reason: Server
+                                                                 unavailable */
+                F_LOGE(true, true, LC_RED, "Connection refused: Server unavailable");
+                break;
+              case MQTT_CONNECTION_REFUSE_BAD_USERNAME: /*!< MQTT connection refused reason: Wrong user */
+                F_LOGE(true, true, LC_RED, "Connection refused: Wrong user");
+                break;
+              case MQTT_CONNECTION_REFUSE_NOT_AUTHORIZED: /*!< MQTT connection refused reason: Wrong username or password */
+                F_LOGE(true, true, LC_RED, "Connection refused: Authentication error");
+                break;
+              default:;
+            }
+            break;
+          case MQTT_ERROR_TYPE_NONE:
+          default:;
+        }
         break;
       }
     case MQTT_EVENT_DELETED:
@@ -747,6 +778,8 @@ void proc_ev_dev_network (esp_mqtt_event_handle_t event)
   jsmn_parser p;
   jsmntok_t t[12];
 
+  //F_LOGI(true, true, LC_WHITE, "%.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
+
   jsmn_init (&p);
   r = jsmn_parse(&p, event->data, event->data_len, t, sizeof (t) / sizeof (t[0]));
 
@@ -767,11 +800,11 @@ void proc_ev_dev_network (esp_mqtt_event_handle_t event)
   }
 
   F_LOGV(true, true, LC_GREEN, "iface: %s, status: %s", iface, status);
-  if ( !str_cmp ("wan1", iface) )
+  if ( !str_cmp ("BT-PPPoE", iface) )
   {
     z = 4;
   }
-  else if ( !str_cmp ("wan2", iface) )
+  else if ( !str_cmp ("PN-PPPoE", iface) )
   {
     z = 5;
   }
@@ -990,20 +1023,100 @@ void proc_ev_lux (esp_mqtt_event_handle_t event)
   }
 }
 
+/*********************************************************************************/
+/* subscribed: The string used to subscribe                                      */
+/* topic: The topic string we received                                           */
+/* topic_len: The length of the received topic string                            */
+/*********************************************************************************/
+#if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
+IRAM_ATTR int topic_cmp(const char *subscribed, const char *topic, uint16_t topic_len)
+#else
+uint16_t topic_cmp(const char *subscribed, const char *topic, uint16_t topic_len)
+#endif
+{
+  int16_t vld = 1, ps = 0;
+
+  // Iterate over both strings
+  for (int tpos = 0, spos = 0; vld && tpos < topic_len; tpos++ )
+  {
+    // Case insensitive character comparison.
+    if ( (subscribed[spos] | 32) - (topic[tpos] | 32) )
+    {
+      // No match, so first check if we are in a wildcard search
+      if ( !ps )
+      {
+        // Not in a wildcard search, check for 'Single topic' wildcard
+        if ( subscribed[spos] == '+' )
+        {
+          // Flag entering single topic wildcard comparison
+          ps = 1;
+
+          // Move past the wildcard character
+          spos++;
+        }
+        // Check for Complete (end of line) wildcard substitution
+        else if ( subscribed[spos] == '#' )
+        {
+          break;
+        }
+        // Not a wildcard
+        else
+        {
+          // Topics don't match, set the return value and terminate the search
+          vld = 0;
+          break;
+        }
+      }
+      // We are in a 'single topic' wildcard, check for end of topic or return from comparison
+      else
+      {
+        // Check for end of topic
+        if ( topic[tpos] == '/' )
+        {
+          // Simples
+          ps = 0;
+        }
+        // A little more work if we reach EOL
+        else if ( tpos == (topic_len - 1) )
+        {
+          // End on correct EOL 'single topic' wildcard
+          if ( subscribed[spos] == 0 )
+          {
+            break;
+          }
+          // Our 'single topic' wildcard continues, but our comparison topic ends here.
+          else if ( subscribed[spos] == '/' )
+          {
+            vld = 0;
+            break;
+          }
+          // No 'else'. We have all our bases covered.
+        }
+      }
+    }
+    else
+    {
+      spos++;
+    }
+  }
+
+  return(vld);
+}
+
 /// @brief
 /// @param event
 /// @return
-void process_mqtt_event_data (esp_mqtt_event_handle_t event)
+void proc_mqtt_data (esp_mqtt_event_handle_t event)
 {
   uint16_t dev;
 
+  //F_LOGI(true, true, LC_BRIGHT_WHITE, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
   for ( dev = dev_Light; dev < num_devices; dev++ )
   {
-    if ( strncmp (MQTT_server_cfg[dev].Topic_sub, event->topic, event->topic_len) == 0 )
+    //F_LOGI(true, true, LC_BRIGHT_BLUE, "proc_mqtt_data: %s -> %.*s", MQTT_server_cfg[dev].Topic_sub, event->topic_len, event->topic);
+    if ( topic_cmp(MQTT_server_cfg[dev].Topic_sub, event->topic, event->topic_len) == 1 )
     {
-#if defined (CONFIG_DEBUG)
-      F_LOGV(true, true, LC_GREY, "%s -> %.*s", MQTT_server_cfg[dev].Topic_sub, event->topic_len, event->topic);
-#endif
+      F_LOGD(true, true, LC_MAGENTA, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
       switch ( (mqtt_devices_t)dev )
       {
         case dev_Light:
@@ -1028,7 +1141,7 @@ void process_mqtt_event_data (esp_mqtt_event_handle_t event)
             char *pattern = (char *)pvPortMalloc (event->data_len + 1);
             if ( pattern == NULL )
             {
-              F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'pattern'");
+              F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating %d bytes for 'pattern'", (event->data_len + 1));
             }
             else
             {
@@ -1084,6 +1197,7 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
       //.cert_pem        = server_cert,
       //.client_cert_pem = client_cert,
       //.client_key_pem  = client_key,
+      //.user_context    = 0,
       .lwt_topic       = get_lwt_topic (),
       .lwt_msg         = "Disconnected",
       .lwt_retain      = 1,
@@ -1227,7 +1341,7 @@ char *replace_smart (const char *str, const char *sub, const char *rep)
 
   if ( buf == NULL )
   {
-    F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'buf'");
+    F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating %d bytes for 'buf'", capacity);
   }
   else
   {
@@ -1287,10 +1401,10 @@ void mqtt_publish (char *topic, const char *data, int len, int qos, int retain)
     return;
   }
 
-  mqtt_mesg_t *mesg = (mqtt_mesg_t *)pvPortMalloc (sizeof (mqtt_mesg_t));
+  mqtt_mesg_t *mesg = (mqtt_mesg_t *)pvPortMalloc(sizeof(mqtt_mesg_t));
   if ( mesg == NULL )
   {
-    F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'mesg'");
+    F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating %d bytes for 'mesg'", sizeof(mqtt_mesg_t));
   }
   else
   {
@@ -1317,19 +1431,19 @@ int mqtt_subscribe (char *topic, int qos)
   char *tmpTopic = NULL;
   int msg_id = 0;
 
-  tmpTopic = _parse_mqtt_string (topic);
+  tmpTopic = _parse_mqtt_string(topic);
 
-  if ( mqtt_check_connected () )
+  if ( mqtt_check_connected() )
   {
     if ( (msg_id = esp_mqtt_client_subscribe(mqtt_client, tmpTopic, qos)) == -1 )
     {
-      F_LOGE(true, true, LC_RED, "esp_mqtt_client_subscribe: %s", tmpTopic);
+      F_LOGI(true, true, LC_RED, "esp_mqtt_client_subscribe: %s", tmpTopic);
     }
   }
 
   if ( tmpTopic )
   {
-    vPortFree (tmpTopic);
+    vPortFree(tmpTopic);
     tmpTopic = NULL;
   }
 
@@ -1343,7 +1457,7 @@ int mqtt_subscribe (char *topic, int qos)
 int mqttSubscribe (enum mqtt_devices device)
 {
   F_LOGI(true, true, LC_GREY, "Subscribing to \"%s\"", MQTT_server_cfg[device].Topic_sub);
-  return mqtt_subscribe (MQTT_server_cfg[device].Topic_sub, MQTT_server_cfg[device].QoS);
+  return mqtt_subscribe(MQTT_server_cfg[device].Topic_sub, MQTT_server_cfg[device].QoS);
 }
 
 // Publish on our status topic
@@ -1352,13 +1466,13 @@ void mqttPublish (enum mqtt_devices device, const char *format, ...)
   char tmpBuf[MQTT_BUFSIZE];
   va_list va_args;
 
-  va_start (va_args, format);
+  va_start(va_args, format);
 
-  vsnprintf (tmpBuf, MQTT_BUFSIZE, format, va_args);
+  vsnprintf(tmpBuf, MQTT_BUFSIZE, format, va_args);
   F_LOGV(true, true, LC_GREEN, "Topic = %s (%s)", MQTT_server_cfg[device].Topic_pub, tmpBuf);
-  mqtt_publish (MQTT_server_cfg[device].Topic_pub, tmpBuf, strlen (tmpBuf), MQTT_server_cfg[device].QoS, MQTT_server_cfg[device].Retained);
+  mqtt_publish(MQTT_server_cfg[device].Topic_pub, tmpBuf, strlen (tmpBuf), MQTT_server_cfg[device].QoS, MQTT_server_cfg[device].Retained);
 
-  va_end (va_args);
+  va_end(va_args);
 }
 
 // Publish on our control topic

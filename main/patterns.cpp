@@ -438,7 +438,7 @@ void fadeinandout (uint16_t start, uint16_t count, uint8_t step, controlvars_t *
     pixel_control = (_pixel_control *)pvPortMalloc (pixel_count * sizeof (_pixel_control));
     if ( pixel_control == NULL )
     {
-      F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'pixel_control'");
+      F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'pixel_control'", (pixel_count * sizeof (_pixel_control)));
       return;
     }
 
@@ -809,7 +809,7 @@ void meteorRain (uint16_t start, uint16_t count, uint8_t step, controlvars_t *cv
     metPalette = (cRGB *)pvPortMalloc ((MET_COUNT * count) * sizeof (cRGB));
     if ( metPalette == NULL )
     {
-      F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'metPalette'");
+      F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'metPalette'", ((MET_COUNT * count) * sizeof (cRGB)));
       return;
     }
     memset (metPalette, 0, (MET_COUNT * count) * sizeof (cRGB));
@@ -925,7 +925,7 @@ void rachels (uint16_t start, uint16_t count, uint8_t step, controlvars_t *cvars
     pl = (int *)pvPortMalloc (pc * sizeof (int));
     if ( pl == NULL )
     {
-      F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'pl'");
+      F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'pl'", (pc * sizeof(int)));
       return;
     }
 
