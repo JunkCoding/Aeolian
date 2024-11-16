@@ -611,7 +611,7 @@ int _get_idf_version (char *buf, int bufsize, int param)
 {
   // Something broke, so using an alternative method
   //return snprintf (buf, bufsize, "%s", esp_get_idf_version ());
-  return snprintf(buf, bufsize, "v%d.%d.%d", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH);
+  return snprintf(buf, bufsize, "v%d.%d.%d, fw: %s", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH, AXRGB_FW_HASH);
 }
 // ***********************************************
 static uint8_t _parse_u8 (char *parseStr)
