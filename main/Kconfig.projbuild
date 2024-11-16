@@ -2,7 +2,7 @@ menu "AXRGB Configuration"
 
   config USE_BOTH_CORES
     bool "Use both cores for all tasks"
-    default false
+    default true
     help
       Use both cores for all tasks or bind LEDs to core1 and all other tasks to core0.
       Depending on the number of LEDs and the loop delay, some flickering may be apparent when using both cores for all tasks.
