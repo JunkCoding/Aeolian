@@ -76,9 +76,6 @@
   "editor.tabSize": 2,
   "idf.enableSizeTaskAfterBuildTask": false,
   "idf.enableIdfComponentManager": true,
-  "scm.inputFontSize": 10,
-  "markdown.preview.fontSize": 10,
-  "editor.fontSize": 10,
   "markdown.preview.lineHeight": 1.5,
   "editor.minimap.renderCharacters": true,
   "scm.diffDecorations": "all",
@@ -99,4 +96,5 @@
     "IDF_CCACHE_ENABLE": "1"
   },
   "idf.gitPathWin": "E:/VSCode/esp/v4.4.6/tools/idf-git/2.39.2/cmd/git.exe",
+  "editor.fontSize": 9,
 }
