@@ -837,7 +837,7 @@ int _get_buildOpts (char *buf, int bufsize, int param)
   {
     len = snprintf (buf, bufsize, "Release");
   }
-  else if ( APP_OPT == 1 )
+  else if ( HEAP_P == 1 )
   {
     len = snprintf (buf, bufsize, "Heap trace/poison");
   }
