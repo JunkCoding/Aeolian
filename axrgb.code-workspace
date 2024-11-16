@@ -109,10 +109,7 @@
 	},
 	"extensions": {
 		"recommendations": [
-			"daylerees.rainglow",
 			"lihui.vs-color-picker",
-			"mechatroner.rainbow-csv",
-			"mcu-debug.memory-view",
 			"eamodio.gitlens",
 			"anseki.vscode-color"
 		]

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.13.0)
+
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(axrgb)
+
+set(BUILD_DIR ${CMAKE_BINARY_DIR})
+set(SDKCONFIG_DEFAULTS "sdkconfig.defaults")
 
 idf_build_set_property(COMPILE_OPTIONS "-Wno-error" APPEND)
 idf_build_set_property(COMPILE_OPTIONS "-Wno-unused-parameter" APPEND)

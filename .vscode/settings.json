@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "Tag Parser",
   "idf.adapterTargetName": "esp32",
-  "idf.portWin": "COM4",
+  "idf.portWin": "COM3",
   "files.associations": {
     "espfs_log.h": "c",
     "*.ipp": "c",
@@ -87,9 +87,16 @@
   "idf.espIdfPath": "${env:IDF_PATH}",
   "idf.toolsPath": "${env:IDF_TOOLS_PATH}",
   "idf.pythonBinPath": "${env:IDF_TOOLS_PATH}/python_env/idf4.4_py3.11_env/bin/python",
-  "idf.toolsPathWin": "${env:IDF_TOOLS_PATH}",
-  "idf.espIdfPathWin": "${env:IDF_PATH}",
+  "idf.toolsPathWin": "E:\\VSCode\\esp\\v4.4.6",
+  "idf.espIdfPathWin": "E:/VSCode/esp/v4.4.6/frameworks/esp-idf-v4.4.6/",
   "editor.minimap.maxColumn": 200,
   "editor.minimap.scale": 1,
   "editor.stickyTabStops": true,
+  "idf.pythonBinPathWin": "E:/VSCode/esp/v4.4.6/python_env/idf4.4_py3.11_env/Scripts/python.exe",
+  "idf.customExtraPaths": "E:\\VSCode\\esp\\v4.4.6\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\riscv32-esp-elf-gdb\\11.2_20220823\\riscv32-esp-elf-gdb\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\xtensa-esp32-elf\\esp-2021r2-patch5-8.4.0\\xtensa-esp32-elf\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\xtensa-esp32s2-elf\\esp-2021r2-patch5-8.4.0\\xtensa-esp32s2-elf\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\xtensa-esp32s3-elf\\esp-2021r2-patch5-8.4.0\\xtensa-esp32s3-elf\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\riscv32-esp-elf\\esp-2021r2-patch5-8.4.0\\riscv32-esp-elf\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\esp32ulp-elf\\2.35_20220830\\esp32ulp-elf\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\cmake\\3.23.1\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\openocd-esp32\\v0.12.0-esp32-20230419\\openocd-esp32\\bin;E:\\VSCode\\esp\\v4.4.6\\tools\\ninja\\1.10.2;E:\\VSCode\\esp\\v4.4.6\\tools\\idf-exe\\1.0.3;E:\\VSCode\\esp\\v4.4.6\\tools\\ccache\\4.3\\ccache-4.3-windows-64;E:\\VSCode\\esp\\v4.4.6\\tools\\dfu-util\\0.9\\dfu-util-0.9-win64",
+  "idf.customExtraVars": {
+    "OPENOCD_SCRIPTS": "E:\\VSCode\\esp\\v4.4.6\\tools\\openocd-esp32\\v0.12.0-esp32-20230419/openocd-esp32/share/openocd/scripts",
+    "IDF_CCACHE_ENABLE": "1"
+  },
+  "idf.gitPathWin": "E:/VSCode/esp/v4.4.6/tools/idf-git/2.39.2/cmd/git.exe",
 }
