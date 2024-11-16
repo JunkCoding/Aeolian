@@ -86,6 +86,7 @@ static QueueHandle_t xApScanQueue = NULL;
 // Function declarations
 // **************************************************************************************************
 static void start_ap(void);
+static void stop_ap (bool forceStop=false);
 static void periodic_sta_callback(void *arg);
 static bool scan_for_ssid(void);
 
@@ -329,6 +330,9 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
           *hHttpServer = start_webserver ();
         }
 
+        // Check if we need to stop our SoftAP
+        stop_ap();
+
         // Fin
         break;
       }
@@ -346,12 +350,18 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
           // We were connected, so AP may have rebooted. Try reconnects at random intervals
           periodic_sta_callback(NULL);
         }
+        // If we have more than 5 disconnects, start an AP to allow configuration
         else if ( ++disconnects >= 5 )
         {
-          F_LOGE(true, true, LC_YELLOW, "Too many disconnects, stopping STA");
+          wifi_mode_t  cMode;
+          esp_wifi_get_mode(&cMode);
+          if ( !(cMode & WIFI_MODE_AP) )
+          {
+            F_LOGE(true, true, LC_YELLOW, "Too many disconnects, starting AP");
 
-          // Too many disconnects, start AP
-          start_ap();
+            // Too many disconnects, start AP
+            start_ap();
+          }
         }
         else
         {
@@ -556,13 +566,17 @@ void wifi_startScan (void)
   }
   else
   {
-    if ( !(wifi_cfg.mode & WIFI_MODE_STA) )
+    wifi_mode_t  cMode;
+    esp_wifi_get_mode(&cMode);
+
+    if ( !(cMode & WIFI_MODE_STA) )
     {
       F_LOGI(true, true, LC_YELLOW, "Enabling 'WIFI_MODE_STA' to allow wireless scanning");
-      wifi_set_mode((wifi_mode_t)(wifi_cfg.mode | WIFI_MODE_STA));
+      wifi_set_mode((wifi_mode_t)(cMode | WIFI_MODE_STA));
     }
 
-    if ( wifi_cfg.mode & WIFI_MODE_STA )
+    esp_wifi_get_mode(&cMode);
+    if ( cMode & WIFI_MODE_STA )
     {
       wifi_config_t wifi_config = {};
       if ( ESP_OK == esp_wifi_get_config (WIFI_IF_STA, &wifi_config) )
@@ -577,7 +591,7 @@ void wifi_startScan (void)
         // Debug
         // wifiStationConfigDump(&wifi_config);
 
-        esp_wifi_set_config (WIFI_IF_STA, &wifi_config);
+        esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
       }
 
 #pragma GCC diagnostic push                                     // Save the current warning state
@@ -689,6 +703,24 @@ void verify_ap_config (void)
 }
 
 // **************************************************************************************************
+// Stop AP mode
+// **************************************************************************************************
+static void stop_ap (bool forceStop)
+{
+  // Check if we are not configured to run SoftAP
+  if ( !(wifi_cfg.mode & WIFI_MODE_AP) || forceStop )
+  {
+    wifi_mode_t  cMode;
+    esp_wifi_get_mode(&cMode);
+
+    if ( cMode | WIFI_MODE_AP )
+    {
+      wifi_set_mode((wifi_mode_t)(cMode &~ WIFI_MODE_AP));
+    }
+  }
+}
+
+// **************************************************************************************************
 // Start AP mode
 // **************************************************************************************************
 static void start_ap (void)
@@ -737,12 +769,13 @@ static void start_ap (void)
 
   // Let any watcher know the configuration
   //F_LOGW(true, true, LC_GREEN, "AP: ssid = '%s' (%d), pass = '%s'", wifi_config.ap.ssid, wifi_config.ap.ssid_len, wifi_config.ap.password);
-  F_LOGW(true, true, LC_GREEN, "AP: ssid = '%s' (%d), pass = '********", wifi_config.ap.ssid, wifi_config.ap.ssid_len);
+  F_LOGW(true, true, LC_GREEN, "AP: ssid = '%s' (%d), pass = '********'", wifi_config.ap.ssid, wifi_config.ap.ssid_len);
 
-  esp_wifi_get_mode(&wifi_cfg.mode);
-  F_LOGI(true, true, LC_MAGENTA, "WiFi mode: %s", mode2str(wifi_cfg.mode));
+  wifi_mode_t cMode;
+  esp_wifi_get_mode(&cMode);
+  F_LOGI(true, true, LC_MAGENTA, "WiFi current mode: %s", mode2str(cMode));
 
-  wifi_set_mode((wifi_mode_t)(wifi_cfg.mode | WIFI_MODE_AP));
+  wifi_set_mode((wifi_mode_t)(cMode | WIFI_MODE_AP));
   esp_wifi_set_config(WIFI_IF_AP, &wifi_config);
 }
 
@@ -1267,20 +1300,17 @@ int waitConnectedBit()
 // AP          ?      c      --    c
 // APSTA       d      ---    d     --
 // ===============================================================================================
-esp_err_t wifi_set_mode(wifi_mode_t mode)
+esp_err_t wifi_set_mode(wifi_mode_t mSet)
 {
   esp_err_t err = ESP_OK;
+  wifi_mode_t  cMode;
 
-  F_LOGV(true, true, LC_GREY, "wifi_set_mode(%s)", mode2str(mode));
+  F_LOGV(true, true, LC_GREY, "wifi_set_mode(%s)", mode2str(mSet));
 
-  err = esp_wifi_set_mode(mode);
+  err = esp_wifi_set_mode(mSet);
 
-  if ( err == ESP_OK )
-  {
-    esp_wifi_get_mode(&wifi_cfg.mode);
-  }
-
-  F_LOGV(true, true, LC_GREY, "actual mode: %s", mode2str(wifi_cfg.mode));
+  esp_wifi_get_mode(&cMode);
+  F_LOGV(true, true, LC_GREY, "actual mode: %s", mode2str(cMode));
 
   return err;
 }
