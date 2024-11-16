@@ -77,6 +77,7 @@ typedef struct
   char         password[PASSW_STRLEN];                            // AP Password
   size_t       ssid_len;                                          // Store len
   size_t       pass_len;                                          // Store len
+  //uint8_t      enabled;                                           // Enabled by default?
   uint8_t      primary;                                           // AP Primary Channel
   uint8_t      secondary;                                         // AP's Second Channel
   uint8_t      authmode;                                          // AP Authmode
