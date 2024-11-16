@@ -7,6 +7,15 @@ The interface allows an end user to view tasks, amend wireless settings and mana
 
 The lights have several control modes, allowing them to be forced on/off at fixed times or turned on/off when, according to the local sunrise/sunset, it is dark.
 
+# Before compiling
+On windows, configure environment variables for connecting your ESP32 to your IOT network. I have included an example script in the tools directory.
+Essentially, you will need to run
+setx WIFI_SSID "<Your SSID>"
+setx WIFI_PASS "<password>"
+setx MQTT_SERVER "mqtt://<mqtt server>/"
+setx MQTT_USER "<mqtt username>"
+setx MQTT_PASS "<mqtt password>"
+
 # Working:
 A unit can be a master or slave (two masters is possible, but unknown results).
 Synchronisation of patterns and palettes.
