@@ -163,8 +163,8 @@ overlay_t overlay[] = {
   {NULL,  { 38,   2,  0,   MediumWhite},  0,  false},
   {NULL,  { 32,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 33,   1,  0,   MediumWhite},  0,  false},
-  {NULL,  {  0,   1,  0,   MediumWhite},  0,  false},
-  {NULL,  {  0,   1,  0,   MediumWhite},  0,  false}};
+  {NULL,  { 20,   1,  0,   MediumWhite},  0,  false},
+  {NULL,  { 21,   1,  0,   MediumWhite},  0,  false}};
 #elif defined (CONFIG_AXRGB_DEV_OLIMEX)
 overlay_t overlay[] = {
   {NULL,  {  0,   3,  0,   MediumWhite},  0,  false},

@@ -299,7 +299,7 @@ static void send_ping (void *arg)
   free (resp_arg);
 }
 
-#define JSON_SCAN_STR "{\n\t\t\"ssid\": \"%s\",\n\t\t\"bssid\": \"N/A\",\n\t\t\"chan\": %d,\n\t\t\"2chan\": %d,\n\t\t\"rssi\": %d,\n\t\t\"enc\": \"%s\"\n\t}"
+#define JSON_SCAN_STR "{\n\t\t\"ssid\": \"%s\",\n\t\t\"bssid\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\n\t\t\"chan\": %d,\n\t\t\"2chan\": %d,\n\t\t\"rssi\": %d,\n\t\t\"enc\": \"%s\"\n\t}"
 #define SIZE_JSONBUF   4096
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
 IRAM_ATTR char *ws_scan_results (uint16_t *strLen)
@@ -311,6 +311,9 @@ char *ws_scan_results (uint16_t *strLen)
   char *jsonStr = NULL;
   *strLen = 0;
 
+  wifi_ap_record_t apinfo;
+  esp_wifi_sta_get_ap_info(&apinfo);
+
   wifi_getApScanResult (&cgiWifiAps);
 
   // Have we got any AP's from the last scan?
@@ -321,7 +324,8 @@ char *ws_scan_results (uint16_t *strLen)
     memset (jsonStr, 0x0, (SIZE_JSONBUF+1));
 
     // Start our JSON response
-    *strLen = snprintf (jsonStr, SIZE_JSONBUF - *strLen, "{\n\t\"APs\": [");
+    *strLen = snprintf (jsonStr, SIZE_JSONBUF - *strLen, "{\n\"curAP\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\n\t\"APs\": [",
+                    apinfo.bssid[0], apinfo.bssid[1], apinfo.bssid[2], apinfo.bssid[3], apinfo.bssid[4], apinfo.bssid[5]);
 
     // print the list
     for ( int i = 0; i < cgiWifiAps.apCount; i++ )
@@ -332,7 +336,9 @@ char *ws_scan_results (uint16_t *strLen)
         *strLen += snprintf (&jsonStr[*strLen], SIZE_JSONBUF - *strLen, ", ");
       }
       *strLen += snprintf (&jsonStr[*strLen], SIZE_JSONBUF - *strLen, JSON_SCAN_STR,
-        cgiWifiAps.apList[i].ssid, cgiWifiAps.apList[i].primary, cgiWifiAps.apList[i].second,
+        cgiWifiAps.apList[i].ssid,
+        cgiWifiAps.apList[i].bssid[0], cgiWifiAps.apList[i].bssid[1], cgiWifiAps.apList[i].bssid[2], cgiWifiAps.apList[i].bssid[3], cgiWifiAps.apList[i].bssid[4], cgiWifiAps.apList[i].bssid[5], 
+        cgiWifiAps.apList[i].primary, cgiWifiAps.apList[i].second,
         cgiWifiAps.apList[i].rssi, auth2str (cgiWifiAps.apList[i].authmode));
     }
     *strLen += snprintf (&jsonStr[*strLen], SIZE_JSONBUF - *strLen, "]\n}");

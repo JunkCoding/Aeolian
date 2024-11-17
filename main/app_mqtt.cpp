@@ -809,9 +809,9 @@ void proc_ev_dev_network (esp_mqtt_event_handle_t event)
     z = 5;
   }
 
-  if ( !shrt_cmp ("Connected", status) )
+  if ( !shrt_cmp("connected", status) )
   {
-    setZone (z, OV_MASK_PAUSED | OV_MASK_DAY, CRGBMediumWhite, 50);
+    setZone (z, OV_MASK_PAUSED | OV_MASK_DAY, CRGBMediumWhite, 75);
   }
   else
   {
