@@ -11,6 +11,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "esp_random.h"
+
 #include "app_utils.h"
 #include "app_yuarel.h"
 
