@@ -1,4 +1,5 @@
 var retries;
+var curAP = "";
 let xhr = new XMLHttpRequest();
 
 function updateSelSsid(sel)
@@ -21,7 +22,8 @@ function createRowForAp(row, ap)
   input.name = "ssid";
   input.value = ap.ssid;
   input.addEventListener('change', function() {updateSelSsid(input)});
-  if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";
+  /*if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";*/
+  if(curAP == ap.bssid) input.checked = "1";
   input.id = "opt-" + ap.ssid;
   radio.appendChild(input);
   row.appendChild(radio);
@@ -151,6 +153,10 @@ function wsOpen()
       if ( evt.data )
       {
         var apList = JSON.parse(evt.data);
+        if(apList.curAP)
+        {
+          curAP = apList.curAP;
+        }
         if(apList.APs && apList.APs.length > 0)
         {
           let ntbdy = document.createElement('tbody');

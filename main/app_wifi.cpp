@@ -780,11 +780,27 @@ static void start_ap (void)
 }
 
 // --------------------------------------------------------------------------
+// Local helper function
+// --------------------------------------------------------------------------
+void log_ap(const wifi_ap_record_t ap, const log_colour_t logCol)
+{
+  F_LOGI(true, true, logCol, "Found AP: %s (%02X:%02X:%02X:%02X:%02X:%02X), channel: %d, rssi: %d, auth: %s",
+        ap.ssid,
+        ap.bssid[0], ap.bssid[1], ap.bssid[2], ap.bssid[3], ap.bssid[4], ap.bssid[5],
+        ap.primary,  ap.rssi, auth2str(ap.authmode));
+}
+
+// --------------------------------------------------------------------------
 // Scan local access points for an AP matching our configuration
 // --------------------------------------------------------------------------
-bool check_for_ssid(const uint8_t *ssid, uint8_t len)
+bool findBestAP(uint8_t *bssid, const uint8_t *ssid, uint8_t len)
 {
-  int x = 4;
+  // Prepare everything for our search
+  int x = 4;              // Max loops
+  int rssi = -2000;       // Impossibly high(low?) value
+  bool foundAP = false;   // Did we find a match?
+
+  // Loop until we time out or find a match
   do
   {
     EventBits_t uxBits = xEventGroupGetBits (wifi_event_group);
@@ -796,19 +812,43 @@ bool check_for_ssid(const uint8_t *ssid, uint8_t len)
       {
         for ( int i = 0; i < cgiWifiAps.apCount; i++ )
         {
-          F_LOGI(true, true, LC_GREY, "ssid: %s, channel: %d, rssi: %d, auth: %s", cgiWifiAps.apList[i].ssid, cgiWifiAps.apList[i].primary,  cgiWifiAps.apList[i].rssi, auth2str(cgiWifiAps.apList[i].authmode));
+          // Compare this AP with the SSID we are looking for
           if ( strncmp(wifi_sta_cfg.ssid, (const char *)cgiWifiAps.apList[i].ssid, wifi_sta_cfg.ssid_len) == 0 )
           {
-            return true;
+            // If the signal strength is lower than our current saved, make this our chosen AP
+            if ( cgiWifiAps.apList[i].rssi > rssi )
+            {
+              // Let anyone watching know what we are doing
+              log_ap(cgiWifiAps.apList[i], LC_GREEN);
+
+              // Store the bssid to ensure we connec to the right AP
+              memcpy(bssid, cgiWifiAps.apList[i].bssid, 6);
+
+              // Flag we found something
+              foundAP = true;
+
+              // Save the rssi value for later comparison
+              rssi = cgiWifiAps.apList[i].rssi;
+            }
+            else
+            {
+              // Let anyone watching know what we are doing
+              log_ap(cgiWifiAps.apList[i], LC_YELLOW);
+            }
+          }
+          else
+          {
+            // Let anyone watching know what we are doing
+            log_ap(cgiWifiAps.apList[i], LC_GREY);
           }
         }
       }
       wifi_startScan();
       x--;
     }
-  } while ( x > 0 );
+  } while ( x > 0 && !foundAP );
 
-  return false;
+  return foundAP;
 }
 
 // **************************************************************************************************
@@ -817,6 +857,7 @@ bool check_for_ssid(const uint8_t *ssid, uint8_t len)
 static bool scan_for_ssid(void)
 {
   bool scan_found = false;
+  uint8_t bssid[6] = {};
 
   F_LOGI(true, true, LC_GREY, "Setting up STA...");
 
@@ -836,16 +877,24 @@ static bool scan_for_ssid(void)
   // Set the SSID/Password
   if ( wifi_sta_cfg.ssid_len > 0 && wifi_sta_cfg.pass_len > 0 )
   {
+    // Copy the stored SSID to our configuration
     memcpy ((char *)wifi_config.sta.ssid, wifi_sta_cfg.ssid, wifi_sta_cfg.ssid_len);
-    memcpy ((char *)wifi_config.sta.password, wifi_sta_cfg.password, wifi_sta_cfg.pass_len);
     wifi_config.sta.ssid[wifi_sta_cfg.ssid_len] = 0x0;
+
+    // Copy the stored password to our configuration
+    memcpy ((char *)wifi_config.sta.password, wifi_sta_cfg.password, wifi_sta_cfg.pass_len);
     wifi_config.sta.password[wifi_sta_cfg.pass_len] = 0x0;
 
     // Check results for an SSID matching our saved SSID/password combination
-    if ( check_for_ssid(wifi_config.sta.ssid, wifi_sta_cfg.ssid_len) )
+    if ( (scan_found = findBestAP(bssid, wifi_config.sta.ssid, wifi_sta_cfg.ssid_len)) == true )
     {
-      // We found a matching SSID
-      scan_found = true;
+      // Whether to set the MAC address of target AP or not.
+      // Generally, station_config.bssid_set needs to be 0; and it needs to be 1 only when users need to check the MAC address of the AP
+      // (From testing, the ESP32 automatically chooses the AP with the best signal. I would tend to only enable this feature for
+      // security reasons, otherwise this might hinder roaming)
+      //wifi_config.sta.bssid_set = true;
+      // Set the bssid to ensure we connect to the right AP
+      //memcpy(wifi_config.sta.bssid, bssid, 6);
 
       // Attempt a connection to the found SSID
       //F_LOGI(true, true, LC_YELLOW, "Attenpting connection to: '%s', password: '%s'", wifi_config.sta.ssid, wifi_config.sta.password);

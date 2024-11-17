@@ -327,6 +327,13 @@ int _get_buildTarget (char *buf, int bufsize, int type)
   return snprintf (buf, bufsize, "%s", CONFIG_TARGET_DEVICE_STR);
 }
 // ***********************************************
+int _get_buildVersion (char *buf, int bufsize, int param)
+{
+  // Something broke, so using an alternative method
+  //return snprintf (buf, bufsize, "%s", esp_get_idf_version ());
+  return snprintf(buf, bufsize, "%s", AXRGB_FW_HASH);
+}
+// ***********************************************
 int _get_log_history (char *buf, int bufsize, int type)
 {
   return snprintf(buf, bufsize, "%s", CONFIG_TARGET_DEVICE_STR);
@@ -611,7 +618,7 @@ int _get_idf_version (char *buf, int bufsize, int param)
 {
   // Something broke, so using an alternative method
   //return snprintf (buf, bufsize, "%s", esp_get_idf_version ());
-  return snprintf(buf, bufsize, "v%d.%d.%d, %s", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH, AXRGB_FW_HASH);
+  return snprintf(buf, bufsize, "v%d.%d.%d", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH);
 }
 // ***********************************************
 static uint8_t _parse_u8 (char *parseStr)
@@ -901,6 +908,7 @@ WORD_ALIGNED_ATTR DRAM_ATTR static status_command_t status_command[] = {
   {"boot_count",                _get_bootCount,        NULL,                   0},
   {"build_options",             _get_buildOpts,        NULL,                   0},
   {"build_target",              _get_buildTarget,      NULL,                   0},
+  {"build_version",             _get_buildVersion,     NULL,                   0},
   {"cur_pattern",               _get_curPattern,       NULL,                   0},
   {"date",                      _get_date,             NULL,                   0},
   {"date_time",                 _get_dateTime,         NULL,                   0},

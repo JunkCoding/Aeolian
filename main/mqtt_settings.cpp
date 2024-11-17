@@ -59,7 +59,7 @@
 #define Default_0x66    "0"                     // QoS
 
 #define Default_0x71    "Network"               // Name
-#define Default_0x72    "BTRGB/network"         // Topic_sub
+#define Default_0x72    "BTRGB/network/+"       // Topic_sub
 #define Default_0x73    "BTRGB/network/%c"      // Topic_pub
 #define Default_0x74    "1"                     // Enable_publish
 #define Default_0x75    "0"                     // Retained
