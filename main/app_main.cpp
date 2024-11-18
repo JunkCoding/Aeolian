@@ -93,7 +93,7 @@ extern "C" void app_main(void)
 
 #if CONFIG_USE_TASK_WDT
   F_LOGI(true, true, LC_GREY, "Initialising TWDT");
-  CHECK_ERROR_CODE(esp_task_wdt_init((esp_task_wdt_config_t)TWDT_TIMEOUT_S, true), ESP_OK);
+  CHECK_ERROR_CODE(esp_task_wdt_init(TWDT_TIMEOUT_S, true), ESP_OK);
 #endif /* CONFIG_USE_TASK_WDT */
 
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0

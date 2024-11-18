@@ -10,17 +10,20 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
 #include <pthread.h>
-#include <esp_system.h>
-#include <esp_sntp.h>
+
 #include <esp_http_server.h>
+#include <esp32/rom/rtc.h>
+#include <esp_system.h>
+#include <esp_netif.h>
+#include <esp_wifi.h>
+#include <esp_sntp.h>
+#include <esp_mac.h>
+
 #include <driver/gpio.h>
 
 #include <lwip/err.h>
-#include <esp_netif.h>
-#include <esp32/rom/rtc.h>
-#include <esp_wifi.h>
+
 #include <nvs_flash.h>
 
 #include "app_main.h"
@@ -487,7 +490,7 @@ int _get_macAddress (char *buf, int bufsize, int type)
   if ( mode & WIFI_MODE_STA )
   {
     uint8_t macaddr[6] = {};
-    esp_efuse_mac_get_default (macaddr);
+    esp_efuse_mac_get_default(macaddr);
     len = snprintf (buf, bufsize, MACSTR, MAC2STR (macaddr));
   }
   else
