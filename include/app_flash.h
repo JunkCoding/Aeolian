@@ -3,14 +3,19 @@
 
 #include <string.h>
 #include <sys/time.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
+
 #include <esp_flash_partitions.h>
 #include <esp_http_server.h>
 #include <esp_app_format.h>
 #include <esp_partition.h>
+#include <esp_app_desc.h>
+#include <esp_flash.h>
+
 #include "app_wifi.h"
 
 typedef enum

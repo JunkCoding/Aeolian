@@ -10,17 +10,17 @@
 #include <freertos/semphr.h>
 #include <freertos/queue.h>
 #include <freertos/event_groups.h>
-#include <soc/rtc_wdt.h>
-#include <esp_task_wdt.h>
 
-#include <esp_types.h>
-#include <esp_spi_flash.h>
 #include <lwip/ip_addr.h>
-#include <esp_netif.h>
 
+#include <esp_task_wdt.h>
+#include <esp_types.h>
+#include <esp_netif.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
+
 #include <nvs_flash.h>
+
 #include <mqtt_config.h>
 #include <mqtt_client.h>
 
@@ -360,8 +360,8 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
             uint16_t reason = PAUSE_NOTPROVIDED;
 
             // Number of objects
-            uint objs = t[i++].size;
-            for ( uint v = 0; v < objs; v++, i++ )
+            uint16_t objs = t[i++].size;
+            for ( uint16_t v = 0; v < objs; v++, i++ )
             {
               snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
               //F_LOGW(true, true, LC_YELLOW, "Loop: %s", token);
@@ -400,8 +400,8 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
             if ( t[i].type == JSMN_ARRAY )
             {
               uint16_t paused = 0, pauseReason = 0, themeID = 0;
-              uint objs = t[i++].size;
-              for ( uint v = 0; v < objs; v++, i++ )
+              uint16_t objs = t[i++].size;
+              for ( uint16_t v = 0; v < objs; v++, i++ )
               {
                 snprintf(param, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
                 switch(v)
@@ -841,7 +841,7 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
   r = jsmn_parse(&p, event->data, event->data_len, t, sizeof (t) / sizeof (t[0]));
 
   bool eng_pkt = false;
-  uint i = 1;
+  uint16_t i = 1;
   while ( i < r )
   {
     snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
@@ -866,21 +866,21 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
       if ( t[i].type == JSMN_OBJECT )
       {
         // Number of objects
-        uint objs = t[i++].size;
+        uint16_t objs = t[i++].size;
 
-        for ( uint v = 0; v < objs; v++ )
+        for ( uint16_t v = 0; v < objs; v++ )
         {
           if ( !shrt_cmp ("mov", event->data + t[i].start) )
           {
             if ( t[++i].type == JSMN_ARRAY )
             {
               // Store the length of the array
-              uint elements = t[i++].size;
+              uint16_t elements = t[i++].size;
 
               // Create a code friendly pointer to the elements
               //g = &t[i];
 
-              for ( uint z = 0; z < elements; z++ )
+              for ( uint16_t z = 0; z < elements; z++ )
               {
                 mov[z] = (uint16_t)strtol(event->data + t[i].start, &endptr, 10);
                 i++;
@@ -892,12 +892,12 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
             if ( t[++i].type == JSMN_ARRAY )
             {
               // Store the length of the array
-              uint elements = t[i++].size;
+              uint16_t elements = t[i++].size;
 
               // Create a code friendly pointer to the elements
               //g = &t[i];
 
-              for ( uint z = 0; z < elements; z++ )
+              for ( uint16_t z = 0; z < elements; z++ )
               {
                 sta[z] = (uint16_t)strtol(event->data + t[i].start, &endptr, 10);
                 i++;
@@ -912,9 +912,9 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
       if ( t[i].type == JSMN_OBJECT )
       {
         // Number of objects
-        uint objs = t[i++].size;
+        uint16_t objs = t[i++].size;
 
-        for ( uint v = 0; v < objs; v++ )
+        for ( uint16_t v = 0; v < objs; v++ )
         {
           if ( !shrt_cmp ("dst", event->data + t[i].start) )
           {
@@ -934,9 +934,9 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
       if ( t[i].type == JSMN_OBJECT )
       {
         // Number of objects
-        uint objs = t[i++].size;
+        uint16_t objs = t[i++].size;
 
-        for ( uint v = 0; v < objs; v++ )
+        for ( uint16_t v = 0; v < objs; v++ )
         {
           if ( !shrt_cmp ("dst", event->data + t[i].start) )
           {

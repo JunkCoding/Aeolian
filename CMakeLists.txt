@@ -10,6 +10,19 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
   find_package(Git)
   if (Git_FOUND)
     execute_process(
+      #COMMAND git branch --show-current
+      COMMAND git rev-parse --abbrev-ref HEAD
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_BRANCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
+      COMMAND git config user.name
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_USER_NAME
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
       COMMAND git rev-list --count HEAD
       OUTPUT_VARIABLE GIT_COMMIT_REVISION
       ERROR_QUIET
@@ -46,7 +59,8 @@ endif()
 #string(TIMESTAMP TODAY "%Y%m%d")
 #set(VERSION_REVISION "-${TODAY}-${GIT_COMMIT_HASH}${GIT_DIRTY}")
 idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_HASH=\"${GIT_COMMIT_HASH}${GIT_DIRTY}\"" APPEND)
-idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_BRANCH=\"${GIT_COMMIT_BRANCH}\"" APPEND)
+idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_BRANCH=\"${GIT_BRANCH}\"" APPEND)
+idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_GITUSER=\"${GIT_USER_NAME}\"" APPEND)
 # #####################################################
 
 set(BUILD_DIR ${CMAKE_BINARY_DIR})

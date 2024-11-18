@@ -12,7 +12,9 @@
 #include <string.h> // memcpy()
 
 #include <esp_types.h>
-#include <esp_spi_flash.h>
+#include <esp_flash.h>
+#include <esp_partition.h>
+
 #include <lwip/ip_addr.h> // IP4_ADDR()
 
 #include "app_configs.h"
@@ -30,7 +32,6 @@
 
 #define CFG_DATA_START_ADDR (INITDATAPOS - (CFG_DATA_NUM_BLOCKS + EXTRA_BLOCKS_AT_END) * SPI_FLASH_SEC_SIZE)
 #define CFG_START_MARKER 0xABCDABCD
-//#define CFG_START_MARKER 0xDEADBEEF
 
 #define NO_DATA_AVAILABLE -1
 #define NO_WRITE_BLOCK_AVAILABLE -2
@@ -830,9 +831,13 @@ static int user_config_check_integrity (void)
 {
   F_LOGW(true, true, LC_BRIGHT_YELLOW, "begin");
 
-  uint8_t status[CFG_DATA_NUM_BLOCKS];
+#if ( ESP_IDF_VERSION_MAJOR < 5 )
+#endif
 
-  int i;
+  uint8_t status[CFG_DATA_NUM_BLOCKS];
+  uint i;
+  const esp_partition_t *nvs_partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NVS_PARTITION);
+
   for (i = 0; i < CFG_DATA_NUM_BLOCKS; i++)
   {
     status[i] = unknown;
@@ -938,7 +943,9 @@ static int user_config_check_integrity (void)
     {
       uint32_t page = i + CFG_DATA_START_ADDR / SPI_FLASH_SEC_SIZE;
       F_LOGE(true, true, LC_RED, "Erase page 0x%04x", page);
-      spi_flash_erase_sector(page);
+
+      esp_flash_erase_region(nvs_partition->flash_chip, page, nvs_partition->size);
+
       status[i] = erased;
     }
   }
@@ -985,6 +992,7 @@ static int user_config_check_integrity (void)
 int user_config_read (uint32_t addr, char* buf, int len)
 {
   int rd_len = 0;
+  const esp_partition_t *nvs_partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NVS_PARTITION);
 
   if ( (addr & 3) != 0 )
   {
@@ -1018,8 +1026,8 @@ int user_config_read (uint32_t addr, char* buf, int len)
 
       if ( len4m > 0 )
       {
-        F_LOGV(true, true, LC_GREY, "spi_flash_read %d, 0x%04x", len4m, rd_addr);
-        spi_flash_read (rd_addr, (uint32_t*)buf, len4m);
+        F_LOGV(true, true, LC_GREY, "esp_flash_read %d, 0x%04x", len4m, rd_addr);
+        esp_flash_read(nvs_partition->flash_chip, (uint32_t*)buf, rd_addr, len4m);
         addr += len4m;
         buf += len4m;
         len -= len4m;
@@ -1029,8 +1037,8 @@ int user_config_read (uint32_t addr, char* buf, int len)
       else if ( len < 4 )
       {
         uint32_t last;
-        F_LOGV(true, true, LC_GREY, "spi_flash_read %d, 0x%04x", len, rd_addr);
-        spi_flash_read (rd_addr, &last, sizeof (last));
+        F_LOGV(true, true, LC_GREY, "esp_flash_read %d, 0x%04x", len, rd_addr);
+        esp_flash_read(nvs_partition->flash_chip, &last, rd_addr, sizeof (last));
         memcpy (buf, &last, len);
         addr += len;
         buf += len;
@@ -1060,6 +1068,7 @@ int user_config_read (uint32_t addr, char* buf, int len)
 int user_config_write (uint32_t addr, char *str, int len)
 {
   int wr_len = 0;
+  const esp_partition_t *nvs_partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NVS_PARTITION);
 
   if ( ((uint32_t)(str) & 3) != 0 )
   {
@@ -1095,7 +1104,7 @@ int user_config_write (uint32_t addr, char *str, int len)
       {
         F_LOGI(true, true, LC_GREY, "spi flash write %d bytes, 0x%04x", len, wr_addr);
 
-        spi_flash_write (wr_addr, (uint32_t*)str, len4m);
+        esp_flash_write(nvs_partition->flash_chip, (uint32_t*)str, wr_addr, len4m);
 
         addr += len4m;
         str += len4m;
@@ -1109,7 +1118,7 @@ int user_config_write (uint32_t addr, char *str, int len)
 
         F_LOGI(true, true, LC_GREY, "spi flash write %d, 0x%04x", len, wr_addr);
 
-        spi_flash_write (wr_addr, &last, sizeof (last));
+        esp_flash_write(nvs_partition->flash_chip, &last, wr_addr, sizeof (last));
 
         addr += len;
         str += len;
@@ -1127,7 +1136,7 @@ int user_config_write (uint32_t addr, char *str, int len)
 
         F_LOGI(true, true, LC_GREY, "spi flash write at 0x%04x next record 0x%04x", wr_addr, start);
 
-        spi_flash_write (wr_addr, &start, sizeof (start)); // write record start address
+        esp_flash_write(nvs_partition->flash_chip, &start, wr_addr, sizeof (start)); // write record start address
 
         addr += sizeof (uint32_t) * 2;
         wr_len += sizeof (uint32_t) * 2;
@@ -1211,6 +1220,7 @@ int _config_save (cfg_mode_t cfg_mode, char* str, int value)
   int len4 = (len + 3) & ~3;
   int current_block = addr / SPI_FLASH_SEC_SIZE;
   int next_block = (addr + sizeof (cfg_mode_t) + len4 - 1) / SPI_FLASH_SEC_SIZE;
+  const esp_partition_t *nvs_partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NVS_PARTITION);
 
   if (next_block != current_block)
   {
@@ -1280,7 +1290,7 @@ int _config_save (cfg_mode_t cfg_mode, char* str, int value)
       while (num_words > 0)
       {
         cfg_mode_t cfg_mode __attribute__ ((aligned (4)));
-        spi_flash_read (rd_addr, (uint32_t*)&cfg_mode, sizeof (cfg_mode));
+        esp_flash_read(nvs_partition->flash_chip, (uint32_t*)&cfg_mode, rd_addr, sizeof (cfg_mode));
         num_words--;
 
         if (cfg_mode.mode == 0xFFFFFFFF) // end of list
@@ -1297,7 +1307,7 @@ int _config_save (cfg_mode_t cfg_mode, char* str, int value)
           if (cfg_mode.id == ID_EXTRA_DATA && cfg_mode.valid != RECORD_ERASED)
           {
             uint8_t buf[len4] __attribute__ ((aligned (4)));
-            spi_flash_read (rd_addr, (uint32_t*)buf, len4);
+            esp_flash_read(nvs_partition->flash_chip, (uint32_t*)buf, rd_addr, len4);
 
             int wr_len = user_config_write (addr, (char*)&cfg_mode, sizeof (cfg_mode_t));
             addr += wr_len;
@@ -1317,7 +1327,7 @@ int _config_save (cfg_mode_t cfg_mode, char* str, int value)
       // erase start block
       uint32_t page = first + CFG_DATA_START_ADDR / SPI_FLASH_SEC_SIZE;
       F_LOGW(true, true, LC_BRIGHT_YELLOW, "Erase page 0x%04x", page);
-      spi_flash_erase_sector (page);
+      esp_flash_erase_sector (page);
 
       // write marker to its next block
       int next = (first + 1) % CFG_DATA_NUM_BLOCKS;
@@ -1346,7 +1356,7 @@ int _config_save (cfg_mode_t cfg_mode, char* str, int value)
     addr += wr_len;
     wr_addr = addr;
 
-    F_LOGW(true, true, LC_BRIGHT_YELLOW, "spi_flash_write value 0x%08x to 0x%04x", value, addr);
+    F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_flash_write value 0x%08x to 0x%04x", value, addr);
 
     wr_len = user_config_write (addr, (char*)&value, sizeof (value));
     addr += wr_len;
@@ -1565,6 +1575,8 @@ uint32_t user_config_invalidate (uint32_t addr)
 {
   F_LOGV(true, true, LC_GREY, "0x%08x", addr);
 
+  const esp_partition_t *nvs_partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NVS_PARTITION);
+
   // addr points to the value or the begin of the string
   // the contol block is 4 bytes before
 
@@ -1575,12 +1587,12 @@ uint32_t user_config_invalidate (uint32_t addr)
     cfg_mode_t cfg_mode;
     uint32_t spi_addr = CFG_DATA_START_ADDR + cfg_addr;
 
-    spi_flash_read (spi_addr, (uint32_t*)&cfg_mode, sizeof (cfg_mode));
+    esp_flash_read(nvs_partition->flash_chip, (uint32_t*)&cfg_mode, spi_addr, sizeof (cfg_mode));
 
     if (cfg_mode.valid != RECORD_ERASED)
     {
       cfg_mode.valid = RECORD_ERASED;
-      spi_flash_write (spi_addr, (uint32_t*)&cfg_mode, sizeof (cfg_mode));
+      esp_flash_write(nvs_partition->flash_chip, (uint32_t*)&cfg_mode, spi_addr, sizeof (cfg_mode));
     }
   }
   else

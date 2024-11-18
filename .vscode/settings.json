@@ -98,4 +98,5 @@
   },
   "idf.gitPathWin": "E:\\VSCode\\esp\\v5.3.1\\tools\\tools\\idf-git\\2.39.2\\cmd\\git.exe",
   "editor.fontSize": 9,
+  "workbench.startupEditor": "none",
 }

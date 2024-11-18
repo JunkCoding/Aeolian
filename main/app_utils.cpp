@@ -29,7 +29,7 @@ IRAM_ATTR uint32_t clock_ms()
 }
 
 // Serial ports
-extern uint radSerial;
+extern uint16_t radSerial;
 
 const char *colour[] =
 {

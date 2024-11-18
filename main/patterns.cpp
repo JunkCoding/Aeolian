@@ -6,7 +6,6 @@
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
 #include <soc/rmt_struct.h>
-#include <lwip/apps/sntp.h>
 #include <esp_task_wdt.h>
 #include <esp_err.h>
 

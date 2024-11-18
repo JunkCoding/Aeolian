@@ -5,14 +5,17 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
-#include <driver/timer.h>
 #include <freertos/event_groups.h>
+
+#include <driver/timer.h>
+#include <driver/gpio.h>
+
 #include <esp_task_wdt.h>
 #include <esp_err.h>
+
 #include <sys/time.h>
-#include <lwip/apps/sntp.h>
 #include <soc/rtc.h>
-#include <driver/gpio.h>
+
 
 #include <time.h>
 

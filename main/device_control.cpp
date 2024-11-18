@@ -13,10 +13,10 @@
 
 #include <pthread.h>
 #include <esp_system.h>
+#include <esp_sntp.h>
 #include <esp_http_server.h>
 #include <driver/gpio.h>
 
-#include <lwip/apps/sntp.h>
 #include <lwip/err.h>
 #include <esp_netif.h>
 #include <esp32/rom/rtc.h>
@@ -319,7 +319,7 @@ int _get_apAddress (char *buf, int bufsize, int unused)
 // ***********************************************
 int _get_bootCount (char *buf, int bufsize, int type)
 {
-  return snprintf (buf, bufsize, "%d (last ota @ %d)", boot_count, ota_update);
+  return snprintf (buf, bufsize, "%lu (last ota @ %lu)", boot_count, ota_update);
 }
 // ***********************************************
 int _get_buildTarget (char *buf, int bufsize, int type)
@@ -390,7 +390,7 @@ int _get_dateTime (char *buf, int bufsize, int dmmy)
 // ***********************************************
 int _get_heap (char *buf, int bufsize, int dmmy)
 {
-  return snprintf (buf, bufsize, "%d", esp_get_free_heap_size ());
+  return snprintf (buf, bufsize, "%lu", esp_get_free_heap_size ());
 }
 // ***********************************************
 int _set_hostname (char *buf, int bufsize, char *param, char *value, int zone)

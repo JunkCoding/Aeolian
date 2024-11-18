@@ -8,20 +8,21 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
+
+#include <driver/gpio.h>
+
 #include <soc/rmt_struct.h>
-#include <lwip/apps/sntp.h>
+
+#include <lwip/ip_addr.h>
+#include <lwip/err.h>
+#include <lwip/sys.h>
 
 #include <esp_system.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
 #include <esp_partition.h>
 #include <esp_ota_ops.h>
-#include <lwip/err.h>
-#include <lwip/sys.h>
 #include <nvs_flash.h>
-#include <driver/gpio.h>
-#include <stdio.h>
-#include <esp_sntp.h>
 
 #include "app_main.h"
 #include "app_sntp.h"
@@ -152,47 +153,47 @@ void init_sntp ( void )
    * NOTE: This call should be made BEFORE esp aquires IP address from DHCP,
    * otherwise NTP option would be rejected by default.
    */
-  sntp_servermode_dhcp ( 1 );      // accept NTP offers from DHCP server, if any
+  esp_sntp_servermode_dhcp(1);      // accept NTP offers from DHCP server, if any
 #endif
 }
 
 void obtain_time ( void )
 {
   // Stop SNTP if enabled
-  if ( sntp_enabled () )
+  if ( esp_sntp_enabled() )
   {
-    sntp_stop ();
+    esp_sntp_stop();
   }
 
   // Flag as not synced
   ntp_time_sync = false;
 
-  sntp_setoperatingmode ( SNTP_OPMODE_POLL );
+  esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
 
 #if LWIP_DHCP_GET_NTP_SRV && SNTP_MAX_SERVERS > 1
-  sntp_setservername ( 1, "0.pool.ntp.org" );
+  esp_sntp_setservername(1, "0.pool.ntp.org");
 #elif defined CONFIG_SNTP_TIME_SERVER
-  sntp_setservername ( 0, CONFIG_SNTP_TIME_SERVER );
+  esp_sntp_setservername(0, CONFIG_SNTP_TIME_SERVER);
 #endif
 
   sntp_set_time_sync_notification_cb ( time_sync_notification_cb );
 
   // Start SNTP
-  sntp_init ();
+  esp_sntp_init();
 
   F_LOGI(true, true, LC_GREY, "List of configured NTP servers:");
 
   for ( uint8_t i = 0; i < SNTP_MAX_SERVERS; ++i )
   {
-    if ( sntp_getservername (i) )
+    if ( esp_sntp_getservername(i) )
     {
-      F_LOGI(true, true, LC_GREY, "Server %d: %s", i, sntp_getservername(i));
+      F_LOGI(true, true, LC_GREY, "Server %d: %s", i, esp_sntp_getservername(i));
     }
     else
     {
          // we have either IPv4 or IPv6 address, let's print it
       char buff[INET6_ADDRSTRLEN];
-      ip_addr_t const *ip = sntp_getserver ( i );
+      ip_addr_t const *ip = esp_sntp_getserver(i);
       if ( ipaddr_ntoa_r ( ip, buff, INET6_ADDRSTRLEN ) != NULL )
       {
         F_LOGI(true, true, LC_GREY, "Server %d: %s", i, buff);

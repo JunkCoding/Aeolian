@@ -4,26 +4,27 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
+#include <freertos/event_groups.h>
 #include <freertos/portmacro.h>
 #include <freertos/task.h>
-#include <esp_heap_task_info.h>
-#include <freertos/event_groups.h>
-#include <esp_timer.h>
+
 #include <soc/rmt_struct.h>
+
 #include <driver/periph_ctrl.h>
 #include <driver/timer.h>
 #include <driver/i2s.h>
 #include <driver/uart.h>
-#include <soc/rtc_wdt.h>
-#include <esp_task_wdt.h>
 
+#include <esp_task_wdt.h>
+#include <esp_heap_task_info.h>
+#include <esp_heap_caps.h>
+#include <esp_timer.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
-#include <esp_heap_caps.h>
-#include <esp32/clk.h>
 #include <esp_pm.h>
 
 #include <lwip/err.h>
@@ -31,7 +32,6 @@
 
 #include "app_wifi.h"
 #include "app_httpd.h"
-
 #include "app_main.h"
 #include "app_utils.h"
 #include "app_lightcontrol.h"
@@ -93,7 +93,7 @@ extern "C" void app_main(void)
 
 #if CONFIG_USE_TASK_WDT
   F_LOGI(true, true, LC_GREY, "Initialising TWDT");
-  CHECK_ERROR_CODE(esp_task_wdt_init(TWDT_TIMEOUT_S, true), ESP_OK);
+  CHECK_ERROR_CODE(esp_task_wdt_init((esp_task_wdt_config_t)TWDT_TIMEOUT_S, true), ESP_OK);
 #endif /* CONFIG_USE_TASK_WDT */
 
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0

@@ -3,35 +3,43 @@
 
 #include <iostream>
 #include <string>
-
 #include <string.h>
 #include <sys/time.h>
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
+#include <freertos/event_groups.h>
 #include <freertos/portmacro.h>
 #include <freertos/task.h>
+
 #include <esp_heap_task_info.h>
-#include <freertos/event_groups.h>
+#include <esp_chip_info.h>
+#include <esp_ota_ops.h>
+#include <esp_partition.h>
+#include <esp_idf_version.h>
+#include <esp_heap_caps.h>
+#include <esp_system.h>
 #include <esp_timer.h>
+#include <esp_mac.h>
+#include <esp_cpu.h>
+#include <esp_clk.h>
+
 #include <soc/rmt_struct.h>
-#include <soc/rtc_wdt.h>
+
 #include <driver/periph_ctrl.h>
 #include <driver/timer.h>
 #include <driver/i2s.h>
 #include <driver/uart.h>
-#include <nvs_flash.h>
-
-// Include this here due to bug of dac.h not including it
-#include "driver/gpio.h"
-
-#include <esp_ota_ops.h>
 #include <driver/dac.h>
 #include <driver/rtc_io.h>
+
+// Include this here due to bug of dac.h not including it
+//#include <driver/gpio.h>
+
 #include <esp32/rom/rtc.h>
-#include <esp_partition.h>
-#include <esp_spi_flash.h>
-#include <esp_heap_caps.h>
-#include <esp32/clk.h>
+
+#include <esp_flash_mmap.h>
+#include <nvs_flash.h>
 
 #include "app_main.h"
 #include "app_lightcontrol.h"
@@ -123,8 +131,8 @@ void print_app_info (void)
   F_LOGI(true, true, LC_GREY, "%25s = %d", "Num cores", chip_info.cores);
   F_LOGI(true, true, LC_GREY, "%25s = WiFi%s%s", "Features", (chip_info.features & CHIP_FEATURE_BT)?"/BT":"", (chip_info.features & CHIP_FEATURE_BLE)?"/BLE":"");
   F_LOGI(true, true, LC_GREY, "%25s = %02X:%02X:%02X:%02X:%02X:%02X", "MAC address", default_mac_addr[0], default_mac_addr[1], default_mac_addr[2], default_mac_addr[3], default_mac_addr[4], default_mac_addr[5]);
-  F_LOGI(true, true, LC_GREY, "%25s = %d MHz", "CPU freq", esp_clk_cpu_freq () / 1000000);
-  F_LOGI(true, true, LC_GREY, "%25s = %dMB %s", "Flash size", spi_flash_get_chip_size () / (1024 * 1024), (chip_info.features & CHIP_FEATURE_EMB_FLASH)?"embedded":"external");
+  F_LOGI(true, true, LC_GREY, "%25s = %d MHz", "CPU freq", esp_clk_cpu_freq() / 1000000);
+  F_LOGI(true, true, LC_GREY, "%25s = %dMB %s", "Flash size", esp_flash_get_chip_size () / (1024 * 1024), (chip_info.features & CHIP_FEATURE_EMB_FLASH)?"embedded":"external");
   F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Free heap size", esp_get_minimum_free_heap_size ());
   F_LOGI(true, true, LC_GREY, "%25s = %s (0x%08x)", "Partition", running->label, running->address);
   F_LOGI(true, true, LC_GREY, "%25s = %s", "OTA state", ota_state_to_str (ota_state));
@@ -150,7 +158,8 @@ void show_nvs_usage (void)
   F_LOGI(true, true, LC_GREY, "%16s: %-20s  %s", "Namespace", "Key", "Type");
   _print_divider ();
 
-  nvs_iterator_t it = nvs_entry_find (NVS_PARTITION, NULL, NVS_TYPE_ANY);
+#if ( ESP_IDF_VERSION_MAJOR < 5 )
+  nvs_iterator_t it = nvs_entry_find(NVS_PARTITION, NULL, NVS_TYPE_ANY);
   nvs_entry_info_t info;
   while ( it != NULL )
   {
@@ -158,10 +167,22 @@ void show_nvs_usage (void)
     it = nvs_entry_next (it);
     F_LOGI(true, true, LC_GREY, "%16s: %-20s  %d", info.namespace_name, info.key, info.type);
   };
+#else
+  nvs_iterator_t it = nullptr;
+  esp_err_t res = nvs_entry_find(NVS_PARTITION, NULL, NVS_TYPE_ANY, &it);
+  while ( res == ESP_OK )
+  {
+    nvs_entry_info_t info;
+    nvs_entry_info(it, &info); // Can omit error check if parameters are guaranteed to be non-NULL
+    F_LOGI(true, true, LC_GREY, "%16s: %-20s  %d", info.namespace_name, info.key, info.type);
+    res = nvs_entry_next(&it);
+  }
+  nvs_release_iterator(it);
+#endif
 
   _print_divider ();
   nvs_stats_t nvs_stats;
-  nvs_get_stats (NULL, &nvs_stats);
+  nvs_get_stats(NULL, &nvs_stats);
   F_LOGI(true, true, LC_GREY, "%25s = %d", "Total Entries", nvs_stats.total_entries);
   F_LOGI(true, true, LC_GREY, "%25s = %d", "Used Entries", nvs_stats.used_entries);
   F_LOGI(true, true, LC_GREY, "%25s = %d", "Free Entries", nvs_stats.free_entries);
@@ -599,7 +620,7 @@ void boot_init (void)
   // -----------------------------------------------------------
   // Enable OTA updates & other stuff
   // -----------------------------------------------------------
-  spi_flash_init();
+  esp_flash_init();
 }
 
 void new_fw_delay (void)
