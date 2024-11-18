@@ -4,8 +4,9 @@
 
 #include <esp_err.h>
 #include <esp_wifi.h>
-#include "app_httpd.h"
 #include <esp_wifi_types.h>
+
+#include "app_httpd.h"
 
 #define NUMARRAY_SIZE           16
 #define SSID_STRLEN             32

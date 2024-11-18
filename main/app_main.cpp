@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/time.h>
 
 #include <freertos/FreeRTOS.h>
@@ -93,7 +94,12 @@ extern "C" void app_main(void)
 
 #if CONFIG_USE_TASK_WDT
   F_LOGI(true, true, LC_GREY, "Initialising TWDT");
-  CHECK_ERROR_CODE(esp_task_wdt_init(TWDT_TIMEOUT_S, true), ESP_OK);
+  esp_task_wdt_config_t twdt_config = {
+    .timeout_ms     = TWDT_TIMEOUT_S * 1000,
+    .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,
+    .trigger_panic  = true,
+  };
+  ESP_ERROR_CHECK(esp_task_wdt_init(&twdt_config));
 #endif /* CONFIG_USE_TASK_WDT */
 
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0

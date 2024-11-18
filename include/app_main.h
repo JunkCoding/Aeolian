@@ -1,7 +1,6 @@
 #ifndef   __MAIN_H__
 #define   __MAIN_H__
 
-#include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
 #include <freertos/portmacro.h>

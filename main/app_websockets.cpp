@@ -96,7 +96,7 @@ static int prepareSystemStatusMsg (char **buf)
 
   F_LOGV(true, true, LC_BRIGHT_GREEN, "%s", jsonBuffer);
 
-  *(buf) = jsonBuffer;
+  *(buf) = strndup(jsonBuffer, bufptr);
   return bufptr;
 }
 // --------------------------------------------------------------------------
@@ -122,8 +122,9 @@ static void send_status_update (async_resp_arg *resp_arg)
 #endif
 {
   char  *buf = NULL;
-  int buflen = prepareSystemStatusMsg (&buf);
+  int buflen = prepareSystemStatusMsg(&buf);
   send_async_frame(resp_arg, (uint8_t *)buf, buflen);
+  free(buf);
   vPortFree (resp_arg);
 }
 
