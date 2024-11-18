@@ -1327,7 +1327,7 @@ int _config_save (cfg_mode_t cfg_mode, char* str, int value)
       // erase start block
       uint32_t page = first + CFG_DATA_START_ADDR / SPI_FLASH_SEC_SIZE;
       F_LOGW(true, true, LC_BRIGHT_YELLOW, "Erase page 0x%04x", page);
-      esp_flash_erase_sector (page);
+      esp_flash_erase_region(NULL, page, 0x1000);
 
       // write marker to its next block
       int next = (first + 1) % CFG_DATA_NUM_BLOCKS;
