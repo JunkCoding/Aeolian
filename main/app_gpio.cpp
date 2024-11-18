@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
+#include "freertos/queue.h"
 #include <driver/gpio.h>
 
 #include "app_main.h"
@@ -14,7 +15,7 @@
 #include "app_utils.h"
 
 #if defined (CONFIG_MOTION_DETECTION)
-xQueueHandle gpio_evt_queue = NULL;
+QueueHandle_t gpio_evt_queue = NULL;
 IRAM_ATTR static void gpio_isr_handler (void* arg)
 {
   uint8_t zone = 0;
@@ -180,7 +181,7 @@ esp_err_t init_gpio_pins(controlvars_t *control_vars)
   // -----------------------------------------------------------
   // Create a queue to handle gpio event from isr
   // -----------------------------------------------------------
-  gpio_evt_queue = xQueueCreate (10, sizeof (zone_event_t));
+  gpio_evt_queue = xQueueCreate(10, sizeof (zone_event_t));
 
   // -----------------------------------------------------------
   // Trigger input pins

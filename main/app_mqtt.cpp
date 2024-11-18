@@ -44,7 +44,7 @@ const char *STR_RULEID      = "RuleId";
 #define   MQTT_EVT_BUFSIZE    128
 #define   MQTT_BUFSIZE        512
 
-xQueueHandle mqtt_send_queue = NULL;
+QueueHandle_t mqtt_send_queue = NULL;
 EventGroupHandle_t mqtt_event_group = NULL;
 
 const int MQTT_CONNECTED = BIT0;
@@ -498,22 +498,14 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
         else if ( !shrt_cmp(JSON_STR_THEME, token) )
         {
           snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
+          set_theme(atoi(token));
           i++;
-          if ( token != NULL )
-          {
-            //F_LOGW(true, true, LC_YELLOW, "theme: %s", token);
-            set_theme(atoi(token));
-          }
         }
         else if ( !shrt_cmp(JSON_STR_PATTERN, token) )
         {
           snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
+          set_pattern(atoi(token));
           i++;
-          if ( token != NULL )
-          {
-            //F_LOGW(true, true, LC_YELLOW, "pattern: %s", token);
-            set_pattern(atoi(token));
-          }
         }
         break;
       }
@@ -1186,7 +1178,7 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
 #pragma GCC diagnostic push                                     // Save the current warning state
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"   // Disable missing-field-initilizers
   esp_mqtt_client_config_t mqtt_cfg = {
-      .event_handle    = mqtt_event_handler,
+      //.event_handle    = mqtt_event_handler,
       //.host            = resolve_host(host),
       .uri             = MQTT_Client_Cfg.Uri,
       .port            = MQTT_Client_Cfg.Port,
@@ -1206,7 +1198,7 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
 #pragma GCC diagnostic pop                                      // Restore previous default behaviour
 
   // Attempt to initialise MQTT client
-  if ( strlen (mqtt_cfg.uri) > 0 )
+  if ( strlen(mqtt_cfg.uri) > 0 )
   {
     *MQTTClient = esp_mqtt_client_init(&mqtt_cfg);
   }

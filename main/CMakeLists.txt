@@ -29,4 +29,9 @@ idf_component_register(SRCS
   "sundial.cpp"
   "ws2812_driver.cpp"
   "FreeRTOS-openocd.cpp"
-  INCLUDE_DIRS "." "../include/")
+  INCLUDE_DIRS "." "../include/"
+  REQUIRES esp_http_server espfs jsmn vfs
+  REQUIRES partition_table bootloader_support esp_app_format esp_bootloader_format esp_partition mqtt
+  PRIV_REQUIRES app_update driver efuse esp_app_format esptool_py esp_wifi esp_https_ota nvs_flash spi_flash
+  )
+

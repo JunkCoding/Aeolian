@@ -22,7 +22,6 @@
 #include <esp_timer.h>
 #include <esp_mac.h>
 #include <esp_cpu.h>
-#include <esp_clk.h>
 
 #include <soc/rmt_struct.h>
 
@@ -33,12 +32,9 @@
 #include <driver/dac.h>
 #include <driver/rtc_io.h>
 
-// Include this here due to bug of dac.h not including it
-//#include <driver/gpio.h>
-
 #include <esp32/rom/rtc.h>
 
-#include <esp_flash_mmap.h>
+//#include <esp_flash_mmap.h>
 #include <nvs_flash.h>
 
 #include "app_main.h"
