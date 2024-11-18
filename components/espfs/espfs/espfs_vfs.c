@@ -2,19 +2,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <esp_err.h>
-#include <esp_log.h>
-#include <esp_vfs.h>
-#include <esp_spi_flash.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <sys/ioctl.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
+
+#include <esp_err.h>
+#include <esp_log.h>
+#include <esp_vfs.h>
+
+#include <esp_spi_flash.h>
+
 
 #include "espfs_priv.h"
 #include "espfs_log.h"

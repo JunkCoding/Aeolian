@@ -6,6 +6,9 @@
 #include <freertos/FreeRTOSConfig.h>
 #include <freertos/portmacro.h>
 #include <freertos/task.h>
+
+#include <esp_sntp.h>
+
 #include "app_task.h"
 #include "ws2812_driver.h"
 

@@ -17,7 +17,7 @@
 #include <freertos/FreeRTOS.h>
 #include <esp_partition.h>
 #include <esp_flash_spi_init.h>
-#include <esp_spi_flash.h>
+#include <spi_flash_mmap.h>
 #include "espfs_priv.h"
 #include "espfs_log.h"
 #include "espfs_format.h"
@@ -144,7 +144,7 @@ static const void* find_object (espfs_fs_t* fs, const char* path)
   ESPFS_LOGV (__func__, "%s", path);
 
   uint32_t hash = hash_path (path);
-  ESPFS_LOGV (__func__, "hash %08x", hash);
+  ESPFS_LOGV (__func__, "hash %08x", (unsigned int)hash);
 
   int first = 0;
   int last = fs->header->num_objects - 1;

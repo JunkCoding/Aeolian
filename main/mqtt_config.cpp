@@ -324,7 +324,7 @@ int _get_mqtt_setting (char *buf, int bufsize, int setting)
       len = snprintf(buf, bufsize, "%s", MQTT_Client_Cfg.Password);
       break;
     case MQTT_PORT:
-      len = snprintf(buf, bufsize, "%d", MQTT_Client_Cfg.Port);
+      len = snprintf(buf, bufsize, "%lu", MQTT_Client_Cfg.Port);
       break;
     case MQTT_KEEPALIVE:
       len = snprintf(buf, bufsize, "%d", MQTT_Client_Cfg.Keep_Alive);
