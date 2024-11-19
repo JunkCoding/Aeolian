@@ -78,3 +78,5 @@ idf_build_set_property(COMPILE_DEFINITIONS "-DMQTT_SERVER=\"$ENV{MQTT_URI}\"" AP
 idf_build_set_property(COMPILE_DEFINITIONS "-DMQTT_USER=\"$ENV{MQTT_USER}\"" APPEND)
 idf_build_set_property(COMPILE_DEFINITIONS "-DMQTT_PASS=\"$ENV{MQTT_PASS}\"" APPEND)
 
+# Fix jsmn not compiling correctly
+idf_build_set_property(COMPILE_DEFINITIONS "-DJSMN_STATIC" APPEND)
