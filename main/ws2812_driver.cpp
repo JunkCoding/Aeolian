@@ -7,26 +7,27 @@
  * This code is placed in the public domain (or CC0 licensed, at your option).
  */
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-
-#include "ws2812_driver.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
-#include <esp_task_wdt.h>
 
+#include <esp_task_wdt.h>
+#include <esp_intr_alloc.h>
+#include <esp_clk_tree.h>
+
+#include <soc/gpio_sig_map.h>
 #include <soc/rmt_struct.h>
 #include <soc/dport_reg.h>
 #include <soc/rtc.h>
 
 #include <driver/gpio.h>
-#include <soc/gpio_sig_map.h>
-#include <esp_intr_alloc.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <driver/rmt.h>
 
+#include "ws2812_driver.h"
 #include "app_utils.h"
 
 /* ********************************
@@ -461,9 +462,11 @@ uint16_t set_ws2812_bits (uint16_t num_leds)
   uint32_t xtal_freq = rtc_clk_xtal_freq_get ();
   uint32_t apb_freq = rtc_clk_apb_freq_get () / 1000000;
 #if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 2, 0))
-  uint32_t cpu_freq = xt_clock_freq () / 1000000;
+  uint32_t cpu_freq = xt_clock_freq() / 1000000;
 #else
-  uint32_t cpu_freq = xt_clock_freq () / 1000000;
+  uint32_t cpu_freq = 0;
+  esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_APB, ESP_CLK_TREE_SRC_FREQ_PRECISION_EXACT, &cpu_freq);
+  cpu_freq = cpu_freq / 1000000;
 #endif
   //  apb_freq = ((READ_PERI_REG(RTC_CNTL_STORE5_REG)) & UINT16_MAX) << 12;
   F_LOGI(true, true, LC_GREY, "xtal_freq: %d, apb_freq: %d MHz, cpu_freq: %d MHz", xtal_freq, apb_freq, cpu_freq);

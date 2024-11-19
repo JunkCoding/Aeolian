@@ -2,7 +2,8 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <string.h>
 
 #include <freertos/FreeRTOS.h>
@@ -12,16 +13,20 @@
 #include <freertos/event_groups.h>
 
 #include <lwip/ip_addr.h>
+#include <lwip/sockets.h>
+#include <lwip/dns.h>
+#include <lwip/netdb.h>
 
 #include <esp_task_wdt.h>
 #include <esp_types.h>
 #include <esp_netif.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
+#include <esp_system.h>
+#include <nvs_flash.h>
 
 #include <nvs_flash.h>
 
-#include <mqtt_config.h>
 #include <mqtt_client.h>
 
 #include <jsmn.h>
@@ -670,7 +675,10 @@ void proc_ev_dev_hikAlarm (esp_mqtt_event_handle_t event)
 {
   /* Process JSON Data */
   char token[64] __attribute__ ((aligned(4))) = {};
+#pragma GCC diagnostic push                                     // Save the current warning state
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"      // Disable unused variables
   int devId = 0, eventType = 0, channel = 0, ivmsChannel = 0, ruleID = 0;
+#pragma GCC diagnostic pop                                      // Restore previous default behaviour
   int i, r, v = 0;
   char *endptr;
   jsmn_parser p;
@@ -1169,6 +1177,25 @@ void proc_mqtt_data (esp_mqtt_event_handle_t event)
   }
 }
 
+/*
+  const esp_mqtt_client_config_t mqtt_cfg = {
+    .broker.address.uri = NULL
+  };
+      .broker.address.uri = MQTT_Client_Cfg.Uri,
+      .port               = MQTT_Client_Cfg.Port,
+      .client_id          = MQTT_Client_Cfg.Client_ID,
+      .username           = MQTT_Client_Cfg.Username,
+      .password           = MQTT_Client_Cfg.Password,
+      //.transport          = ssl ? MQTT_TRANSPORT_OVER_SSL : MQTT_TRANSPORT_OVER_TCP,
+      //.cert_pem           = server_cert,
+      //.client_cert_pem    = client_cert,
+      //.client_key_pem     = client_key,
+      //.user_context       = 0,
+      .lwt_topic          = get_lwt_topic (),
+      .lwt_msg            = "Disconnected",
+      .lwt_retain         = 1,
+      .keepalive          = MQTT_Client_Cfg.Keep_Alive
+*/
 // --------------------------------------------------------------------------
 //
 // --------------------------------------------------------------------------
@@ -1176,29 +1203,32 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
 {
   esp_err_t err = ESP_FAIL;
 #pragma GCC diagnostic push                                     // Save the current warning state
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"   // Disable missing-field-initilizers
+#pragma GCC diagnostic ignored "-Wsequence-point"               // Why
   esp_mqtt_client_config_t mqtt_cfg = {
-      //.event_handle    = mqtt_event_handler,
-      //.host            = resolve_host(host),
-      .uri             = MQTT_Client_Cfg.Uri,
-      .port            = MQTT_Client_Cfg.Port,
-      .client_id       = MQTT_Client_Cfg.Client_ID,
-      .username        = MQTT_Client_Cfg.Username,
-      .password        = MQTT_Client_Cfg.Password,
-      //.transport       = ssl ? MQTT_TRANSPORT_OVER_SSL : MQTT_TRANSPORT_OVER_TCP,
-      //.cert_pem        = server_cert,
-      //.client_cert_pem = client_cert,
-      //.client_key_pem  = client_key,
-      //.user_context    = 0,
-      .lwt_topic       = get_lwt_topic (),
-      .lwt_msg         = "Disconnected",
-      .lwt_retain      = 1,
-      .keepalive       = MQTT_Client_Cfg.Keep_Alive
+    .broker = {
+      .address = {
+        .uri          = MQTT_Client_Cfg.Uri,
+        .port         = MQTT_Client_Cfg.Port,
+      },
+    },
+    .credentials = {
+      .username       = MQTT_Client_Cfg.Username,
+      .client_id      = MQTT_Client_Cfg.Client_ID,
+      .authentication = { .password = MQTT_Client_Cfg.Password },
+    },
+    .session = {
+      .last_will = {
+        .topic        = get_lwt_topic(),
+        .msg          = "disconnected",
+        .retain       = 1,
+      },
+    }
   };
 #pragma GCC diagnostic pop                                      // Restore previous default behaviour
+  mqtt_cfg.broker.address.uri = MQTT_Client_Cfg.Uri;
 
   // Attempt to initialise MQTT client
-  if ( strlen(mqtt_cfg.uri) > 0 )
+  if ( strlen(mqtt_cfg.broker.address.uri) > 0 )
   {
     *MQTTClient = esp_mqtt_client_init(&mqtt_cfg);
   }

@@ -6,8 +6,8 @@
 
 
 #include "app_configs.h"
-#include "mqtt_settings.h"
-#include "mqtt_config.h"
+#include "app_mqtt_settings.h"
+#include "app_mqtt_config.h"
 #include "app_mqtt.h"
 #include "app_main.h"
 #include "app_utils.h"

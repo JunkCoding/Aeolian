@@ -43,7 +43,7 @@
 #include "app_flash.h"
 #include "app_cctv.h"
 #include "app_gpio.h"
-#include "mqtt_config.h"
+#include "app_mqtt_config.h"
 #include "app_mqtt.h"
 #include "app_httpd.h"
 #include "moonphase.h"
@@ -84,12 +84,12 @@ extern "C" void app_main(void)
   // -----------------------------------------------------------
   prng_seed();
 
-#if CONFIG_BOOTLOADER_WDT_DISABLE_IN_USER_CODE
+#ifdef CONFIG_BOOTLOADER_WDT_DISABLE_IN_USER_CODE
   // -----------------------------------------------------------
   // If this option is set, the app must explicitly reset, feed,
   // or disable the rtc_wdt in it's own code.
   // -----------------------------------------------------------
-  rtc_wdt_disable();
+  //FixMe: rtc_wdt_disable();
 #endif
 
 #if CONFIG_USE_TASK_WDT
@@ -137,7 +137,7 @@ extern "C" void app_main(void)
   // -----------------------------------------------------------
   // Configure dynamic frequency scaling
   // -----------------------------------------------------------
-#if CONFIG_PM_ENABLE
+#ifdef CONFIG_PM_ENABLE
   esp_pm_config_esp32_t pm_config = {
     .max_freq_mhz = ESP_PM_CPU_FREQ_MAX,
     //.min_freq_mhz = (int) rtc_clk_xtal_freq_get(),

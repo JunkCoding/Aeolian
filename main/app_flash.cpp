@@ -87,22 +87,33 @@ const char *ota_state_to_str (esp_ota_img_states_t ota_state)
 
   return ptr;
 }
+static uint32_t get_cpu_cycles()
+{
+  uint32_t start = esp_cpu_get_cycle_count();
+  uint32_t end = esp_cpu_get_cycle_count();
+  return end - start;
+}
 
 void print_app_info (void)
 {
   uint8_t default_mac_addr[6];
+  uint32_t phySize;
   esp_chip_info_t chip_info;
+
+  // ToDo: use this timestamp for calculating real speed
+  //uint32_t clk = esp_cpu_get_cycle_count() / esp_rom_get_cpu_ticks_per_us() * 1000;
 
   // -----------------------------------------------------------
   // Get information about our enviroment
   // -----------------------------------------------------------
-  configured = (esp_partition_t *)esp_ota_get_boot_partition ();
-  running = (esp_partition_t *)esp_ota_get_running_partition ();
+  configured = (esp_partition_t *)esp_ota_get_boot_partition();
+  running = (esp_partition_t *)esp_ota_get_running_partition();
 
   esp_ota_get_state_partition (running, &ota_state);
   esp_ota_get_partition_description (running, &app_info);
   esp_chip_info (&chip_info);
   esp_efuse_mac_get_default (default_mac_addr);
+  esp_flash_get_physical_size(NULL, &phySize);
 
   _print_divider ();
 #if defined (CONFIG_DEBUG)
@@ -127,8 +138,8 @@ void print_app_info (void)
   F_LOGI(true, true, LC_GREY, "%25s = %d", "Num cores", chip_info.cores);
   F_LOGI(true, true, LC_GREY, "%25s = WiFi%s%s", "Features", (chip_info.features & CHIP_FEATURE_BT)?"/BT":"", (chip_info.features & CHIP_FEATURE_BLE)?"/BLE":"");
   F_LOGI(true, true, LC_GREY, "%25s = %02X:%02X:%02X:%02X:%02X:%02X", "MAC address", default_mac_addr[0], default_mac_addr[1], default_mac_addr[2], default_mac_addr[3], default_mac_addr[4], default_mac_addr[5]);
-  F_LOGI(true, true, LC_GREY, "%25s = %d MHz", "CPU freq", esp_clk_cpu_freq() / 1000000);
-  F_LOGI(true, true, LC_GREY, "%25s = %dMB %s", "Flash size", esp_flash_get_chip_size () / (1024 * 1024), (chip_info.features & CHIP_FEATURE_EMB_FLASH)?"embedded":"external");
+  F_LOGI(true, true, LC_GREY, "%25s = %d MHz", "CPU freq", CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ / 1000000);
+  F_LOGI(true, true, LC_GREY, "%25s = %dMB %s", "Flash size", phySize / (1024 * 1024), (chip_info.features & CHIP_FEATURE_EMB_FLASH)?"embedded":"external");
   F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Free heap size", esp_get_minimum_free_heap_size ());
   F_LOGI(true, true, LC_GREY, "%25s = %s (0x%08x)", "Partition", running->label, running->address);
   F_LOGI(true, true, LC_GREY, "%25s = %s", "OTA state", ota_state_to_str (ota_state));
@@ -255,12 +266,24 @@ esp_err_t delete_nvs_events(const char *ns)
   F_LOGW(true, true, LC_YELLOW, "Request to delete all events for '%s'", ns);
 
   // Count the number of events (if any)
+#if ( ESP_IDF_VERSION_MAJOR < 5 )
   nvs_iterator_t it = nvs_entry_find (NVS_PARTITION, ns, NVS_TYPE_BLOB);
   while ( it != NULL )
   {
     itc++;
     it = nvs_entry_next (it);
   }
+#else
+  nvs_iterator_t it = nullptr;
+  esp_err_t res = nvs_entry_find(NVS_PARTITION, ns, NVS_TYPE_ANY, &it);
+  while ( res == ESP_OK )
+  {
+      nvs_entry_info_t info;
+      nvs_entry_info(it, &info);
+      res = nvs_entry_next(&it);
+  }
+  nvs_release_iterator(it);
+#endif
 
   if ( itc > 0 )
   {
@@ -297,12 +320,24 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
 #endif
 
   // Count the number of events (if any)
+#if ( ESP_IDF_VERSION_MAJOR < 5 )
   nvs_iterator_t it = nvs_entry_find (NVS_PARTITION, ns, NVS_TYPE_BLOB);
   while ( it != NULL )
   {
     itc++;
     it = nvs_entry_next (it);
   }
+#else
+  nvs_iterator_t it = nullptr;
+  esp_err_t res = nvs_entry_find(NVS_PARTITION, ns, NVS_TYPE_ANY, &it);
+  while ( res == ESP_OK )
+  {
+      nvs_entry_info_t info;
+      nvs_entry_info(it, &info);
+      res = nvs_entry_next(&it);
+  }
+  nvs_release_iterator(it);
+#endif
 
   // If we have any items, alloc some ram and add them to an array
   if ( itc > 0 )
@@ -323,7 +358,7 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
         F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'eventList' (%d bytes)", (itc * eventLen));
       }
 
-      // Iterate through the event list
+#if ( ESP_IDF_VERSION_MAJOR < 5 )
       nvs_iterator_t it = nvs_entry_find (NVS_PARTITION, ns, NVS_TYPE_BLOB);
       while ( it != NULL )
       {
@@ -337,11 +372,29 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
           //F_LOGI(true, true, LC_GREY, "%16s: %-20s  %d (size: %d bytes)", info.namespace_name, info.key, info.type, blob_len);
           //hexDump (info.key, eventList + (ci * eventLen), blob_len, 16);
         }
-
         ci++;
-
         it = nvs_entry_next (it);
       }
+#else
+      nvs_iterator_t it = nullptr;
+      esp_err_t res = nvs_entry_find(NVS_PARTITION, ns, NVS_TYPE_ANY, &it);
+      while ( res == ESP_OK )
+      {
+        nvs_entry_info_t info;
+
+        nvs_entry_info(it, &info);
+        if ( info.type == NVS_TYPE_BLOB )
+        {
+          size_t blob_len = eventLen;
+          err = nvs_get_blob (nvs_handle, info.key, ((uint8_t*)eventList) + (ci * eventLen), &blob_len);
+          //F_LOGI(true, true, LC_GREY, "%16s: %-20s  %d (size: %d bytes)", info.namespace_name, info.key, info.type, blob_len);
+          //hexDump (info.key, eventList + (ci * eventLen), blob_len, 16);
+        }
+        ci++;
+        res = nvs_entry_next(&it);
+      }
+      nvs_release_iterator(it);
+#endif
       nvs_close (nvs_handle);
     }
   }
@@ -567,15 +620,17 @@ void get_nvs_led_info (void)
 
 void boot_init (void)
 {
+  esp_err_t err;
+  const esp_partition_t *nvs_partition = esp_partition_find_first (ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, NULL);
+
   // -----------------------------------------------------------
   // Initialise non volatile memory
   // -----------------------------------------------------------
-  // err = nvs_flash_erase();
+  err = nvs_flash_erase();
 
-  esp_err_t err = nvs_flash_init();
+  err = nvs_flash_init();
   if ( err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND )
   {
-    const esp_partition_t *nvs_partition = esp_partition_find_first (ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, NULL);
     ESP_ERROR_CHECK (esp_partition_erase_range(nvs_partition, 0, nvs_partition->size));
     err = nvs_flash_init();
     F_LOGW(true, true, LC_RED, "NVS flash was erased, hope this was expected!")
@@ -616,7 +671,7 @@ void boot_init (void)
   // -----------------------------------------------------------
   // Enable OTA updates & other stuff
   // -----------------------------------------------------------
-  esp_flash_init();
+  esp_flash_init(nvs_partition->flash_chip);
 }
 
 void new_fw_delay (void)

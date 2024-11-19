@@ -7,6 +7,8 @@ idf_component_register(SRCS
   "app_lightcontrol.cpp"
   "app_main.cpp"
   "app_mqtt.cpp"
+  "app_mqtt_config.cpp"
+  "app_mqtt_settings.cpp"
   "app_ota.cpp"
   "app_schedule.cpp"
   "app_sntp.cpp"
@@ -22,8 +24,6 @@ idf_component_register(SRCS
   "device_control.cpp"
   "lib8.cpp"
   "moonphase.cpp"
-  "mqtt_config.cpp"
-  "mqtt_settings.cpp"
   "newlib8.cpp"
   "patterns.cpp"
   "sundial.cpp"
@@ -31,7 +31,8 @@ idf_component_register(SRCS
   "FreeRTOS-openocd.cpp"
   INCLUDE_DIRS "." "../include/"
   REQUIRES esp_http_server espfs jsmn vfs
-  REQUIRES partition_table bootloader_support esp_app_format esp_bootloader_format esp_partition mqtt
-  PRIV_REQUIRES app_update driver efuse esp_app_format esptool_py esp_wifi esp_https_ota nvs_flash spi_flash
+  REQUIRES partition_table esp_app_format esp_bootloader_format esp_http_server esp_hw_support esp_netif esp_netif_stack esp_partition esp_psram mqtt
+  REQUIRES app_update bootloader bootloader_support driver efuse esp_app_format esptool_py esp_wifi esp_https_ota nvs_flash soc spi_flash
+  REQUIRES esp_common esp_hw_support esp_driver_gpio esp_driver_rmt esp_system
   )
 
