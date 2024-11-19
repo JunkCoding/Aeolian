@@ -31,8 +31,8 @@
 #include "app_wifi.h"
 #include "app_mqtt.h"
 #include "app_httpd.h"
-#include "mqtt_settings.h"
-#include "mqtt_config.h"
+#include "app_mqtt_settings.h"
+#include "app_mqtt_config.h"
 #include "app_configs.h"
 #include "app_sntp.h"
 #include "app_schedule.h"
@@ -1113,7 +1113,6 @@ void init_wifi (httpd_handle_t *httpServer)
     netif_ap = esp_netif_create_default_wifi_ap();
 
     // Set the hostname if available
-    char tmpbuf[WIFI_EVT_BUFSIZE + 1]  __attribute__ ((aligned (4)));
     if ( hostname_len > 0 )
     {
       set_hostname(hostname);
@@ -1261,7 +1260,7 @@ esp_err_t cgiWifiSetAp (httpd_req_t *req)
   {
     struct yuarel_param params[MAX_URI_PARTS];
     char *ssid;
-    char *passw;
+    char *pass;
     int pc = 0;
 
     if ( (pc = yuarel_parse_query (rcvbuf, '&', params, MAX_URI_PARTS)) )
@@ -1274,7 +1273,7 @@ esp_err_t cgiWifiSetAp (httpd_req_t *req)
         }
         else if ( !str_cmp (STR_STA_PASSW, params[pc].key) )
         {
-          passw = params[pc].val;
+          pass = params[pc].val;
         }
       }
     }
@@ -1301,8 +1300,6 @@ esp_err_t  cgiWifiSetMode (httpd_req_t *req)
 #endif
 {
   esp_err_t err = ESP_FAIL;
-  struct  yuarel url;
-  struct  yuarel_param params[MAX_URI_PARTS];
 
   //printf("req->uri: %s (%d)\n", req->uri, req->content_len);
 

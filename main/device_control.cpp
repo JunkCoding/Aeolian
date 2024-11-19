@@ -35,7 +35,7 @@
 #include "device_control.h"
 #include "moonphase.h"
 #include "app_mqtt.h"
-#include "mqtt_settings.h"
+#include "app_mqtt_settings.h"
 
 #define   BUF_SIZE    512
 

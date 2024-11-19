@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include "app_configs.h"
-#include "mqtt_settings.h"
+#include "app_mqtt_settings.h"
 #include "app_utils.h"
 
 // --------------------------------------------------------------------------

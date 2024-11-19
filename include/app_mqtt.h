@@ -3,7 +3,7 @@
 
 #include "colours.h"
 
-#include <mqtt_config.h>
+#include "app_mqtt_config.h"
 
 //Behavior event type
 typedef enum _VCA_EVENT_TYPE_
