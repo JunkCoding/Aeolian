@@ -624,7 +624,7 @@ esp_err_t esp_vfs_espfs_register(const esp_vfs_espfs_conf_t *conf)
     vfs_espfs_t *vfs_espfs = calloc(1, sizeof(vfs_espfs_t) +
             (sizeof(vfs_espfs_file_t *) * conf->max_files));
     if (vfs_espfs == NULL) {
-        ESPFS_LOGE(__func__, "vfs_espfs could not be alloc'd");
+        //ESPFS_LOGE(__func__, "vfs_espfs could not be alloc'd");
         return ESP_ERR_NO_MEM;
     }
 

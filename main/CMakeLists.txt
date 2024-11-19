@@ -30,9 +30,12 @@ idf_component_register(SRCS
   "ws2812_driver.cpp"
   "FreeRTOS-openocd.cpp"
   INCLUDE_DIRS "." "../include/"
-  REQUIRES esp_http_server espfs jsmn vfs
-  REQUIRES partition_table esp_app_format esp_bootloader_format esp_http_server esp_hw_support esp_netif esp_netif_stack esp_partition esp_psram mqtt
-  REQUIRES app_update bootloader bootloader_support driver efuse esp_app_format esptool_py esp_wifi esp_https_ota nvs_flash soc spi_flash
-  REQUIRES esp_common esp_hw_support esp_driver_gpio esp_driver_rmt esp_system
+  REQUIRES esp_http_server espfs vfs
+  PRIV_REQUIRES partition_table esp_app_format esp_bootloader_format esp_http_server esp_hw_support esp_netif esp_netif_stack esp_partition esp_psram mqtt
+  PRIV_REQUIRES app_update bootloader bootloader_support driver efuse esp_app_format esptool_py esp_wifi esp_https_ota nvs_flash soc spi_flash
+  PRIV_REQUIRES esp_common esp_hw_support esp_driver_gpio esp_driver_rmt esp_system jsmn
   )
 
+idf_build_set_property(COMPILE_OPTIONS "-Wno-unused-function" APPEND)
+idf_build_set_property(COMPILE_OPTIONS "-Wno-unused-variable" APPEND)
+idf_build_set_property(COMPILE_OPTIONS "-Wno-unused-but-set-variable" APPEND)

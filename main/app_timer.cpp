@@ -86,6 +86,7 @@ timer_info_t *_timer_init ( timer_group_t group, timer_idx_t timer_idx, uint16_t
     .intr_type             = TIMER_INTR_LEVEL,        // Is interrupt triggered on timer’s alarm (timer_intr_mode_t)
     .counter_dir           = TIMER_COUNT_UP,          // Does counter increment or decrement (timer_count_dir_t)
     .auto_reload           = TIMER_AUTORELOAD_EN,     // If counter should auto_reload a specific initial value on the timer’s alarm, or continue incrementing or decrementing.
+    .clk_src               = TIMER_SRC_CLK_DEFAULT,   // Use default clock source
     .divider               = divider,                 // Divisor of the incoming 80 MHz (12.5nS) APB_CLK clock. E.g. 80 = 1uS per timer tick
   };
 

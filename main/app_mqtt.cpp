@@ -1203,7 +1203,7 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
 {
   esp_err_t err = ESP_FAIL;
 #pragma GCC diagnostic push                                     // Save the current warning state
-#pragma GCC diagnostic ignored "-Wsequence-point"               // Why
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"   // We know about this, so ignore plz.
   esp_mqtt_client_config_t mqtt_cfg = {
     .broker = {
       .address = {
