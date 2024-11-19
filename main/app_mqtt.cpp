@@ -328,7 +328,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
   jsmn_parser p;
   jsmntok_t t[30];
 
-  jsmn_init (&p);
+  jsmn_init(&p);
   int r = jsmn_parse(&p, event->data, event->data_len, t, sizeof(t) / sizeof(t[0]));
   // ToDo: Add to all jsmn_parse()
   if ( r < 0 )
@@ -1225,7 +1225,6 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
     }
   };
 #pragma GCC diagnostic pop                                      // Restore previous default behaviour
-  mqtt_cfg.broker.address.uri = MQTT_Client_Cfg.Uri;
 
   // Attempt to initialise MQTT client
   if ( strlen(mqtt_cfg.broker.address.uri) > 0 )

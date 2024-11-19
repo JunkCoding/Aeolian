@@ -17,6 +17,6 @@ dependencies:
 direct_dependencies:
 - espressif/jsmn
 - idf
-manifest_hash: 04674e60f63ad065a6ef8de6e49fabbd10e79664b09186995d429e8ee31ae187
+manifest_hash: aff85f58b94ebaaeda31db065af9aeca3464567da8da1341b39f31344d2ef94c
 target: esp32
 version: 2.0.0
