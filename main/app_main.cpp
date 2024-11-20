@@ -28,6 +28,9 @@
 #include <esp_event.h>
 #include <esp_pm.h>
 
+#include "hal/wdt_hal.h"
+#include "rtc_wdt.h"
+
 #include <lwip/err.h>
 #include <lwip/sys.h>
 
@@ -56,7 +59,7 @@ lightcheck_t lightcheck = {0, 0, 0, 0, 0, 0, false};
 // ************************************************************
 extern "C" void app_main(void)
 {
-  //esp_err_t err;
+  esp_err_t err;
   // -----------------------------------------------------------
   // Set our console to our requested monitor
   // rate (CONFIG_ESPTOOLPY_MONITOR_BAUD)
@@ -94,24 +97,47 @@ extern "C" void app_main(void)
 #endif
 
 #if CONFIG_USE_TASK_WDT
-  F_LOGI(true, true, LC_GREY, "Initialising TWDT");
+  F_LOGI(true, true, LC_GREY, "Checking TWDT...");
   esp_task_wdt_config_t twdt_config = {
     .timeout_ms     = TWDT_TIMEOUT_S * 1000,
     .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,
     .trigger_panic  = true,
   };
-  ESP_ERROR_CHECK(esp_task_wdt_init(&twdt_config));
-#endif /* CONFIG_USE_TASK_WDT */
+
+  if ( (err = esp_task_wdt_init(&twdt_config)) == ESP_ERR_INVALID_STATE )
+  {
+    F_LOGI(true, true, LC_GREY, "TWDT already running, reconfiguring with a timeout of %d seconds...", TWDT_TIMEOUT_S);
+    err = esp_task_wdt_reconfigure(&twdt_config);
+  }
+
+  if ( err == ESP_OK )
+  {
+    F_LOGW(true, true, LC_GREY, "Checking TWDT idle tasks...");
 
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0
-  // F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
-  // FIXME: esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
+    F_LOGW(true, true, LC_GREY, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
+    esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
+    if ( esp_task_wdt_status(xTaskGetIdleTaskHandleForCPU(0)) != ESP_OK )
+    {
+      F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
+    }
 #endif /* CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0 */
 
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1
-  // F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1))");
-  // FIXME: esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1));
+    F_LOGW(true, true, LC_GREY, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1))");
+    esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1));
+    if ( esp_task_wdt_status(xTaskGetIdleTaskHandleForCPU(1)) != ESP_OK )
+    {
+      F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
+    }
 #endif /* CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1 */
+  }
+  if ( err != ESP_OK )
+  {
+    F_LOGW(true, true, LC_RED, "TWDT configuration failed... restarting");
+    esp_restart();
+  }
+#endif /* CONFIG_USE_TASK_WDT */
 
   // -----------------------------------------------------------
   // Warn GDBSTUB_ENABLED is set

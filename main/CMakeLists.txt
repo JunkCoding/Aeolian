@@ -30,7 +30,6 @@ idf_component_register(SRCS
   "ws2812_driver.cpp"
   "FreeRTOS-openocd.cpp"
   INCLUDE_DIRS "." "../include/"
-  REQUIRED_IDF_TARGETS "esp32"
   )
 
 idf_build_set_property(COMPILE_OPTIONS "-Wno-unused-function" APPEND)
