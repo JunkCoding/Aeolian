@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.13.0)
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(COMPONENTS cxx app app_update bootloader bootloader_support driver efuse espfs esptool_py esp_app_format esp_bootloader_format esp_common
+set(COMPONENTS cxx app app_update bootloader bootloader_init bootloader_support driver efuse espfs esptool_py esp_app_format esp_bootloader_format esp_common
                esp_driver_gpio esp_driver_rmt esp_http_server esp_hw_support esp_netif esp_netif_stack esp_partition esp_psram esp_system
-               esp_wifi mqtt vfs soc main nvs_flash partition_table spi_flash wifi_provisioning)
+               esp_wifi hal mqtt vfs soc main nvs_flash partition_table spi_flash wifi_provisioning)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
