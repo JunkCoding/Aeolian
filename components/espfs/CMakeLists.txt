@@ -59,7 +59,7 @@ list(APPEND webpages
 
 # For ref
 # ---------------------------------------------------------
-if(AXRGB_DEV_ROCKET)
+if(AEOLIAN_DEV_ROCKET)
   list(APPEND weboages "${PROJECT_DIR}/html/wsa.html")
 endif()
 

@@ -177,7 +177,7 @@ int _set_led_control (char *buf, int bufsize, char *param, char *value, int xtyp
 }
 
 // ***********************************************
-#if defined (CONFIG_AXRGB_DEV_ROCKET)
+#if defined (CONFIG_AEOLIAN_DEV_ROCKET)
 // Handle here to prevent overlapping timers (lazy coding)
 esp_timer_handle_t reset_task_handle = NULL;
 
@@ -235,7 +235,7 @@ int _launch_rocket (char *buf, int bufsize, char *param, char *value, int type)
 
   return true;
 }
-#endif // CONFIG_AXRGB_DEV_ROCKET
+#endif // CONFIG_AEOLIAN_DEV_ROCKET
 // --------------------------------------------------------------------------
 //
 // --------------------------------------------------------------------------
@@ -334,7 +334,7 @@ int _get_buildVersion (char *buf, int bufsize, int param)
 {
   // Something broke, so using an alternative method
   //return snprintf (buf, bufsize, "%s", esp_get_idf_version ());
-  return snprintf(buf, bufsize, "%s", AXRGB_FW_HASH);
+  return snprintf(buf, bufsize, "%s", AEOLIAN_FW_HASH);
 }
 // ***********************************************
 int _get_log_history (char *buf, int bufsize, int type)
@@ -921,7 +921,7 @@ WORD_ALIGNED_ATTR DRAM_ATTR static status_command_t status_command[] = {
   {"idf_version",               _get_idf_version,      NULL,                   0},
   {"info_led",                  NULL,                  NULL,                   0},
   {"ip_address",                _get_ipAddress,        NULL,                   0},
-#if defined (CONFIG_AXRGB_DEV_ROCKET)
+#if defined (CONFIG_AEOLIAN_DEV_ROCKET)
   {"launch_rocket",             NULL,                  _launch_rocket,         TYPE_U8},
 #endif
   {"led_count",                 _get_led_count,        _set_led_control,       TYPE_U16},

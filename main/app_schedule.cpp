@@ -768,7 +768,7 @@ void scheduler_task(void *arg)
 void scheduler_task(void *arg)
 #endif
 {
-#if not defined (CONFIG_AXRGB_DEV_CARAVAN)
+#if not defined (CONFIG_AEOLIAN_DEV_CARAVAN)
   // Toggle onboard LED to show we are alive
   // *****************************************
   static bool status_led = false;

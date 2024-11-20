@@ -155,7 +155,7 @@ esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
         mqttSubscribe(dev_Pattern);
         mqttSubscribe(dev_hikAlarm);
         // These are for internal use
-#if defined (CONFIG_AXRGB_DEV_OLIMEX) || defined (CONFIG_AXRGB_DEV_TTGO) || defined (CONFIG_AXRGB_DEV_SEGGER) || defined (CONFIG_AXRGB_DEV_DEBUG)
+#if defined (CONFIG_AEOLIAN_DEV_OLIMEX) || defined (CONFIG_AEOLIAN_DEV_TTGO) || defined (CONFIG_AEOLIAN_DEV_SEGGER) || defined (CONFIG_AEOLIAN_DEV_DEBUG)
         mqttSubscribe(dev_Network);
         mqttSubscribe(dev_Radar);
 #endif
@@ -532,7 +532,7 @@ DRAM_ATTR hik_alert_t hik_alert[] = {
   //                             <--   Received   -->                    |
   //         |                                      |      | ivms | rule | sec.  | on                                      | on            | dura-  |
   //  devId  | eventType                            | chan | Chan | ID   | light | zones                                   | mask          | tion   | color
-#if defined (CONFIG_AXRGB_DEV_WORKSHOP)
+#if defined (CONFIG_AEOLIAN_DEV_WORKSHOP)
   // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   // 1. Caravan Camera
   {1,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     0,     0x00,   (overlay_zone)(OV_ZONE_03),               OV_EXT_LIGHTS,  30000,   MediumWhite},   // Caravan, line crossing (close left)
@@ -561,7 +561,7 @@ DRAM_ATTR hik_alert_t hik_alert[] = {
   {4,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     1,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  1000,    HotPink},       // Front, line crossing (car any direction)
   {4,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     2,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  1000,    HotPink},       // Front, line crossing (car any direction)
   {4,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     3,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  1000,    Violet},        // Front, line crossing (car downhill travel)
-#elif defined (CONFIG_AXRGB_DEV_CARAVAN)
+#elif defined (CONFIG_AEOLIAN_DEV_CARAVAN)
   // --------------------------------------------------------------------------------------------------------------
   // Caravan Camera
   {1,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     0,     0x05,   (overlay_zone)(OV_ZONE_01|OV_ZONE_04),    OV_EXT_LIGHTS,  30000,   MediumWhite},   // Caravan, line crossing (close left)

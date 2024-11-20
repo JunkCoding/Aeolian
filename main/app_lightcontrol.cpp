@@ -148,7 +148,7 @@ cRGB *rgbBuffer = NULL;
 cRGB *outBuffer = NULL;
 
 // Our overlay for when motion is detected in a specific quadrant
-#if defined (CONFIG_AXRGB_DEV_CARAVAN)
+#if defined (CONFIG_AEOLIAN_DEV_CARAVAN)
 overlay_t overlay[] = {
   {NULL,  { 16,  44,  0,   MediumWhite},  0,  false},
   {NULL,  { 60, 154,  0,   MediumWhite},  0,  false},
@@ -158,7 +158,7 @@ overlay_t overlay[] = {
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false}};
-#elif defined (CONFIG_AXRGB_DEV_DEBUG)
+#elif defined (CONFIG_AEOLIAN_DEV_DEBUG)
 overlay_t overlay[] = {
   {NULL,  { 45,   2,  0,   MediumWhite},  0,  false},
   {NULL,  { 43,   2,  0,   MediumWhite},  0,  false},
@@ -168,7 +168,7 @@ overlay_t overlay[] = {
   {NULL,  { 33,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 20,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 21,   1,  0,   MediumWhite},  0,  false}};
-#elif defined (CONFIG_AXRGB_DEV_OLIMEX)
+#elif defined (CONFIG_AEOLIAN_DEV_OLIMEX)
 overlay_t overlay[] = {
   {NULL,  {  0,   3,  0,   MediumWhite},  0,  false},
   {NULL,  {  3,   3,  0,   MediumWhite},  0,  false},
@@ -178,7 +178,7 @@ overlay_t overlay[] = {
   {NULL,  { 11,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 12,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 13,   1,  0,   MediumWhite},  0,  false}};
-#elif defined (CONFIG_AXRGB_DEV_TTGO)
+#elif defined (CONFIG_AEOLIAN_DEV_TTGO)
 overlay_t overlay[] = {
   {NULL,  {  0,   3,  0,   MediumWhite},  0,  false},
   {NULL,  {  3,   3,  0,   MediumWhite},  0,  false},
@@ -188,7 +188,7 @@ overlay_t overlay[] = {
   {NULL,  { 18,   1,  0,   MediumWhite},  0,  false},
   {NULL,  {  7,   1,  0,   MediumWhite},  0,  false},
   {NULL,  {  8,   1,  0,   MediumWhite},  0,  false}};
-#elif defined (CONFIG_AXRGB_DEV_WORKSHOP)
+#elif defined (CONFIG_AEOLIAN_DEV_WORKSHOP)
 overlay_t overlay[] = {
   {NULL,  {367,  84,  0,   MediumWhite},  0,  false},
   {NULL,  { 67, 110,  0,   MediumWhite},  0,  false},
@@ -582,9 +582,9 @@ IRAM_ATTR void lights_task (void *pvParameters)
 // -------------------------------------------------------------------------------------------------
 // --  Some ranbdom light flickering to simulate a dying bulb or loosa connection in the breeze.  --
 // -------------------------------------------------------------------------------------------------
-#if defined (CONFIG_AXRGB_DEV_WORKSHOP)
+#if defined (CONFIG_AEOLIAN_DEV_WORKSHOP)
     else if ( lightcheck.isdark )
-//#if defined (CONFIG_AXRGB_DEV_OLIMEX)
+//#if defined (CONFIG_AEOLIAN_DEV_OLIMEX)
     {
       static uint32_t dt = 5000;
       static uint16_t cp = 0;

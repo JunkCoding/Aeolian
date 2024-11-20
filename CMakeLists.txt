@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 3.13.0)
-set(CMAKE_CXX_STANDARD 14)
-#set(COMPONENTS main)
+
+set(CMAKE_CXX_STANDARD 23)
+
+set(COMPONENTS cxx app app_update bootloader bootloader_support driver efuse espfs esptool_py esp_app_format esp_bootloader_format esp_common
+               esp_driver_gpio esp_driver_rmt esp_http_server esp_hw_support esp_netif esp_netif_stack esp_partition esp_psram esp_system
+               esp_wifi mqtt vfs soc main nvs_flash partition_table spi_flash wifi_provisioning)
+
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(axrgb)
+
+project(Aeolian)
 
 # #####################################################
 # # Git stuff
@@ -59,9 +65,9 @@ else()
 endif()
 #string(TIMESTAMP TODAY "%Y%m%d")
 #set(VERSION_REVISION "-${TODAY}-${GIT_COMMIT_HASH}${GIT_DIRTY}")
-idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_HASH=\"${GIT_COMMIT_HASH}${GIT_DIRTY}\"" APPEND)
-idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_BRANCH=\"${GIT_BRANCH}\"" APPEND)
-idf_build_set_property(COMPILE_DEFINITIONS "-DAXRGB_FW_GITUSER=\"${GIT_USER_NAME}\"" APPEND)
+idf_build_set_property(COMPILE_DEFINITIONS "-DAEOLIAN_FW_HASH=\"${GIT_COMMIT_HASH}${GIT_DIRTY}\"" APPEND)
+idf_build_set_property(COMPILE_DEFINITIONS "-DAEOLIAN_FW_BRANCH=\"${GIT_BRANCH}\"" APPEND)
+idf_build_set_property(COMPILE_DEFINITIONS "-DAEOLIAN_FW_GITUSER=\"${GIT_USER_NAME}\"" APPEND)
 # #####################################################
 
 set(BUILD_DIR ${CMAKE_BINARY_DIR})
@@ -80,3 +86,5 @@ idf_build_set_property(COMPILE_DEFINITIONS "-DMQTT_PASS=\"$ENV{MQTT_PASS}\"" APP
 
 # Fix jsmn not compiling correctly
 idf_build_set_property(COMPILE_DEFINITIONS "-DJSMN_STATIC" APPEND)
+
+#idf_build_set_property(COMPILE_OPTIONS "-fdiagnostics-color" APPEND)
