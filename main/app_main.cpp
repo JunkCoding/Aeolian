@@ -89,7 +89,8 @@ extern "C" void app_main(void)
   // If this option is set, the app must explicitly reset, feed,
   // or disable the rtc_wdt in it's own code.
   // -----------------------------------------------------------
-  //FixMe: rtc_wdt_disable();
+  rtc_wdt_protect_off();
+  rtc_wdt_disable();
 #endif
 
 #if CONFIG_USE_TASK_WDT

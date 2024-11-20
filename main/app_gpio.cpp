@@ -153,7 +153,7 @@ esp_err_t init_gpio_pins(controlvars_t *control_vars)
   io_conf.intr_type    = GPIO_INTR_DISABLE;                            // Disable interrupt trigger
   io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;                        // Disable pulldown resistor
   io_conf.pull_up_en   = GPIO_PULLUP_DISABLE;                          // Disable pullup resistor
-#if defined (CONFIG_AXRGB_DEV_ROCKET)
+#if defined (CONFIG_AEOLIAN_DEV_ROCKET)
   io_conf.pin_bit_mask = (ROCKET_SETUP);
   gpio_config (&io_conf);
   gpio_set_drive_capability ((gpio_num_t)ROCKET_ONE, GPIO_DRIVE_CAP_1);
