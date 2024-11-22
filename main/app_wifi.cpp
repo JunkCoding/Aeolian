@@ -957,31 +957,34 @@ void get_nvs_sta_cfg (wifi_sta_cfg_t *wifi_sta_cfg)
 {
   const char *default_sta_ssid = WIFI_SSID;
   const char *default_sta_pass = WIFI_PASS;
-  nvs_handle handle;
+  nvs_handle_t nvs_handle;
 
-  esp_err_t err = nvs_open (NVS_WIFI_STA_CFG, NVS_READONLY, &handle);
+  esp_err_t err = nvs_open(NVS_WIFI_STA_CFG, NVS_READONLY, &nvs_handle);
   if ( err == ESP_OK )
   {
     wifi_sta_cfg->ssid_len = SSID_STRLEN;
-    if ( nvs_get_str (handle, STR_STA_SSID, wifi_sta_cfg->ssid, &wifi_sta_cfg->ssid_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_STA_SSID, wifi_sta_cfg->ssid, &wifi_sta_cfg->ssid_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_sta_cfg->ssid_len = 0;
     }
 
     wifi_sta_cfg->pass_len = PASSW_STRLEN;
-    if ( nvs_get_str (handle, STR_STA_PASSW, wifi_sta_cfg->password, &wifi_sta_cfg->pass_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_STA_PASSW, wifi_sta_cfg->password, &wifi_sta_cfg->pass_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_sta_cfg->pass_len = 0;
     }
 
     /*
     wifi_sta_cfg->uname_len = UNAME_STRLEN;
-    if ( nvs_get_str (handle, STR_STA_UNAME, wifi_sta_cfg->username, &wifi_sta_cfg->uname_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str (nvs_handle, STR_STA_UNAME, wifi_sta_cfg->username, &wifi_sta_cfg->uname_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_sta_cfg->uname_len = 0;
     }*/
-
-    nvs_close (handle);
+    nvs_close(nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_WIFI_STA_CFG,  __FILE__, __LINE__);
   }
 
   // Check for zero config
@@ -999,33 +1002,36 @@ void get_nvs_sta_cfg (wifi_sta_cfg_t *wifi_sta_cfg)
 // **************************************************************************************************
 void get_nvs_ap_cfg (wifi_ap_cfg_t *wifi_ap_cfg)
 {
-  nvs_handle handle;
+  nvs_handle_t nvs_handle;
 
-  esp_err_t err = nvs_open(NVS_WIFI_AP_CFG, NVS_READONLY, &handle);
+  esp_err_t err = nvs_open(NVS_WIFI_AP_CFG, NVS_READONLY, &nvs_handle);
   if ( err == ESP_OK )
   {
     wifi_ap_cfg->ssid_len = SSID_STRLEN;
-    if ( nvs_get_str(handle, STR_AP_SSID, wifi_ap_cfg->ssid, &wifi_ap_cfg->ssid_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_AP_SSID, wifi_ap_cfg->ssid, &wifi_ap_cfg->ssid_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_ap_cfg->ssid_len = 0;
     }
 
     wifi_ap_cfg->pass_len = PASSW_STRLEN;
-    if ( nvs_get_str(handle, STR_AP_PASSW, wifi_ap_cfg->password, &wifi_ap_cfg->pass_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_AP_PASSW, wifi_ap_cfg->password, &wifi_ap_cfg->pass_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_ap_cfg->pass_len = 0;
     }
 
     // Validation done later
-    nvs_get_u8(handle, STR_AP_PRIMARY, &wifi_ap_cfg->primary);
-    nvs_get_u8(handle, STR_AP_SECONDARY, &wifi_ap_cfg->secondary);
-    nvs_get_u8(handle, STR_AP_AUTHMODE, &wifi_ap_cfg->authmode);
-    nvs_get_u8(handle, STR_AP_CYPHER, &wifi_ap_cfg->cypher);
-    nvs_get_u8(handle, STR_AP_HIDDEN, &wifi_ap_cfg->hidden);
-    nvs_get_u8(handle, STR_AP_BANDWIDTH, &wifi_ap_cfg->bandwidth);
-    nvs_get_u8(handle, STR_AP_MAX_CONN, &wifi_ap_cfg->max_connection);
-
-    nvs_close(handle);
+    nvs_get_u8(nvs_handle, STR_AP_PRIMARY, &wifi_ap_cfg->primary);
+    nvs_get_u8(nvs_handle, STR_AP_SECONDARY, &wifi_ap_cfg->secondary);
+    nvs_get_u8(nvs_handle, STR_AP_AUTHMODE, &wifi_ap_cfg->authmode);
+    nvs_get_u8(nvs_handle, STR_AP_CYPHER, &wifi_ap_cfg->cypher);
+    nvs_get_u8(nvs_handle, STR_AP_HIDDEN, &wifi_ap_cfg->hidden);
+    nvs_get_u8(nvs_handle, STR_AP_BANDWIDTH, &wifi_ap_cfg->bandwidth);
+    nvs_get_u8(nvs_handle, STR_AP_MAX_CONN, &wifi_ap_cfg->max_connection);
+    nvs_close(nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_WIFI_AP_CFG,  __FILE__, __LINE__);
   }
 }
 

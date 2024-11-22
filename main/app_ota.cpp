@@ -842,12 +842,19 @@ esp_err_t cgiUploadFirmware(httpd_req_t *req)
         {
           // Save our current reboot number
           // *****************************************
-          nvs_handle handle;
-          nvs_open(NVS_SYS_INFO, NVS_READWRITE, &handle);
-          nvs_set_u32(handle, NVS_OTA_UPDATE_KEY, boot_count);
-          nvs_commit(handle);
-          nvs_close(handle);
-          F_LOGI(true, true, LC_BRIGHT_YELLOW, "OTA update: Complete");
+          nvs_handle_t nvs_handle;
+          err = nvs_open(NVS_SYS_INFO, NVS_READWRITE, &nvs_handle);
+          if ( err == ESP_OK )
+          {
+            nvs_set_u32(nvs_handle, NVS_OTA_UPDATE_KEY, boot_count);
+            nvs_commit(nvs_handle);
+            nvs_close(nvs_handle);
+            F_LOGI(true, true, LC_BRIGHT_YELLOW, "OTA update: Complete");
+          }
+          else
+          {
+            F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_WIFI_STA_CFG, __FILE__, __LINE__);
+          }
         }
       }
     }

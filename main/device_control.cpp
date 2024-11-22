@@ -538,17 +538,17 @@ int _get_zone_count (char *buf, int bufsize, int zone)
 // ***********************************************
 esp_err_t _set_zone (uint16_t zone)
 {
-  esp_err_t err;
-
+  nvs_handle_t nvs_handle;
   char zoneStr[64];
   sprintf(zoneStr, "zone_%2d", zone);
 
-  nvs_handle handle;
-  nvs_open (NVS_LIGHT_CONFIG, NVS_READWRITE, &handle);
-  err = nvs_set_blob (handle, zoneStr, &overlay[zone], sizeof (overlay_t));
-  nvs_commit (handle);
-  nvs_close (handle);
-
+  esp_err_t err = nvs_open(NVS_LIGHT_CONFIG, NVS_READWRITE, &nvs_handle);
+  if ( err == ESP_OK )
+  {
+    err = nvs_set_blob(nvs_handle, zoneStr, &overlay[zone], sizeof (overlay_t));
+    ESP_ERROR_CHECK(nvs_commit(nvs_handle));
+    nvs_close(nvs_handle);
+  }
   return err;
 }
 int _set_zone_start (char *buf, int bufsize, char *param, char *value, int zone)
