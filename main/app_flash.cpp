@@ -26,10 +26,9 @@
 #include <soc/rmt_struct.h>
 
 #include <driver/periph_ctrl.h>
-#include <driver/timer.h>
+#include <driver/gptimer.h>
 #include <driver/i2s.h>
 #include <driver/uart.h>
-#include <driver/dac.h>
 #include <driver/rtc_io.h>
 
 #include <esp32/rom/rtc.h>
@@ -422,20 +421,29 @@ void save_nvs_event (const char *ns, const char *eventKey, void *eventData, uint
   }
 }
 
-esp_err_t save_nvs_str (const char *ns, const char *key, const char *strValue)
+esp_err_t save_nvs_str(const char *ns, const char *key, const char *strValue)
 {
   nvs_handle handle;
-  esp_err_t err = nvs_open (ns, NVS_READWRITE, &handle);
+  esp_err_t err = nvs_open(ns, NVS_READWRITE, &handle);
   if ( err == ESP_OK )
   {
     err = nvs_set_str(handle, key, strValue);
+    if ( err != ESP_OK )
+    {
+      F_LOGE(true, true, LC_RED, "nvs_set_str failed for ns: %s, key: %s, value: %s", ns, key, strValue);
+    }
+    F_LOGI(true, true, LC_BRIGHT_BLUE, "nvs_set_str (ns: %s, key: %s, value: %s)", ns, key, strValue);
     err = nvs_commit(handle);
     nvs_close (handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_RED, "Failed to open nvs namespace: %s", ns);
   }
   return err;
 }
 
-esp_err_t get_nvs_num (const char *location, const char *token, char *value, tNumber type)
+esp_err_t get_nvs_num(const char *location, const char *token, char *value, tNumber type)
 {
   nvs_handle handle;
 
@@ -633,7 +641,7 @@ void boot_init (void)
   {
     ESP_ERROR_CHECK (esp_partition_erase_range(nvs_partition, 0, nvs_partition->size));
     err = nvs_flash_init();
-    F_LOGW(true, true, LC_RED, "NVS flash was erased, hope this was expected!")
+    F_LOGW(true, true, LC_BRIGHT_RED, "NVS flash was erased, hope this was expected!")
   }
   else
   {

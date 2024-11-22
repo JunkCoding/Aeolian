@@ -20,7 +20,6 @@
 #include "app_flash.h"
 #include "app_lightcontrol.h"
 #include "app_schedule.h"
-#include "app_timer.h"
 #include "app_sntp.h"
 #include "app_mqtt.h"
 #include "sundial.h"

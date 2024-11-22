@@ -1230,19 +1230,22 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
   if ( strlen(mqtt_cfg.broker.address.uri) > 0 )
   {
     *MQTTClient = esp_mqtt_client_init(&mqtt_cfg);
-  }
 
-  // If MQTT was successfully initialised then we attempt to start the client
-  if ( *MQTTClient )
-  {
-    err = esp_mqtt_client_start(*MQTTClient);
-  }
+    F_LOGI(true, true, LC_MAGENTA, "MQTT_Client_Cfg.Uri: %s, MQTT_Client_Cfg.Port: %d", MQTT_Client_Cfg.Uri, MQTT_Client_Cfg.Port);
+    F_LOGI(true, true, LC_MAGENTA, "MQTT_Client_Cfg.Username: %s, MQTT_Client_Cfg.Client_ID: %s", MQTT_Client_Cfg.Username, MQTT_Client_Cfg.Client_ID);
 
-  if ( err )
-  {
-    F_LOGE(true, true, LC_RED, "esp_mqtt_client_start, %s", esp_err_to_name (err));
-    stop_mqtt_client(*MQTTClient);
-    *MQTTClient = NULL;
+    // If MQTT was successfully initialised then we attempt to start the client
+    if ( *MQTTClient )
+    {
+      err = esp_mqtt_client_start(*MQTTClient);
+    }
+
+    if ( err )
+    {
+      F_LOGE(true, true, LC_RED, "esp_mqtt_client_start, %s", esp_err_to_name (err));
+      stop_mqtt_client(*MQTTClient);
+      *MQTTClient = NULL;
+    }
   }
 }
 // --------------------------------------------------------------------------

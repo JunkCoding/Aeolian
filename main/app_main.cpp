@@ -14,9 +14,7 @@
 
 #include <soc/rmt_struct.h>
 
-#include <driver/periph_ctrl.h>
-#include <driver/timer.h>
-#include <driver/i2s.h>
+#include <driver/gptimer.h>
 #include <driver/uart.h>
 
 #include <esp_task_wdt.h>
@@ -92,17 +90,11 @@ extern "C" void app_main(void)
   // If this option is set, the app must explicitly reset, feed,
   // or disable the rtc_wdt in it's own code.
   // -----------------------------------------------------------
+  //wdt_hal_context_t rtc_wdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
   wdt_hal_context_t rtc_wdt_ctx = {.inst = WDT_RWDT, .rwdt_dev = &RTCCNTL};
   wdt_hal_write_protect_disable(&rtc_wdt_ctx);
   wdt_hal_disable(&rtc_wdt_ctx);
   wdt_hal_write_protect_enable(&rtc_wdt_ctx);
-  //wdt_hal_context_t rtc_wdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
-  //wdt_hal_write_protect_disable(&rtc_wdt_ctx);
-  //wdt_hal_disable(&rtc_wdt_ctx);
-  //wdt_hal_write_protect_enable(&rtc_wdt_ctx);
-  //rtc_wdt_protect_off();
-  //rtc_wdt_disable();
-  //rtc_wdt_protect_on();
 #endif
 
 #if CONFIG_USE_TASK_WDT
