@@ -92,8 +92,17 @@ extern "C" void app_main(void)
   // If this option is set, the app must explicitly reset, feed,
   // or disable the rtc_wdt in it's own code.
   // -----------------------------------------------------------
-  rtc_wdt_protect_off();
-  rtc_wdt_disable();
+  wdt_hal_context_t rtc_wdt_ctx = {.inst = WDT_RWDT, .rwdt_dev = &RTCCNTL};
+  wdt_hal_write_protect_disable(&rtc_wdt_ctx);
+  wdt_hal_disable(&rtc_wdt_ctx);
+  wdt_hal_write_protect_enable(&rtc_wdt_ctx);
+  //wdt_hal_context_t rtc_wdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
+  //wdt_hal_write_protect_disable(&rtc_wdt_ctx);
+  //wdt_hal_disable(&rtc_wdt_ctx);
+  //wdt_hal_write_protect_enable(&rtc_wdt_ctx);
+  //rtc_wdt_protect_off();
+  //rtc_wdt_disable();
+  //rtc_wdt_protect_on();
 #endif
 
 #if CONFIG_USE_TASK_WDT
@@ -110,10 +119,11 @@ extern "C" void app_main(void)
     err = esp_task_wdt_reconfigure(&twdt_config);
   }
 
+/*  I think, the next code is legacy as it is not needed since they are
+    configured as part of the statement above
   if ( err == ESP_OK )
   {
     F_LOGW(true, true, LC_GREY, "Checking TWDT idle tasks...");
-
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0
     F_LOGW(true, true, LC_GREY, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
     esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
@@ -121,7 +131,7 @@ extern "C" void app_main(void)
     {
       F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
     }
-#endif /* CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0 */
+#endif // CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0
 
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1
     F_LOGW(true, true, LC_GREY, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1))");
@@ -130,8 +140,9 @@ extern "C" void app_main(void)
     {
       F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
     }
-#endif /* CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1 */
+#endif // CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1
   }
+  */
   if ( err != ESP_OK )
   {
     F_LOGW(true, true, LC_RED, "TWDT configuration failed... restarting");
@@ -165,10 +176,10 @@ extern "C" void app_main(void)
   // Configure dynamic frequency scaling
   // -----------------------------------------------------------
 #ifdef CONFIG_PM_ENABLE
+  int cur_cpu_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ;
   esp_pm_config_esp32_t pm_config = {
-    .max_freq_mhz = ESP_PM_CPU_FREQ_MAX,
-    //.min_freq_mhz = (int) rtc_clk_xtal_freq_get(),
-    .min_freq_mhz = esp_clk_xtal_freq() / 1000000,
+    .max_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ,
+    .min_freq_mhz = 80,
 #if CONFIG_FREERTOS_USE_TICKLESS_IDLE
     .light_sleep_enable = true
 #else
@@ -211,62 +222,62 @@ extern "C" void app_main(void)
   // -----------------------------------------------------------
   // HTTP Initialisation
   // -----------------------------------------------------------
-  init_http_server(&httpServer);
+//  init_http_server(&httpServer);
 
   // -----------------------------------------------------------
   // MQTT Initialisation
   // -----------------------------------------------------------
-  init_mqtt_client();
-#if CONFIG_USE_BOTH_CORES
-  xTaskCreate(mqtt_send_task, TASK_NAME_MQTT_BROKER, STACKSIZE_MQTT_BROKER, NULL, TASK_PRIORITY_MQTT, &xMQTTHandle);
-#else
-  xTaskCreatePinnedToCore(mqtt_send_task, TASK_NAME_MQTT_BROKER, STACKSIZE_MQTT_BROKER, NULL, TASK_PRIORITY_MQTT, &xMQTTHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+  //init_mqtt_client();
+//#if CONFIG_USE_BOTH_CORES
+//  xTaskCreate(mqtt_send_task, TASK_NAME_MQTT_BROKER, STACKSIZE_MQTT_BROKER, NULL, TASK_PRIORITY_MQTT, &xMQTTHandle);
+//#else
+//  xTaskCreatePinnedToCore(mqtt_send_task, TASK_NAME_MQTT_BROKER, STACKSIZE_MQTT_BROKER, NULL, TASK_PRIORITY_MQTT, &xMQTTHandle, TASKS_CORE);
+//#endif /* CONFIG_USE_BOTH_CORES */
 
   // -----------------------------------------------------------
   // Random CCTV Movement
   // -----------------------------------------------------------
-#if defined(CONFIG_CCTV)
-#if CONFIG_USE_BOTH_CORES
-  xTaskCreate(cctv_task, TASK_NAME_CCTV, STACKSIZE_CCTV, NULL, TASK_PRIORITY_CCTV, &xCCTVHandle);
-#else
-  xTaskCreatePinnedToCore(cctv_task, TASK_NAME_CCTV, STACKSIZE_CCTV, NULL, TASK_PRIORITY_CCTV, &xCCTVHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
-#endif /* CONFIG_CCTV */
+//#if defined(CONFIG_CCTV)
+//#if CONFIG_USE_BOTH_CORES
+//  xTaskCreate(cctv_task, TASK_NAME_CCTV, STACKSIZE_CCTV, NULL, TASK_PRIORITY_CCTV, &xCCTVHandle);
+//#else
+//  xTaskCreatePinnedToCore(cctv_task, TASK_NAME_CCTV, STACKSIZE_CCTV, NULL, TASK_PRIORITY_CCTV, &xCCTVHandle, TASKS_CORE);
+//#endif /* CONFIG_USE_BOTH_CORES */
+//#endif /* CONFIG_CCTV */
 
   // -----------------------------------------------------------
   // Set a random pattern at boot time.
   // -----------------------------------------------------------
-  lights_dailies();
+//  lights_dailies();
 
   // -----------------------------------------------------------
   // Begin the light display task
   // -----------------------------------------------------------
-  if ( lights_init() == ESP_OK )
-  {
-#if CONFIG_USE_BOTH_CORES
-    xTaskCreate(lights_task, TASK_NAME_LIGHTS, STACKSIZE_LIGHTS, NULL, TASK_PRIORITY_LIGHTS, &xLightsHandle);
-#else
-    xTaskCreatePinnedToCore(lights_task, TASK_NAME_LIGHTS, STACKSIZE_LIGHTS, NULL, TASK_PRIORITY_LIGHTS, &xLightsHandle, LIGHTS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
-  }
+//  if ( lights_init() == ESP_OK )
+//  {
+//#if CONFIG_USE_BOTH_CORES
+//    xTaskCreate(lights_task, TASK_NAME_LIGHTS, STACKSIZE_LIGHTS, NULL, TASK_PRIORITY_LIGHTS, &xLightsHandle);
+//#else
+//    xTaskCreatePinnedToCore(lights_task, TASK_NAME_LIGHTS, STACKSIZE_LIGHTS, NULL, TASK_PRIORITY_LIGHTS, &xLightsHandle, LIGHTS_CORE);
+//#endif /* CONFIG_USE_BOTH_CORES */
+//  }
 
   // -----------------------------------------------------------
   // Initialise gpio pins and task if applicable
   // -----------------------------------------------------------
-  init_gpio_pins(&control_vars);
-#if CONFIG_MOTION_DETECTION
-#if CONFIG_USE_BOTH_CORES
-  xTaskCreate(gpio_task, TASK_NAME_GPIO, STACKSIZE_GPIO, NULL, TASK_PRIORITY_GPIO, &xGpioHandle);
-#else
-  xTaskCreatePinnedToCore(gpio_task, TASK_NAME_GPIO, STACKSIZE_GPIO, NULL, TASK_PRIORITY_GPIO, &xGpioHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
-#endif /* CONFIG_MOTION_DETECTION */
+//  init_gpio_pins(&control_vars);
+//#if CONFIG_MOTION_DETECTION
+//#if CONFIG_USE_BOTH_CORES
+//  xTaskCreate(gpio_task, TASK_NAME_GPIO, STACKSIZE_GPIO, NULL, TASK_PRIORITY_GPIO, &xGpioHandle);
+//#else
+//  xTaskCreatePinnedToCore(gpio_task, TASK_NAME_GPIO, STACKSIZE_GPIO, NULL, TASK_PRIORITY_GPIO, &xGpioHandle, TASKS_CORE);
+//#endif /* CONFIG_USE_BOTH_CORES */
+//#endif /* CONFIG_MOTION_DETECTION */
 
   // -----------------------------------------------------------
   // Initialise schedule management
   // -----------------------------------------------------------
-  init_scheduler();
+//  init_scheduler();
 #pragma GCC diagnostic push                                     // Save the current warning state
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"   // Disable missing-field-initilizers
   const esp_timer_create_args_t scheduler_args = {
@@ -274,24 +285,24 @@ extern "C" void app_main(void)
       .name = "scheduler"};
 #pragma GCC diagnostic pop                                      // Restore previous default behaviour
   esp_timer_handle_t schedulerHandle;
-  esp_timer_create(&scheduler_args, &schedulerHandle);
-  esp_timer_start_periodic(schedulerHandle, 1000000);
+//  esp_timer_create(&scheduler_args, &schedulerHandle);
+//  esp_timer_start_periodic(schedulerHandle, 1000000);
 
   // -----------------------------------------------------------
   // Are we showing runtime stats?
   // -----------------------------------------------------------
-#if (CONFIG_FREERTOS_VTASKLIST_INCLUDE_COREID && CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS)
-#if CONFIG_USE_BOTH_CORES
-  xTaskCreate(stats_task, TASK_NAME_STATS, STACKSIZE_STATS, NULL, TASK_PRIORITY_STATS, &xStatsHandle);
-#else
-  xTaskCreatePinnedToCore(stats_task, TASK_NAME_STATS, STACKSIZE_STATS, NULL, TASK_PRIORITY_STATS, &xStatsHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
-#endif
+//#if (CONFIG_FREERTOS_VTASKLIST_INCLUDE_COREID && CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS)
+//#if CONFIG_USE_BOTH_CORES
+//  xTaskCreate(stats_task, TASK_NAME_STATS, STACKSIZE_STATS, NULL, TASK_PRIORITY_STATS, &xStatsHandle);
+//#else
+//  xTaskCreatePinnedToCore(stats_task, TASK_NAME_STATS, STACKSIZE_STATS, NULL, TASK_PRIORITY_STATS, &xStatsHandle, TASKS_CORE);
+//#endif /* CONFIG_USE_BOTH_CORES */
+//#endif
 
   // -----------------------------------------------------------
   // Clear pause request for boot initialisation
   // -----------------------------------------------------------
-  lightsUnpause(PAUSE_BOOT, true);
+//  lightsUnpause(PAUSE_BOOT, true);
 
   // -----------------------------------------------------------
   // Did we just do an OTA update?

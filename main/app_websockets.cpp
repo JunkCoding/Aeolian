@@ -308,14 +308,14 @@ IRAM_ATTR char *ws_scan_results (uint16_t *strLen)
 char *ws_scan_results (uint16_t *strLen)
 #endif
 {
-  struct scan_result_t cgiWifiAps = {};
+  scan_result_t cgiWifiAps = {0, NULL};
   char *jsonStr = NULL;
   *strLen = 0;
 
   wifi_ap_record_t apinfo;
   esp_wifi_sta_get_ap_info(&apinfo);
 
-  wifi_getApScanResult (&cgiWifiAps);
+  wifi_getApScanResult(&cgiWifiAps);
 
   // Have we got any AP's from the last scan?
   if ( cgiWifiAps.apCount > 0 )

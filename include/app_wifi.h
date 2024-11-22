@@ -99,11 +99,11 @@ typedef struct
 // --------------------------------------------------------------------------
 // Scan result
 // --------------------------------------------------------------------------
-struct scan_result_t
+typedef struct 
 {
   uint16_t          apCount;
-  wifi_ap_record_t  apList[CONFIG_WIFI_PROV_SCAN_MAX_ENTRIES];
-};
+  wifi_ap_record_t  *apList; //apList[CONFIG_WIFI_PROV_SCAN_MAX_ENTRIES];
+} scan_result_t;
 
 //extern ScanResultData cgiWifiAps;
 
@@ -128,7 +128,7 @@ const char *SecondChanStr(wifi_second_chan_t second);
 bool        wifi_connect(void);
 void        wifi_disconnect(void);
 void        wifi_startScan (void);
-esp_err_t   wifi_getApScanResult (struct scan_result_t *cgiWifiAps);
+esp_err_t   wifi_getApScanResult (scan_result_t *cgiWifiAps);
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
 esp_err_t   tplWifi(struct async_resp_arg *resp_arg, char *token);

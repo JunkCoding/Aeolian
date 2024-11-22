@@ -59,51 +59,54 @@ const char *print_reset_reason (RESET_REASON reason)
 
   switch ( (uint16_t)reason )
   {
+    case 0:
+      reasonString = (char *)"ESP_RST_UNKNOWN";
+      break;                                                /**<0,  Reset reason can not be determined */
     case 1:
-      reasonString = (char *)"POWERON_RESET";
-      break;                                                /**<1,  Vbat power on reset*/
+      reasonString = (char *)"ESP_RST_POWERON";
+      break;                                                /**<1,  Reset due to power-on event */
     case 3:
-      reasonString = (char *)"SW_RESET";
-      break;                                                /**<3,  Software reset digital core*/
+      reasonString = (char *)"ESP_RST_EXT";
+      break;                                                /**<3,  Reset by external pin (not applicable for ESP32) */
     case 4:
-      reasonString = (char *)"OWDT_RESET";
-      break;                                                /**<4,  Legacy watch dog reset digital core*/
+      reasonString = (char *)"ESP_RST_SW";
+      break;                                                /**<4,  Software reset via esp_restart */
     case 5:
-      reasonString = (char *)"DEEPSLEEP_RESET";
-      break;                                                /**<5,  Deep Sleep reset digital core*/
+      reasonString = (char *)"ESP_RST_PANIC";
+      break;                                                /**<5,  Software reset due to exception/panic */
     case 6:
-      reasonString = (char *)"SDIO_RESET";
-      break;                                                /**<6,  Reset by SLC module, reset digital core*/
+      reasonString = (char *)"ESP_RST_INT_WDT";
+      break;                                                /**<6,  Reset (software or hardware) due to interrupt watchdog */
     case 7:
-      reasonString = (char *)"TG0WDT_SYS_RESET";
-      break;                                                /**<7,  Timer Group0 Watch dog reset digital core*/
+      reasonString = (char *)"ESP_RST_TASK_WDT";
+      break;                                                /**<7,  Reset due to task watchdog */
     case 8:
-      reasonString = (char *)"TG1WDT_SYS_RESET";
-      break;                                                /**<8,  Timer Group1 Watch dog reset digital core*/
+      reasonString = (char *)"ESP_RST_WDT";
+      break;                                                /**<8,  TReset due to other watchdogs */
     case 9:
-      reasonString = (char *)"RTCWDT_SYS_RESET";
-      break;                                                /**<9,  RTC Watch dog Reset digital core*/
+      reasonString = (char *)"ESP_RST_DEEPSLEEP";
+      break;                                                /**<9,  Reset after exiting deep sleep mode */
     case 10:
-      reasonString = (char *)"INTRUSION_RESET";
-      break;                                                /**<10, Instrusion tested to reset CPU*/
+      reasonString = (char *)"ESP_RST_BROWNOUT";
+      break;                                                /**<10, Brownout reset (software or hardware) */
     case 11:
-      reasonString = (char *)"TGWDT_CPU_RESET";
-      break;                                                /**<11, Time Group reset CPU*/
+      reasonString = (char *)"ESP_RST_SDIO";
+      break;                                                /**<11, TReset over SDIO */
     case 12:
-      reasonString = (char *)"SW_CPU_RESET";
-      break;                                                /**<12, Software reset CPU*/
+      reasonString = (char *)"ESP_RST_USB";
+      break;                                                /**<12, Reset by USB peripheral */
     case 13:
-      reasonString = (char *)"RTCWDT_CPU_RESET";
-      break;                                                /**<13, RTC Watch dog Reset CPU*/
+      reasonString = (char *)"ESP_RST_JTAG";
+      break;                                                /**<13, Reset by JTAG */
     case 14:
-      reasonString = (char *)"EXT_CPU_RESET";
-      break;                                                /**<14, for APP CPU, reseted by PRO CPU*/
+      reasonString = (char *)"ESP_RST_EFUSE";
+      break;                                                /**<14, Reset due to efuse error */
     case 15:
-      reasonString = (char *)"RTCWDT_BROWN_OUT_RESET";
-      break;                                                /**<15, Reset when the vdd voltage is not stable*/
+      reasonString = (char *)"ESP_RST_PWR_GLITCH";
+      break;                                                /**<15, Reset due to power glitch detected */
     case 16:
-      reasonString = (char *)"RTCWDT_RTC_RESET";
-      break;                                                /**<16, RTC Watch dog reset digital core and rtc module*/
+      reasonString = (char *)"ESP_RST_CPU_LOCKUP";
+      break;                                                /**<16, Reset due to CPU lock up */
     default:
       reasonString = (char *)"NO_MEAN";
   }
