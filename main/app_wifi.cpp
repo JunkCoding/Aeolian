@@ -639,7 +639,7 @@ void wifi_startScan (void)
 //
 // **************************************************************************************************
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR esp_err_t wifi_getApScanResult (scan_result_t cgiWifiAps)
+IRAM_ATTR esp_err_t wifi_getApScanResult (scan_result_t *cgiWifiAps)
 #else
 esp_err_t wifi_getApScanResult (scan_result_t *cgiWifiAps)
 #endif

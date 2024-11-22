@@ -7,7 +7,7 @@
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
 
-#include <driver/timer.h>
+#include <driver/gptimer.h>
 #include <driver/gpio.h>
 
 #include <esp_task_wdt.h>
