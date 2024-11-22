@@ -243,16 +243,23 @@ void printHeapInfo (void)
 void _show_namespace_used_entries (const char *ns)
 {
   nvs_handle_t nvs_handle;
-  nvs_open(ns, NVS_READONLY, &nvs_handle);
-  size_t used_entries = 0;
-  size_t total_entries_namespace = 0;
-  if ( nvs_get_used_entry_count (nvs_handle, &used_entries) == ESP_OK )
+  esp_err_t err = nvs_open(ns, NVS_READONLY, &nvs_handle);
+  if ( err == ESP_OK )
   {
-    // the total number of entries occupied by the namespace
-    total_entries_namespace = used_entries + 1;
+    size_t used_entries = 0;
+    size_t total_entries_namespace = 0;
+    if ( nvs_get_used_entry_count (nvs_handle, &used_entries) == ESP_OK )
+    {
+      // the total number of entries occupied by the namespace
+      total_entries_namespace = used_entries + 1;
+    }
+    nvs_close (nvs_handle);
+    F_LOGI(true, true, LC_BRIGHT_GREEN, "namespace: %s, used_entries: %d, total_entries: %d", ns, (int)used_entries, (int)total_entries_namespace);
   }
-  nvs_close (nvs_handle);
-  F_LOGI(true, true, LC_BRIGHT_GREEN, "namespace: %s, used_entries: %d, total_entries: %d", ns, (int)used_entries, (int)total_entries_namespace);
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", ns, __FILE__, __LINE__);
+  }
 }
 
 // **********************************************************************
@@ -287,20 +294,21 @@ esp_err_t delete_nvs_events(const char *ns)
   if ( itc > 0 )
   {
     F_LOGW(true, true, LC_YELLOW, "Deleting all (%d) entries for '%s'", itc, ns);
-
     uint32_t nvs_handle;
-
     err = nvs_open(ns, NVS_READWRITE, &nvs_handle);
     if ( err == ESP_OK )
     {
       err = nvs_erase_all(nvs_handle);
+      if ( err == ESP_OK )
+      {
+        err = nvs_commit(nvs_handle);
+      }
+      nvs_close(nvs_handle);
     }
-    if ( err == ESP_OK )
+    else
     {
-      err = nvs_commit(nvs_handle);
+      F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", ns, __FILE__, __LINE__);
     }
-
-    nvs_close(nvs_handle);
   }
 
   return err;
@@ -344,7 +352,7 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
     uint32_t nvs_handle;
     uint16_t ci = 0; // Counter
 
-    esp_err_t err = nvs_open (ns, NVS_READONLY, &nvs_handle);
+    esp_err_t err = nvs_open(ns, NVS_READONLY, &nvs_handle);
     if ( err == ESP_OK )
     {
       // Save the count of items
@@ -396,6 +404,10 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
 #endif
       nvs_close (nvs_handle);
     }
+    else
+    {
+      F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", ns, __FILE__, __LINE__);
+    }
   }
 
   return eventList;
@@ -403,51 +415,54 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
 
 void save_nvs_event (const char *ns, const char *eventKey, void *eventData, uint16_t dataLen)
 {
-  nvs_handle handle;
-  esp_err_t err = nvs_open (ns, NVS_READWRITE, &handle);
-  if ( err != ESP_OK )
+  nvs_handle_t nvs_handle;
+  esp_err_t err = nvs_open(ns, NVS_READWRITE, &nvs_handle);
+  if ( err == ESP_OK )
   {
-    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\", key: \"%s\"", ns, eventKey);
-  }
-  else
-  {
-    err = nvs_set_blob(handle, eventKey, eventData, dataLen);
+    err = nvs_set_blob(nvs_handle, eventKey, eventData, dataLen);
     if ( err != ESP_OK )
     {
       F_LOGE(true, true, LC_YELLOW, "Couldn't write flash in \"%s\", key: \"%s\"", ns, eventKey);
     }
-    err = nvs_commit (handle);
-    nvs_close (handle);
+    ESP_ERROR_CHECK(nvs_commit(nvs_handle));
+    nvs_close (nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", ns, __FILE__, __LINE__);
   }
 }
 
 esp_err_t save_nvs_str(const char *ns, const char *key, const char *strValue)
 {
-  nvs_handle handle;
-  esp_err_t err = nvs_open(ns, NVS_READWRITE, &handle);
+  nvs_handle_t nvs_handle;
+  esp_err_t err = nvs_open(ns, NVS_READWRITE, &nvs_handle);
   if ( err == ESP_OK )
   {
-    err = nvs_set_str(handle, key, strValue);
+    err = nvs_set_str(nvs_handle, key, strValue);
     if ( err != ESP_OK )
     {
       F_LOGE(true, true, LC_RED, "nvs_set_str failed for ns: %s, key: %s, value: %s", ns, key, strValue);
     }
+    else
+    {
+      err = nvs_commit(nvs_handle);
+
+    }
     F_LOGI(true, true, LC_BRIGHT_BLUE, "nvs_set_str (ns: %s, key: %s, value: %s)", ns, key, strValue);
-    err = nvs_commit(handle);
-    nvs_close (handle);
+    nvs_close (nvs_handle);
   }
   else
   {
-    F_LOGE(true, true, LC_RED, "Failed to open nvs namespace: %s", ns);
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", ns, __FILE__, __LINE__);
   }
   return err;
 }
 
-esp_err_t get_nvs_num(const char *location, const char *token, char *value, tNumber type)
+esp_err_t get_nvs_num(const char *ns, const char *token, char *value, tNumber type)
 {
-  nvs_handle handle;
-
-  esp_err_t err = nvs_open (location, NVS_READONLY, &handle);
+  nvs_handle_t nvs_handle;
+  esp_err_t err = nvs_open(ns, NVS_READONLY, &nvs_handle);
   if ( ESP_OK == err )
   {
     switch ( type )
@@ -455,13 +470,13 @@ esp_err_t get_nvs_num(const char *location, const char *token, char *value, tNum
       case TYPE_U8:
         {
           uint8_t *x = (uint8_t *)value;
-          err = nvs_get_u8 (handle, token, x);
+          err = nvs_get_u8 (nvs_handle, token, x);
           break;
         }
       case TYPE_U16:
         {
           uint16_t *x = (uint16_t *)value;
-          err = nvs_get_u16 (handle, token, x);
+          err = nvs_get_u16(nvs_handle, token, x);
           break;
         }
       case TYPE_NONE:
@@ -469,19 +484,20 @@ esp_err_t get_nvs_num(const char *location, const char *token, char *value, tNum
         err = ESP_FAIL;
         break;
     }
-
-    nvs_close (handle);
+    nvs_close (nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (err: %04X)(func:%s, line: %d)", ns, err, __FILE__, __LINE__);
   }
   return err;
 }
 
-esp_err_t save_nvs_num (const char *location, const char *token, const char *value, tNumber type)
+esp_err_t save_nvs_num(const char *ns, const char *token, const char *value, tNumber type)
 {
-  nvs_handle handle;
-
-  F_LOGV(true, true, LC_BRIGHT_YELLOW, "save_nvs_num(%s, %s, %s, %d)", location, token, value, type);
-
-  esp_err_t err = nvs_open (location, NVS_READWRITE, &handle);
+  nvs_handle_t nvs_handle;
+  F_LOGV(true, true, LC_BRIGHT_YELLOW, "save_nvs_num(%s, %s, %s, %d)", ns, token, value, type);
+  esp_err_t err = nvs_open(ns, NVS_READWRITE, &nvs_handle);
   if ( ESP_OK == err )
   {
     switch ( type )
@@ -490,51 +506,49 @@ esp_err_t save_nvs_num (const char *location, const char *token, const char *val
         {
           uint8_t x = (uint8_t)atoi (value);
           F_LOGV(true, true, LC_GREY, " U8: %s -> %d", token, x);
-          err = nvs_set_u8(handle, token, x);
+          err = nvs_set_u8(nvs_handle, token, x);
           break;
         }
       case TYPE_U16:
         {
           uint16_t x = (uint16_t)atoi (value);
           F_LOGV(true, true, LC_GREY, "U16: %s -> %d", token, x);
-          err = nvs_set_u16(handle, token, x);
+          err = nvs_set_u16(nvs_handle, token, x);
           break;
         }
       case TYPE_U32:
         {
           uint32_t x = (uint16_t)atoi (value);
           F_LOGV(true, true, LC_GREY, "U32: %s -> %d", token, x);
-          err = nvs_set_u32(handle, token, x);
+          err = nvs_set_u32(nvs_handle, token, x);
           break;
         }
       case TYPE_NONE:
       default:
-        F_LOGE(true, true, LC_RED, "save_nvs_num(%s, %s, %s, %d) *Not Implemented*", location, token, value, type);
+        F_LOGE(true, true, LC_RED, "save_nvs_num(%s, %s, %s, %d) *Not Implemented*", ns, token, value, type);
         err = ESP_FAIL;
         break;
     }
-
-    if ( err == ESP_OK )
-    {
-      nvs_commit (handle);
-    }
-
-    nvs_close (handle);
+    ESP_ERROR_CHECK(nvs_commit(nvs_handle));
+    nvs_close (nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", ns, __FILE__, __LINE__);
   }
   return err;
 }
 
 void get_nvs_led_info (void)
 {
-  nvs_handle handle;
+  nvs_handle_t nvs_handle;
   uint16_t tmpInt;
-
-  esp_err_t err = nvs_open (NVS_LIGHT_CONFIG, NVS_READONLY, &handle);
+  esp_err_t err = nvs_open (NVS_LIGHT_CONFIG, NVS_READONLY, &nvs_handle);
   if ( err == ESP_OK )
   {
     // The on schedule (On, auto, off)
     // -----------------------------------------------------------
-    err = nvs_get_u8 (handle, "schedule", (uint8_t *)&tmpInt);
+    err = nvs_get_u8 (nvs_handle, "schedule", (uint8_t *)&tmpInt);
     if ( err == ESP_OK )
     {
       control_vars.schedule = tmpInt;
@@ -552,7 +566,7 @@ void get_nvs_led_info (void)
 
     // Count of LED 'pixels'
     // -----------------------------------------------------------
-    err = nvs_get_u16 (handle, "led_count", &tmpInt);
+    err = nvs_get_u16 (nvs_handle, "led_count", &tmpInt);
     if ( err == ESP_OK )
     {
       control_vars.pixel_count = tmpInt;
@@ -566,7 +580,7 @@ void get_nvs_led_info (void)
 
     // LED brightness level
     // -----------------------------------------------------------
-    err = nvs_get_u8 (handle, "dim_level", (uint8_t *)&tmpInt);
+    err = nvs_get_u8 (nvs_handle, "dim_level", (uint8_t *)&tmpInt);
     if ( err == ESP_OK )
     {
       if ( check_valid_output(tmpInt) )
@@ -577,7 +591,7 @@ void get_nvs_led_info (void)
 
     // LED lights GPIO pin
     // -----------------------------------------------------------
-    err = nvs_get_u8 (handle, "led_gpio_pin", (uint8_t *)&tmpInt);
+    err = nvs_get_u8 (nvs_handle, "led_gpio_pin", (uint8_t *)&tmpInt);
     if ( err == ESP_OK )
     {
       if ( check_valid_output(tmpInt) )
@@ -588,7 +602,7 @@ void get_nvs_led_info (void)
 
     // Security light GPIO pin
     // -----------------------------------------------------------
-    err = nvs_get_u8 (handle, "light_gpio_pin", (uint8_t *)&tmpInt);
+    err = nvs_get_u8 (nvs_handle, "light_gpio_pin", (uint8_t *)&tmpInt);
     if ( err == ESP_OK )
     {
       if ( check_valid_output(tmpInt) )
@@ -605,7 +619,7 @@ void get_nvs_led_info (void)
       zone_params_t tmp_zone;
       size_t size = sizeof(zone_params_t);
       sprintf(zoneStr, "zone_%02d", cz);
-      err = nvs_get_blob(handle, zoneStr, &tmp_zone, &size);
+      err = nvs_get_blob(nvs_handle, zoneStr, &tmp_zone, &size);
       if ( err == ESP_OK )
       {
         if ( size != sizeof(zone_params_t) )
@@ -622,7 +636,11 @@ void get_nvs_led_info (void)
       overlay[cz].tHandle = NULL;
       overlay[cz].set = 0;
     }
-    nvs_close (handle);
+    nvs_close (nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_LIGHT_CONFIG, __FILE__, __LINE__);
   }
 }
 
@@ -634,7 +652,7 @@ void boot_init (void)
   // -----------------------------------------------------------
   // Initialise non volatile memory
   // -----------------------------------------------------------
-  err = nvs_flash_erase();
+  //err = nvs_flash_erase();
 
   err = nvs_flash_init();
   if ( err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND )
@@ -652,28 +670,32 @@ void boot_init (void)
   // -----------------------------------------------------------
   // Keep track of our reboots
   // -----------------------------------------------------------
-  nvs_handle handle;
-  if ( nvs_open(NVS_SYS_INFO, NVS_READWRITE, &handle) == ESP_OK )
+  nvs_handle_t nvs_handle;
+  if ( nvs_open(NVS_SYS_INFO, NVS_READWRITE, &nvs_handle) == ESP_OK )
   {
-    nvs_get_u32(handle, NVS_OTA_UPDATE_KEY, &ota_update);
-    nvs_get_u32(handle, NVS_BOOT_COUNT_KEY, &boot_count);
+    nvs_get_u32(nvs_handle, NVS_OTA_UPDATE_KEY, &ota_update);
+    nvs_get_u32(nvs_handle, NVS_BOOT_COUNT_KEY, &boot_count);
     boot_count++;
-    nvs_set_u32(handle, NVS_BOOT_COUNT_KEY, boot_count);
+    nvs_set_u32(nvs_handle, NVS_BOOT_COUNT_KEY, boot_count);
 
     hostname_len = 32;
-    if ( nvs_get_str(handle, NVS_HOSTNAME_KEY, hostname, &hostname_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, NVS_HOSTNAME_KEY, hostname, &hostname_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       F_LOGW(true, true, LC_YELLOW, "No hostname found in nvs");
       memcpy(hostname, CONFIG_TARGET_DEVICE_STR, strlen(CONFIG_TARGET_DEVICE_STR));
-      nvs_set_str(handle, NVS_HOSTNAME_KEY, hostname);
+      nvs_set_str(nvs_handle, NVS_HOSTNAME_KEY, hostname);
     }
     else if ( hostname_len > 0 )
     {
       F_LOGW(true, true, LC_YELLOW, "Hostname found: %s", hostname);
     }
 
-    nvs_commit(handle);
-    nvs_close(handle);
+    nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_SYS_INFO, __FILE__, __LINE__);
   }
 
   // -----------------------------------------------------------

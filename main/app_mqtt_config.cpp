@@ -375,50 +375,50 @@ void getMqttConfig (void)
 void _get_nvs_mqtt_config(void)
 {
   size_t strlen;
-  nvs_handle handle;
+  nvs_handle_t nvs_handle;
 
-  esp_err_t err = nvs_open(NVS_MQTT_CONFIG, NVS_READONLY, &handle);
+  esp_err_t err = nvs_open(NVS_MQTT_CONFIG, NVS_READONLY, &nvs_handle);
   if ( err == ESP_OK )
   {
     strlen = MQTT_CLIENT_STRLEN_NAME;
-    if ( nvs_get_str(handle, STR_MQTT_CLIENT_NAME, MQTT_Client_Cfg.Name, &strlen) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_MQTT_CLIENT_NAME, MQTT_Client_Cfg.Name, &strlen) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Name[0] = 0x0;
     }
 
     strlen = MQTT_CLIENT_STRLEN_SERVER;
-    if ( nvs_get_str(handle, STR_MQTT_CLIENT_SERVER, MQTT_Client_Cfg.Server, &strlen) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_MQTT_CLIENT_SERVER, MQTT_Client_Cfg.Server, &strlen) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Server[0] = 0x0;
     }
 
     strlen = MQTT_CLIENT_STRLEN_URI;
-    if ( nvs_get_str(handle, STR_MQTT_CLIENT_URI, MQTT_Client_Cfg.Uri, &strlen) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_MQTT_CLIENT_URI, MQTT_Client_Cfg.Uri, &strlen) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Uri[0] = 0x0;
     }
 
     strlen = MQTT_CLIENT_STRLEN_ID;
-    if ( nvs_get_str(handle, STR_MQTT_CLIENT_ID, MQTT_Client_Cfg.Client_ID, &strlen) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_MQTT_CLIENT_ID, MQTT_Client_Cfg.Client_ID, &strlen) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Client_ID[0] = 0x0;
     }
 
     strlen = MQTT_CLIENT_STRLEN_USERNAME;
-    if ( nvs_get_str(handle, STR_MQTT_CLIENT_USERNAME, MQTT_Client_Cfg.Username, &strlen) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_MQTT_CLIENT_USERNAME, MQTT_Client_Cfg.Username, &strlen) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Username[0] = 0x0;
     }
 
     strlen = MQTT_CLIENT_STRLEN_PASSWORD;
-    if ( nvs_get_str(handle, STR_MQTT_CLIENT_PASSWORD, MQTT_Client_Cfg.Password, &strlen) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_MQTT_CLIENT_PASSWORD, MQTT_Client_Cfg.Password, &strlen) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Password[0] = 0x0;
     }
 
     // Validation done later
     uint32_t port;
-    if ( nvs_get_u32(handle, STR_MQTT_CLIENT_PORT, &port) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_u32(nvs_handle, STR_MQTT_CLIENT_PORT, &port) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Port = 1883;
     }
@@ -428,7 +428,7 @@ void _get_nvs_mqtt_config(void)
     }
 
     uint8_t val;
-    if ( nvs_get_u8(handle, STR_MQTT_CLIENT_MASTER, &val) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_u8(nvs_handle, STR_MQTT_CLIENT_MASTER, &val) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Master = false;
     }
@@ -437,7 +437,7 @@ void _get_nvs_mqtt_config(void)
       MQTT_Client_Cfg.Master = val;
     }
 
-    if ( nvs_get_u8(handle, STR_MQTT_CLIENT_SLAVE, &val) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_u8(nvs_handle, STR_MQTT_CLIENT_SLAVE, &val) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Slave = false;
     }
@@ -446,7 +446,7 @@ void _get_nvs_mqtt_config(void)
       MQTT_Client_Cfg.Slave = val;
     }
 
-    if ( nvs_get_u8(handle, STR_MQTT_CLIENT_KEEPALIVE, &val) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_u8(nvs_handle, STR_MQTT_CLIENT_KEEPALIVE, &val) == ESP_ERR_NVS_NOT_FOUND )
     {
       MQTT_Client_Cfg.Keep_Alive = false;
     }
@@ -454,9 +454,13 @@ void _get_nvs_mqtt_config(void)
     {
       MQTT_Client_Cfg.Keep_Alive = val;
     }
-
-    nvs_close(handle);
+    nvs_close(nvs_handle);
   }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_MQTT_CONFIG, __FILE__, __LINE__);
+  }
+
 
   F_LOGW(true, true, LC_GREY, "MQTT_Client Client_ID  : %s", MQTT_Client_Cfg.Client_ID);
   F_LOGW(true, true, LC_GREY, "MQTT_Client Uri        : %s", MQTT_Client_Cfg.Uri);
