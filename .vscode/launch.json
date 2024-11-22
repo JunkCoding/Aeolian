@@ -10,6 +10,7 @@
       "cwd": "${workspaceRoot}",
       "args": [],
       "environment": [],
+      "program": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       "MIMode": "gdb",
       "linux": {
         "miDebuggerPath": "${config:idf.toolsPath}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb",
@@ -20,8 +21,8 @@
         "program": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "windows": {
-        "miDebuggerPath": "${config:idf.toolsPathWin}\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin\\xtensa-esp32-elf-gdb.exe",
-        "program": "${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "miDebuggerPath": "${config:idf.toolsPathWin}/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb.exe",
+        "program": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "miDebuggerServerAddress": "127.0.0.1:3333",
       "stopAtEntry": false,
@@ -55,8 +56,8 @@
         "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "windows": {
-        "gdbpath": "${config:idf.toolsPathWin}\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin\\xtensa-esp32-elf-gdb.exe",
-        "executable": "${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "gdbpath": "${config:idf.toolsPathWin}/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb.exe",
+        "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "autorun": [
         "target remote :3333",
@@ -89,8 +90,8 @@
         "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "windows": {
-        "gdbpath": "${config:idf.toolsPathWin}\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin\\xtensa-esp32-elf-gdb.exe",
-        "executable": "${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "gdbpath": "${config:idf.toolsPathWin}/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb.exe",
+        "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "autorun": [
         "target remote :3333",
@@ -112,7 +113,7 @@
       "type": "gdb",
       "request": "attach",
       "cwd": "${workspaceFolder}",
-      "target": ":3333",
+      "target": "localhost:3333",
       "remote": true,
       "linux": {
         "gdbpath": "${config:idf.toolsPath}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb",
@@ -123,16 +124,16 @@
         "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "windows": {
-        "gdbpath": "${config:idf.toolsPathWin}\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin\\xtensa-esp32-elf-gdb.exe",
-        "executable": "${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "gdbpath": "${config:idf.toolsPathWin}/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb.exe",
+        "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "autorun": [
         "target remote :3333",
-        "set remote hardware-watchpoint-limit 2",
-        //"symbol-file ${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
-        "set breakpoint pending on",
         "mon reset halt",
         "maintenance flush register-cache",
+        //"set breakpoint pending on",
+        //"set remote hardware-watchpoint-limit 2",
+        //"mon esp32 appimage_offset 0x020000",
         "thb app_main"
         //"c"
       ],
@@ -155,8 +156,8 @@
         "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "windows": {
-        "gdbpath": "${config:idf.toolsPathWin}\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin\\xtensa-esp32-elf-gdb.exe",
-        "executable": "${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "gdbpath": "${config:idf.toolsPathWin}/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb.exe",
+        "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "target": "localhost:3333",
       "remote": true,
@@ -191,8 +192,8 @@
         "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "windows": {
-        "gdbpath": "${config:idf.toolsPathWin}\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin\\xtensa-esp32-elf-gdb.exe",
-        "executable": "${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "gdbpath": "${config:idf.toolsPathWin}/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb.exe",
+        "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "autorun": [
         "target remote :3333",
@@ -214,7 +215,7 @@
       "type": "gdb",
       "request": "attach",
       "cwd": "${workspaceFolder}",
-      "target": ":3333",
+      "target": "localhost:3333",
       "remote": true,
       "linux": {
         "gdbpath": "${config:idf.toolsPath}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb",
@@ -225,13 +226,13 @@
         "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "windows": {
-        "gdbpath": "${config:idf.toolsPathWin}\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin\\xtensa-esp32-elf-gdb.exe",
-        "executable": "${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "gdbpath": "${config:idf.toolsPathWin}/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb.exe",
+        "executable": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "autorun": [
-        "target remote localhost:3333",
+        //"symbol-file ${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "target remote :3333",
         "set remote hardware-watchpoint-limit 2",
-        "//symbol-file ${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
         "set breakpoint pending on",
         "mon reset halt",
         "maintenance flush register-cache",
@@ -246,6 +247,7 @@
       "type": "gdb",
       "request": "launch",
       "cwd": "${workspaceFolder}",
+      "target": "172.16.1.185:3333",
       "linux": {
         "gdbpath": "${config:idf.toolsPath}/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb",
         "target": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
@@ -255,8 +257,8 @@
         "target": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "windows": {
-        "gdbpath": "${config:idf.toolsPathWin}\\tools\\xtensa-esp-elf-gdb\\11.2_20220823\\xtensa-esp-elf-gdb\\bin\\xtensa-esp32-elf-gdb.exe",
-        "target": "${workspaceRoot}\\build\\${command:espIdf.getProjectName}.elf",
+        "gdbpath": "${config:idf.toolsPathWin}/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb.exe",
+        "target": "${workspaceRoot}/build/${command:espIdf.getProjectName}.elf",
       },
       "autorun": [
         "target remote 172.16.1.185:3333",

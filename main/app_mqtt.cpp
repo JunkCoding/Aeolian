@@ -49,8 +49,8 @@ const char *STR_RULEID      = "RuleId";
 #define   MQTT_EVT_BUFSIZE    128
 #define   MQTT_BUFSIZE        512
 
-QueueHandle_t mqtt_send_queue = NULL;
-EventGroupHandle_t mqtt_event_group = NULL;
+static QueueHandle_t mqtt_send_queue = NULL;
+static EventGroupHandle_t mqtt_event_group = NULL;
 
 const int MQTT_CONNECTED = BIT0;
 

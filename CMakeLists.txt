@@ -1,14 +1,77 @@
 cmake_minimum_required(VERSION 3.13.0)
 
-set(CMAKE_CXX_STANDARD 23)
-
-set(COMPONENTS cxx app app_update bootloader bootloader_init bootloader_support driver efuse espfs esptool_py esp_app_format esp_bootloader_format esp_common
-               esp_driver_gpio esp_driver_rmt esp_http_server esp_hw_support esp_netif esp_netif_stack esp_partition esp_psram esp_system
-               esp_wifi hal mqtt vfs soc main nvs_flash partition_table spi_flash wifi_provisioning)
-
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
-project(Aeolian)
+project(aeolian)
+
+set(CMAKE_CXX_STANDARD 17)
+
+set(COMPONENTS
+      app
+      app_trace
+      app_update
+      app_update 
+      bootloader 
+      bootloader_init 
+      bootloader_support 
+      console
+      cxx
+      driver 
+      efuse 
+      espfs 
+      esptool_py 
+      esp_app_format 
+      esp_bootloader_format 
+      esp_common
+      esp_driver_gpio
+      esp_driver_gptimer
+      esp_driver_rmt 
+      esp_driver_usb_serial_jtag
+      esp_event
+      esp_gdbstub 
+      esp_http_server 
+      esp_hw_support 
+      esp_netif 
+      esp_netif_stack 
+      esp_partition
+      esp_phy
+      esp_pm
+      esp_psram 
+      esp_ringbuf
+      esp_rom
+      esp_system
+      esp_timer
+      esp_wifi
+      espcoredump
+      fatfs
+      freertos 
+      hal 
+      heap
+      http_parser
+      idf_test
+      json
+      jsmn
+      log
+      lwip
+      mqtt 
+      main 
+      nvs_flash 
+      openthread
+      partition_table
+      pthread
+      soc 
+      spi_flash
+      spiffs
+      tcp_transport
+      tcpip_adapter 
+      usb
+      vfs 
+      wear_levelling
+      wifi_provisioning
+      wpa_supplicant
+      xtensa
+    )
+
 
 # #####################################################
 # # Git stuff

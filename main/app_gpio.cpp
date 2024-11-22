@@ -15,7 +15,7 @@
 #include "app_utils.h"
 
 #if defined (CONFIG_MOTION_DETECTION)
-QueueHandle_t gpio_evt_queue = NULL;
+static QueueHandle_t gpio_evt_queue = NULL;
 IRAM_ATTR static void gpio_isr_handler (void* arg)
 {
   uint8_t zone = 0;

@@ -25,8 +25,7 @@
   "idf.flashType": "UART",
   "idf.port": "/dev/cu.SLAB_USBtoUART",
   "idf.openOcdConfigs": [
-    "interface/ftdi/esp32_devkitj_v1.cfg",
-    "target/esp32.cfg"
+    "board/esp32-bridge.cfg"
   ],
   "editor.minimap.autohide": false,
   "editor.minimap.size": "fit",
@@ -97,6 +96,9 @@
     "ESP_ROM_ELF_DIR": "E:\\VSCode\\esp\\v5.3.1\\tools\\tools\\esp-rom-elfs\\20240305/"
   },
   "idf.gitPathWin": "E:\\VSCode\\esp\\v5.3.1\\tools\\tools\\idf-git\\2.39.2\\cmd\\git.exe",
-  "editor.fontSize": 9,
+  "editor.fontSize": 10,
   "workbench.startupEditor": "none",
+  "scm.inputFontSize": 10,
+  "markdown.preview.fontSize": 10,
+  "editor.minimap.sectionHeaderFontSize": 10,
 }
