@@ -308,7 +308,7 @@ IRAM_ATTR char *ws_scan_results (uint16_t *strLen)
 char *ws_scan_results (uint16_t *strLen)
 #endif
 {
-  scan_result_t cgiWifiAps = {0, NULL};
+  scan_result_t cgiWifiAps = {0, 0};
   char *jsonStr = NULL;
   *strLen = 0;
 
@@ -344,6 +344,14 @@ char *ws_scan_results (uint16_t *strLen)
     }
     *strLen += snprintf (&jsonStr[*strLen], SIZE_JSONBUF - *strLen, "]\n}");
   }
+
+  // Release memory
+  if ( cgiWifiAps.apList != NULL )
+  {
+    vPortFree(cgiWifiAps.apList);
+    cgiWifiAps.apList = NULL;
+  }
+
   return jsonStr;
 }
 
