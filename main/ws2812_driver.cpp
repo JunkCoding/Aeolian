@@ -18,6 +18,7 @@
 #include <esp_task_wdt.h>
 #include <esp_intr_alloc.h>
 #include <esp_clk_tree.h>
+#include <esp_timer.h>
 
 #include <soc/gpio_sig_map.h>
 #include <soc/rmt_struct.h>
@@ -345,7 +346,7 @@ IRAM_ATTR static void ws2812_rmt_adapter (const void* src, rmt_item32_t* dest, s
     }
   }
 
-  led_write_last = esp_timer_get_time ();
+  led_write_last = esp_timer_get_time();
   led_debug_cnt++;
 }
 
@@ -358,7 +359,7 @@ IRAM_ATTR esp_err_t ws2812_setColors (uint16_t num_leds, cRGB* array)
     led_accum_time += (led_write_last - led_write_start);
   }
   led_write_count++;
-  led_write_start = esp_timer_get_time ();
+  led_write_start = esp_timer_get_time();
   led_debug_cnt = 0;
 
   memcpy (ws2812_buffer, array, (num_leds * sizeof (cRGB)));

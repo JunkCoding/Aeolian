@@ -175,7 +175,7 @@ extern "C" void app_main(void)
   // Display some useful info on boot
   // -----------------------------------------------------------
   print_app_info();
-#if defined(CONFIG_DEBUG)
+#if defined(AEOLIAN_DEV_DEBUG)
   show_nvs_usage();
   printHeapInfo();
 #endif
