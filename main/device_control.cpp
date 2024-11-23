@@ -337,7 +337,7 @@ int _get_buildVersion (char *buf, int bufsize, int param)
 {
   // Something broke, so using an alternative method
   //return snprintf (buf, bufsize, "%s", esp_get_idf_version ());
-  return snprintf(buf, bufsize, "%s", AEOLIAN_FW_HASH);
+  return snprintf(buf, bufsize, "%s, %s", AEOLIAN_FW_BRANCH, AEOLIAN_FW_HASH);
 }
 // ***********************************************
 int _get_log_history (char *buf, int bufsize, int type)

@@ -159,6 +159,8 @@
 		"terminal.integrated.fontFamily": "Hack",
 		"idf.flashType": "",
 		"editor.minimap.sectionHeaderFontSize": 10,
+		"workbench.editor.enablePreviewFromCodeNavigation": true,
+		"workbench.editor.enablePreviewFromQuickOpen": true,
 	},
 	"extensions": {
 		"recommendations": [

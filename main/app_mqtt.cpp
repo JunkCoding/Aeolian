@@ -108,12 +108,15 @@ bool on_off (int len, char *data)
   return value;
 }
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
+IRAM_ATTR static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 #else
-esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
+static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 #endif
 {
   char evtBuf[MQTT_EVT_BUFSIZE + 1] = {};
+  esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
+  esp_mqtt_client_handle_t client = event->client;
+  int msg_id;
 
   switch ( event->event_id )
   {
@@ -239,8 +242,6 @@ esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
         break;
       }
   }
-
-  return ESP_OK;
 }
 
 void proc_command(uint16_t cmd, char *param, uint16_t reason)
@@ -1110,13 +1111,13 @@ void proc_mqtt_data (esp_mqtt_event_handle_t event)
 {
   uint16_t dev;
 
-  //F_LOGI(true, true, LC_BRIGHT_WHITE, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
+  //F_LOGD(true, true, LC_BRIGHT_WHITE, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
   for ( dev = dev_Light; dev < num_devices; dev++ )
   {
-    //F_LOGI(true, true, LC_BRIGHT_BLUE, "proc_mqtt_data: %s -> %.*s", MQTT_server_cfg[dev].Topic_sub, event->topic_len, event->topic);
+    //F_LOGD(true, true, LC_BRIGHT_BLUE, "proc_mqtt_data: %s -> %.*s", MQTT_server_cfg[dev].Topic_sub, event->topic_len, event->topic);
     if ( topic_cmp(MQTT_server_cfg[dev].Topic_sub, event->topic, event->topic_len) == 1 )
     {
-      F_LOGD(true, true, LC_MAGENTA, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
+      //F_LOGD(true, true, LC_MAGENTA, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
       switch ( (mqtt_devices_t)dev )
       {
         case dev_Light:
@@ -1230,9 +1231,7 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
   if ( strlen(mqtt_cfg.broker.address.uri) > 0 )
   {
     *MQTTClient = esp_mqtt_client_init(&mqtt_cfg);
-
-    F_LOGI(true, true, LC_MAGENTA, "MQTT_Client_Cfg.Uri: %s, MQTT_Client_Cfg.Port: %d", MQTT_Client_Cfg.Uri, MQTT_Client_Cfg.Port);
-    F_LOGI(true, true, LC_MAGENTA, "MQTT_Client_Cfg.Username: %s, MQTT_Client_Cfg.Client_ID: %s", MQTT_Client_Cfg.Username, MQTT_Client_Cfg.Client_ID);
+    esp_mqtt_client_register_event(*MQTTClient, MQTT_EVENT_ANY, mqtt_event_handler, NULL);
 
     // If MQTT was successfully initialised then we attempt to start the client
     if ( *MQTTClient )
