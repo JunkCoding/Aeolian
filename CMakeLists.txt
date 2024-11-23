@@ -80,8 +80,7 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
   find_package(Git)
   if (Git_FOUND)
     execute_process(
-      #COMMAND git branch --show-current
-      COMMAND git rev-parse --abbrev-ref HEAD
+      COMMAND git branch --show-current
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       OUTPUT_VARIABLE GIT_BRANCH
       OUTPUT_STRIP_TRAILING_WHITESPACE

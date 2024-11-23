@@ -2824,7 +2824,7 @@ void color_wave(enum hue_color color, uint16_t start, uint16_t count, uint8_t st
   h = constrain_hue(color, h);
   hTemp = h;
 
-  printf("hue: %d\n", hTemp);
+  //printf("hue: %d\n", hTemp);
 
   uint16_t curPos = start;
   for ( uint16_t i = start; i < count; i++ )

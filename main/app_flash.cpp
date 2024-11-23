@@ -122,7 +122,7 @@ void print_app_info (void)
   F_LOGI(true, true, LC_GREY, "%25s = CPU0: %d, CPU1: %d", "Reset reasons", (uint16_t)rtc_get_reset_reason(0), (uint16_t)rtc_get_reset_reason(1));
   F_LOGI(true, true, LC_GREY, "%25s = %s", "Project name", app_info.project_name);
   //F_LOGI(true, true, LC_GREY, "%25s = %s", "Project firmware", app_info.version);
-  F_LOGI(true, true, LC_GREY, "%25s = %s", "Project firmware", AEOLIAN_FW_HASH);
+  F_LOGI(true, true, LC_GREY, "%25s = %s, %s", "Project firmware", AEOLIAN_FW_BRANCH, AEOLIAN_FW_HASH);
   //This started failing!?
   //F_LOGI(true, true, LC_GREY, "%25s = %s", "IDF version", app_info.idf_ver);
   // -std=c++20 

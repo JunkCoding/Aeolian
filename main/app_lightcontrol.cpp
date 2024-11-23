@@ -15,7 +15,7 @@
 
 #include <sys/time.h>
 #include <soc/rtc.h>
-
+#include <esp_pm.h>
 
 #include <time.h>
 
@@ -206,8 +206,8 @@ overlay_t overlay[] = {
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
-  {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
-  {NULL,  {  0,   0,  0,   MediumWhite},  0,  false}};
+  {NULL,  {  10,  1,  0,   MediumWhite},  0,  false},
+  {NULL,  {  11,  1,  0,   MediumWhite},  0,  false}};
 #endif
 #define NUM_OVERLAYS  (sizeof(overlay) / sizeof(overlay_t))
 
@@ -371,6 +371,37 @@ bool check_valid_output (uint8_t pin)
   }
   return valid;
 }
+
+// **********************************************************************
+// Toggle PM on/off (if user has enabled it)
+// PM doesn't really work well with a fast, responsive LED display, so
+// we will toggle it on and off when required.
+// **********************************************************************
+#ifdef CONFIG_PM_ENABLE
+void set_pm(bool switch_on)
+{
+  int min_freq = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ;
+  if ( switch_on == true )
+  {
+    min_freq = (int) rtc_clk_xtal_freq_get();
+  }
+
+  esp_pm_config_t pm_config = {
+    .max_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ,
+    .min_freq_mhz = min_freq,
+#if CONFIG_FREERTOS_USE_TICKLESS_IDLE
+    .light_sleep_enable = true
+#else
+    .light_sleep_enable = false
+#endif
+  };
+  esp_err_t err = esp_pm_configure(&pm_config);
+  if ( err != ESP_OK )
+  {
+    F_LOGE(true, true, LC_YELLOW, "Problem running esp_pm_configure()");
+  }
+}
+#endif /* CONFIG_PM_ENABLE */
 
 // **********************************************************************
 // Initialise the LED display task
@@ -692,6 +723,10 @@ IRAM_ATTR void lights_task (void *pvParameters)
     // ------------------------------------------------------
     if ( update_leds )
     {
+#ifdef CONFIG_PM_ENABLE
+      set_pm(false);
+#endif /* CONFIG_PM_ENABLE */
+
       // Update LEDs
       ws2812_setColors (control_vars.pixel_count, outBuffer);
 
@@ -712,6 +747,9 @@ IRAM_ATTR void lights_task (void *pvParameters)
     }
     else
     {
+#ifdef CONFIG_PM_ENABLE
+      set_pm(true);
+#endif /* CONFIG_PM_ENABLE */
       skips++;
     }
 
@@ -751,7 +789,7 @@ IRAM_ATTR void lights_task (void *pvParameters)
     // Reset the watchdog
     // ------------------------------------------------------
 #if CONFIG_USE_TASK_WDT
-    CHECK_ERROR_CODE(esp_task_wdt_reset (), ESP_OK);
+    CHECK_ERROR_CODE(esp_task_wdt_reset(), ESP_OK);
 #endif
   }
   while ( true );

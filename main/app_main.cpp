@@ -14,6 +14,9 @@
 
 #include <soc/rmt_struct.h>
 
+#include <lwip/sys.h>
+#include <lwip/err.h>
+
 #include <driver/gptimer.h>
 #include <driver/uart.h>
 
@@ -26,11 +29,8 @@
 #include <esp_event.h>
 #include <esp_pm.h>
 
-#include "hal/wdt_hal.h"
-#include "rtc_wdt.h"
-
-#include <lwip/err.h>
-#include <lwip/sys.h>
+#include <hal/wdt_hal.h>
+#include <rtc_wdt.h>
 
 #include "app_wifi.h"
 #include "app_httpd.h"
@@ -146,7 +146,7 @@ extern "C" void app_main(void)
   // Warn GDBSTUB_ENABLED is set
   // -----------------------------------------------------------
 #if defined (CONFIG_ESP_GDBSTUB_ENABLED)
-  F_LOGW(true, true, LC_BRIGHT_RED, "gdbstub enabled");
+  F_LOGW(false, true, LC_BRIGHT_RED, "*** gdbstub enabled ***");
 #endif
 
   // -----------------------------------------------------------
@@ -163,27 +163,6 @@ extern "C" void app_main(void)
   // Read saved LED/WiFi settings
   // -----------------------------------------------------------
   get_nvs_led_info();
-
-  // -----------------------------------------------------------
-  // Configure dynamic frequency scaling
-  // -----------------------------------------------------------
-#ifdef CONFIG_PM_ENABLE
-  int cur_cpu_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ;
-  esp_pm_config_esp32_t pm_config = {
-    .max_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ,
-    .min_freq_mhz = 80,
-#if CONFIG_FREERTOS_USE_TICKLESS_IDLE
-    .light_sleep_enable = true
-#else
-    .light_sleep_enable = false
-#endif
-  };
-  err = esp_pm_configure(&pm_config);
-  if ( err != ESP_OK )
-  {
-    F_LOGE(true, true, LC_YELLOW, "Problem running esp_pm_configure()");
-  }
-#endif // CONFIG_PM_ENABLE
 
   // -----------------------------------------------------------
   // setup configuration
