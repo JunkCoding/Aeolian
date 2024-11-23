@@ -45,6 +45,7 @@
 
 uint32_t boot_count = 0;
 uint32_t ota_update = 0;
+uint32_t cpu_mhz    = 0;
 
 esp_app_desc_t       app_info     = {};
 esp_partition_t     *configured   = {};
@@ -86,21 +87,26 @@ const char *ota_state_to_str (esp_ota_img_states_t ota_state)
 
   return ptr;
 }
-static uint32_t get_cpu_cycles()
+
+// -----------------------------------------------------------
+// Since v5.x removes this ability, we need to roll our own.
+// -----------------------------------------------------------
+static uint32_t get_cpu_mhz()
 {
   uint32_t start = esp_cpu_get_cycle_count();
+  delay_ms(100);
   uint32_t end = esp_cpu_get_cycle_count();
-  return end - start;
+  return uint((((end - start) / 10000) + 9) / 10);
 }
 
+// -----------------------------------------------------------
+// Display info about our hardware and software environment.
+// -----------------------------------------------------------
 void print_app_info (void)
 {
   uint8_t default_mac_addr[6];
   uint32_t phySize;
   esp_chip_info_t chip_info;
-
-  // ToDo: use this timestamp for calculating real speed
-  //uint32_t clk = esp_cpu_get_cycle_count() / esp_rom_get_cpu_ticks_per_us() * 1000;
 
   // -----------------------------------------------------------
   // Get information about our enviroment
@@ -113,6 +119,9 @@ void print_app_info (void)
   esp_chip_info (&chip_info);
   esp_efuse_mac_get_default (default_mac_addr);
   esp_flash_get_physical_size(NULL, &phySize);
+
+  // Get and save the approximate current CPU speed
+  cpu_mhz = get_cpu_mhz();
 
   _print_divider ();
 #if defined (CONFIG_DEBUG)
@@ -137,7 +146,7 @@ void print_app_info (void)
   F_LOGI(true, true, LC_GREY, "%25s = %d", "Num cores", chip_info.cores);
   F_LOGI(true, true, LC_GREY, "%25s = WiFi%s%s", "Features", (chip_info.features & CHIP_FEATURE_BT)?"/BT":"", (chip_info.features & CHIP_FEATURE_BLE)?"/BLE":"");
   F_LOGI(true, true, LC_GREY, "%25s = %02X:%02X:%02X:%02X:%02X:%02X", "MAC address", default_mac_addr[0], default_mac_addr[1], default_mac_addr[2], default_mac_addr[3], default_mac_addr[4], default_mac_addr[5]);
-  F_LOGI(true, true, LC_GREY, "%25s = %d MHz", "CPU freq", CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ / 1000000);
+  F_LOGI(true, true, LC_GREY, "%25s = %d MHz", "CPU freq", cpu_mhz);
   F_LOGI(true, true, LC_GREY, "%25s = %dMB %s", "Flash size", phySize / (1024 * 1024), (chip_info.features & CHIP_FEATURE_EMB_FLASH)?"embedded":"external");
   F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Free heap size", esp_get_minimum_free_heap_size ());
   F_LOGI(true, true, LC_GREY, "%25s = %s (0x%08x)", "Partition", running->label, running->address);
