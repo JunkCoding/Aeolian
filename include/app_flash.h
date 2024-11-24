@@ -48,6 +48,7 @@ void       *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items);
 void        save_nvs_event (const char *ns, const char *eventKey, void *eventData, uint16_t dataLen);
 
 const char *ota_state_to_str(esp_ota_img_states_t ota_state);
+uint32_t    get_cpu_mhz();
 esp_err_t   save_nvs_str (const char *ns, const char *key, const char *strValue);
 esp_err_t   get_nvs_num (const char *location, const char *token, char *value, tNumber type);
 esp_err_t   save_nvs_num (const char *location, const char *token, const char *value, tNumber type);

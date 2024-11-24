@@ -27,7 +27,7 @@
 #include "app_mqtt.h"
 #include "app_utils.h"
 #include "app_timer.h"
-
+#include "app_flash.h"
 
 // ------------------------------------------------------
 // This is the minium runtime.
@@ -378,8 +378,10 @@ bool check_valid_output (uint8_t pin)
 // we will toggle it on and off when required.
 // **********************************************************************
 #ifdef CONFIG_PM_ENABLE
-void set_pm(bool switch_on)
+IRAM_ATTR void set_pm(bool switch_on)
 {
+  F_LOGI(true, true, LC_BRIGHT_BLUE, "set_pm(%s) - current cpu MHz: %d", switch_on?"true":"false", get_cpu_mhz());
+
   int min_freq = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ;
   if ( switch_on == true )
   {
@@ -508,7 +510,7 @@ IRAM_ATTR void lights_task (void *pvParameters)
   uint32_t skips           = 0;            // Loops without an update
   // Reduce our work load
   uint16_t blank_leds      = BLANK_COUNT;  // Doesn't always blank first shot
-  bool    update_leds      = false;
+  bool     update_leds     = false;
 
   // Add ourselves to the task watchdog list
   // ------------------------------------------------------
@@ -721,19 +723,39 @@ IRAM_ATTR void lights_task (void *pvParameters)
 
     // Send our LED buffer to the WS2812 light string
     // ------------------------------------------------------
+#ifdef CONFIG_PM_ENABLE
+    static bool pm_enabled    = true;  // deault to true, so we always turn it off first
+    static uint16_t pm_delay  = 0;     // Delay for turning PM off
+#endif /* CONFIG_PM_ENABLE */
+
     if ( update_leds )
     {
 #ifdef CONFIG_PM_ENABLE
-      set_pm(false);
+      if ( pm_enabled == true )
+      {
+        set_pm(false);
+        pm_enabled = false;
+        pm_delay = 0;
+      }
+      else if ( pm_delay <= 1 )
+      {
+        // Do nothing for now
+        pm_delay++;
+      }
+      else
+      {
 #endif /* CONFIG_PM_ENABLE */
+        // Update LEDs
+        ws2812_setColors (control_vars.pixel_count, outBuffer);
 
-      // Update LEDs
-      ws2812_setColors (control_vars.pixel_count, outBuffer);
-
-      // Reset update boolean
-      update_leds = false;
-      blank_leds  = BLANK_COUNT;
-      updates++;
+        // Reset update boolean
+        update_leds = false;
+        blank_leds  = BLANK_COUNT;
+        updates++;
+#ifdef CONFIG_PM_ENABLE
+        pm_delay = 0;    // Delay turning PM back on to stop flicker
+      }
+#endif /* CONFIG_PM_ENABLE */
     }
     else if ( BTST(control_vars.bitflags, DISP_BF_PAUSED) && blank_leds )
     {
@@ -744,11 +766,26 @@ IRAM_ATTR void lights_task (void *pvParameters)
       ws2812_setColors (control_vars.pixel_count, outBuffer);
       blank_leds--;
       updates++;
+#ifdef CONFIG_PM_ENABLE
+      pm_delay = 0;    // Delay turning PM back on to stop flicker
+#endif /* CONFIG_PM_ENABLE */
     }
     else
     {
 #ifdef CONFIG_PM_ENABLE
-      set_pm(true);
+      // Delay turning PM back on, so we aren't constantly swapping and changing
+      // and causing disruption to the display.
+      if ( pm_delay < 400 )
+      {
+        pm_delay++;
+      }
+      else if ( pm_enabled == false )
+      {
+        set_pm(true);
+        pm_enabled = true;
+        pm_delay = 0;
+      }
+      else
 #endif /* CONFIG_PM_ENABLE */
       skips++;
     }
