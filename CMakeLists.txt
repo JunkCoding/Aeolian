@@ -1,11 +1,18 @@
 cmake_minimum_required(VERSION 3.13.0)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+set(BUILD_DIR ${CMAKE_BINARY_DIR})
 
 project(aeolian)
 
-set(CMAKE_CXX_STANDARD 17)
+set(SDKCONFIG_DEFAULTS "sdkconfig.defaults")
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# #####################################################
+# # components, lots of components.
+# #####################################################
 set(COMPONENTS
       app
       app_trace
@@ -132,13 +139,19 @@ idf_build_set_property(COMPILE_DEFINITIONS "-DAEOLIAN_FW_BRANCH=\"${GIT_BRANCH}\
 idf_build_set_property(COMPILE_DEFINITIONS "-DAEOLIAN_FW_GITUSER=\"${GIT_USER_NAME}\"" APPEND)
 # #####################################################
 
-set(BUILD_DIR ${CMAKE_BINARY_DIR})
-set(SDKCONFIG_DEFAULTS "sdkconfig.defaults")
-
 idf_build_set_property(COMPILE_OPTIONS "-Wno-error" APPEND)
 idf_build_set_property(COMPILE_OPTIONS "-Wno-unused-parameter" APPEND)
 idf_build_set_property(COMPILE_OPTIONS "-Wno-sign-compare" APPEND)
 
+# #####################################################
+if (CONFIG_PM_ENABLE)
+  set(PM_ENABLED "yes")
+else()
+  set(PM_ENABLED "no")
+endif(CONFIG_PM_ENABLE)
+idf_build_set_property(COMPILE_DEFINITIONS "-DPM_ENABLED=\"${PM_ENABLED}\"" APPEND)
+
+# #####################################################
 idf_build_set_property(COMPILE_DEFINITIONS "-DWIFI_SSID=\"$ENV{WIFI_SSID}\"" APPEND)
 idf_build_set_property(COMPILE_DEFINITIONS "-DWIFI_PASS=\"$ENV{WIFI_PASS}\"" APPEND)
 
@@ -146,7 +159,8 @@ idf_build_set_property(COMPILE_DEFINITIONS "-DMQTT_SERVER=\"$ENV{MQTT_URI}\"" AP
 idf_build_set_property(COMPILE_DEFINITIONS "-DMQTT_USER=\"$ENV{MQTT_USER}\"" APPEND)
 idf_build_set_property(COMPILE_DEFINITIONS "-DMQTT_PASS=\"$ENV{MQTT_PASS}\"" APPEND)
 
+# #####################################################
 # Fix jsmn not compiling correctly
 idf_build_set_property(COMPILE_DEFINITIONS "-DJSMN_STATIC" APPEND)
 
-#idf_build_set_property(COMPILE_OPTIONS "-fdiagnostics-color" APPEND)
+idf_build_set_property(COMPILE_OPTIONS "-fdiagnostics-color" APPEND)
