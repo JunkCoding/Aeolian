@@ -33,13 +33,12 @@
 #include <driver/uart.h>
 #include <driver/rtc_io.h>
 
-#include <esp32/rom/rtc.h>
-
 //#include <esp_flash_mmap.h>
 #include <nvs_flash.h>
 
 #include "app_main.h"
 #include "app_lightcontrol.h"
+#include "device_control.h"
 #include "app_utils.h"
 #include "app_flash.h"
 #include "app_wifi.h"
@@ -121,47 +120,53 @@ void print_app_info (void)
   running = (esp_partition_t *)esp_ota_get_running_partition();
 
   esp_ota_get_state_partition (running, &ota_state);
-  esp_ota_get_partition_description (running, &app_info);
+  esp_ota_get_partition_description(running, &app_info);
   esp_chip_info (&chip_info);
   esp_efuse_mac_get_default (default_mac_addr);
   esp_flash_get_physical_size(NULL, &phySize);
+
+  char shabuf[sizeof(app_info.app_elf_sha256) * 2 + 1];
+  for (int i = 0; i < sizeof(app_info.app_elf_sha256); i++)
+  {
+      sprintf(shabuf + i * 2, "%02x", app_info.app_elf_sha256[i]);
+  }
+  shabuf[sizeof(shabuf) - 1] = '\0';
 
   // Get and save the approximate current CPU speed
   cpu_mhz = get_cpu_mhz();
 
   _print_divider();
 #if defined (CONFIG_DEBUG)
-  F_LOGI(true, true, LC_GREY, "%25s = true", "Local build");
+  F_LOGI(true, true, LC_GREY, "%22s = true", "Local build");
 #endif
-  F_LOGI(true, true, LC_GREY, "%25s = %d (last ota @ %d)", "Boot count", boot_count, ota_update);
-  F_LOGI(true, true, LC_GREY, "%25s = CPU0: %d, CPU1: %d", "Reset reasons", (uint16_t)rtc_get_reset_reason(0), (uint16_t)rtc_get_reset_reason(1));
-  F_LOGI(true, true, LC_GREY, "%25s = %s", "Project name", app_info.project_name);
-  //F_LOGI(true, true, LC_GREY, "%25s = %s", "Project firmware", app_info.version);
-  F_LOGI(true, true, LC_GREY, "%25s = %s, %s", "Project firmware", AEOLIAN_FW_BRANCH, AEOLIAN_FW_HASH);
-  //This started failing!?
-  //F_LOGI(true, true, LC_GREY, "%25s = %s", "IDF version", app_info.idf_ver);
+  F_LOGI(true, true, LC_GREY, "%22s = %d (last ota @ %d)", "Boot count", boot_count, ota_update);
+  F_LOGI(true, true, LC_GREY, "%22s = 0: %s, 1: %s", "Reset reasons", verbose_print_reset_reason(rtc_get_reset_reason(0)), verbose_print_reset_reason(rtc_get_reset_reason(1)));
+  F_LOGI(true, true, LC_GREY, "%22s = %s", "Project name", app_info.project_name);
+  //F_LOGI(true, true, LC_GREY, "%22s = %s", "Project firmware", app_info.version);
+  F_LOGI(true, true, LC_GREY, "%22s = %s, %s", "Project firmware", AEOLIAN_FW_BRANCH, AEOLIAN_FW_HASH);
+  //F_LOGI(true, true, LC_GREY, "%22s = %s", "IDF version", app_info.idf_ver);
   // -std=c++20 
-  //F_LOGI(true, true, LC_GREY, "%25s = %s", "IDF version", std::format("{} {} {}", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH));
+  //F_LOGI(true, true, LC_GREY, "%22s = %s", "IDF version", std::format("{} {} {}", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH));
   char tmpbuf[64] = {};
   snprintf(tmpbuf, 63, "v%d.%d.%d", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH);
-  F_LOGI(true, true, LC_GREY, "%25s = %s", "IDF version", tmpbuf);
-  //F_LOGI(true, true, LC_GREY, "%25s = %s", "SHA256", app_info.app_elf_sha256);
-  F_LOGI(true, true, LC_GREY, "%25s = %s %s", "Last full build", app_info.time, app_info.date);
-  F_LOGI(true, true, LC_GREY, "%25s = %s %s", "Last part build", __TIME__, __DATE__);
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "Silicon rev", chip_info.revision);
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "Num cores", chip_info.cores);
-  F_LOGI(true, true, LC_GREY, "%25s = %d MHz", "CPU freq", cpu_mhz);
-  F_LOGI(true, true, LC_GREY, "%25s = %dMB %s", "Flash size", phySize / (1024 * 1024), (chip_info.features & CHIP_FEATURE_EMB_FLASH)?"embedded":"external");
-  F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Free heap size", esp_get_minimum_free_heap_size ());
-  F_LOGI(true, true, LC_GREY, "%25s = WiFi%s%s", "Features", (chip_info.features & CHIP_FEATURE_BT)?"/BT":"", (chip_info.features & CHIP_FEATURE_BLE)?"/BLE":"");
-  F_LOGI(true, true, LC_GREY, "%25s = %02X:%02X:%02X:%02X:%02X:%02X", "MAC address", default_mac_addr[0], default_mac_addr[1], default_mac_addr[2], default_mac_addr[3], default_mac_addr[4], default_mac_addr[5]);
-  F_LOGI(true, true, LC_GREY, "%25s = %s (0x%08x)", "Partition", running->label, running->address);
-  F_LOGI(true, true, LC_GREY, "%25s = %s", "OTA state", ota_state_to_str (ota_state));
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "LED count", control_vars.pixel_count);
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "LED GPIO Pin", control_vars.led_gpio_pin);
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "Light GPIO Pin", control_vars.light_gpio_pin);
-  F_LOGI(true, true, LC_GREY, "%25s = %s", "Task watchdog", (CONFIG_USE_TASK_WDT?"yes":"no"));
-  F_LOGI(true, true, LC_GREY, "%25s = %s", "Power management", PM_ENABLED);
+  F_LOGI(true, true, LC_GREY, "%22s = %s", "IDF version", tmpbuf);
+  F_LOGI(true, true, LC_GREY, "%22s = %s", "SHA256", shabuf);
+  F_LOGI(true, true, LC_GREY, "%22s = %s %s", "Last full build", app_info.time, app_info.date);
+  F_LOGI(true, true, LC_GREY, "%22s = %s %s", "Last part build", __TIME__, __DATE__);
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "Silicon rev", chip_info.revision);
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "Num cores", chip_info.cores);
+  F_LOGI(true, true, LC_GREY, "%22s = %d MHz", "CPU freq", cpu_mhz);
+  F_LOGI(true, true, LC_GREY, "%22s = %dMB %s", "Flash size", phySize / (1024 * 1024), (chip_info.features & CHIP_FEATURE_EMB_FLASH)?"embedded":"external");
+  F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Free heap size", esp_get_minimum_free_heap_size ());
+  F_LOGI(true, true, LC_GREY, "%22s = WiFi%s%s", "Features", (chip_info.features & CHIP_FEATURE_BT)?"/BT":"", (chip_info.features & CHIP_FEATURE_BLE)?"/BLE":"");
+  F_LOGI(true, true, LC_GREY, "%22s = %02X:%02X:%02X:%02X:%02X:%02X", "MAC address", default_mac_addr[0], default_mac_addr[1], default_mac_addr[2], default_mac_addr[3], default_mac_addr[4], default_mac_addr[5]);
+  F_LOGI(true, true, LC_GREY, "%22s = %s (0x%08x)", "Partition", running->label, running->address);
+  F_LOGI(true, true, LC_GREY, "%22s = %s", "OTA state", ota_state_to_str (ota_state));
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "LED count", control_vars.pixel_count);
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "LED GPIO Pin", control_vars.led_gpio_pin);
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "Light GPIO Pin", control_vars.light_gpio_pin);
+  F_LOGI(true, true, LC_GREY, "%22s = %s", "Task watchdog", (CONFIG_USE_TASK_WDT?"yes":"no"));
+  F_LOGI(true, true, LC_GREY, "%22s = %s", "Power management", PM_ENABLED);
   _print_divider();
 
   if ( configured != running )
@@ -204,10 +209,10 @@ void show_nvs_usage (void)
   _print_divider ();
   nvs_stats_t nvs_stats;
   nvs_get_stats(NULL, &nvs_stats);
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "Total Entries", nvs_stats.total_entries);
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "Used Entries", nvs_stats.used_entries);
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "Free Entries", nvs_stats.free_entries);
-  F_LOGI(true, true, LC_GREY, "%25s = %d", "Namespace Count", nvs_stats.namespace_count);
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "Total Entries", nvs_stats.total_entries);
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "Used Entries", nvs_stats.used_entries);
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "Free Entries", nvs_stats.free_entries);
+  F_LOGI(true, true, LC_GREY, "%22s = %d", "Namespace Count", nvs_stats.namespace_count);
 }
 
 // --------------------------------------------------------------------------
@@ -240,12 +245,12 @@ void printHeapInfo (void)
   free8min = heap_caps_get_minimum_free_size (MALLOC_CAP_8BIT);
   free32min = heap_caps_get_minimum_free_size (MALLOC_CAP_32BIT);
 
-  F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Free heap", xPortGetFreeHeapSize ());
-  F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Minimum 8-bit-capable", free8min);
-  F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Largest 8-bit capable", free8);
-  F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Minimum 32-bit-capable", free32min);
-  F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Largest 32-bit capable", free32);
-  F_LOGI(true, true, LC_GREY, "%25s = %d bytes", "Task stack", uxTaskGetStackHighWaterMark (NULL));
+  F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Free heap", xPortGetFreeHeapSize ());
+  F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Minimum 8-bit-capable", free8min);
+  F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Largest 8-bit capable", free8);
+  F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Minimum 32-bit-capable", free32min);
+  F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Largest 32-bit capable", free32);
+  F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Task stack", uxTaskGetStackHighWaterMark (NULL));
 }
 #endif // CONFIG_DEBUG
 

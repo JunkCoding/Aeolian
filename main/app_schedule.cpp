@@ -8,7 +8,13 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
 #include <driver/gpio.h>
+
+#if defined(CONFIG_IDF_TARGET_ESP32)
 #include <esp32/rom/rtc.h>
+#elif defined(CONFIG_IDF_TARGET_SP32S3)
+#include <esp32s3/rom/rtc.h>
+#endif
+
 #include <nvs.h>
 #include <nvs_flash.h>
 

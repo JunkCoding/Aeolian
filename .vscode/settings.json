@@ -22,10 +22,10 @@
     "string_view": "c"
   },
   "terminal.explorerKind": "external",
-  "idf.flashType": "UART",
+  "idf.flashType": "JTAG",
   "idf.port": "/dev/cu.SLAB_USBtoUART",
   "idf.openOcdConfigs": [
-    "board/esp32-bridge.cfg"
+    "board/esp32-wrover-kit-3.3v.cfg"
   ],
   "editor.minimap.autohide": false,
   "editor.minimap.size": "fit",

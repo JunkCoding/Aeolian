@@ -79,6 +79,9 @@ menu "Aeolian Configuration"
     config AEOLIAN_DEV_TTGO
       bool "TTGO Audio"
 
+    config AEOLIAN_DEV_S3_MATRIX
+      bool "ESP32-S3-Matrix"
+
     config AEOLIAN_DEV_WORKSHOP
       bool "Workshop"
 
@@ -87,32 +90,34 @@ menu "Aeolian Configuration"
   endchoice
     config TARGET_DEVICE_STR
       string
-      default "Caravan"    if AEOLIAN_DEV_CARAVAN
-      default "Debug"      if AEOLIAN_DEV_DEBUG
-      default "Segger"     if AEOLIAN_DEV_SEGGER
-      default "Olimex"     if AEOLIAN_DEV_OLIMEX
-      default "TTGO_Audio" if AEOLIAN_DEV_TTGO
-      default "Workshop"   if AEOLIAN_DEV_WORKSHOP
-      default "WSA"        if AEOLIAN_DEV_ROCKET
+      default "Caravan"         if AEOLIAN_DEV_CARAVAN
+      default "Debug"           if AEOLIAN_DEV_DEBUG
+      default "Segger"          if AEOLIAN_DEV_SEGGER
+      default "Olimex"          if AEOLIAN_DEV_OLIMEX
+      default "TTGO_Audio"      if AEOLIAN_DEV_TTGO
+      default "ESP32-S3-Matrix" if AEOLIAN_DEV_S3_MATRIX
+      default "Workshop"        if AEOLIAN_DEV_WORKSHOP
+      default "WSA"             if AEOLIAN_DEV_ROCKET
     config RGB_ORDER
       bool
-      default n            if AEOLIAN_DEV_OLIMEX
-      default n            if AEOLIAN_DEV_TTGO
+      default n                 if AEOLIAN_DEV_OLIMEX
+      default n                 if AEOLIAN_DEV_TTGO
       default y
     config USING_JTAG
       bool
-      default y             if AEOLIAN_DEV_OLIMEX
-      default y             if AEOLIAN_DEV_SEGGER
+      default y                 if AEOLIAN_DEV_OLIMEX
+      default y                 if AEOLIAN_DEV_SEGGER
+      default y                 if AEOLIAN_DEV_SEGGER
       default n
     config DEBUG
       bool
-      default y             if AEOLIAN_DEV_DEBUG
-      default y             if AEOLIAN_DEV_OLIMEX
-      default y             if AEOLIAN_DEV_SEGGER
+      default y                 if AEOLIAN_DEV_DEBUG
+      default y                 if AEOLIAN_DEV_OLIMEX
+      default y                 if AEOLIAN_DEV_S3_MATRIX
       default n
     config CCTV
       bool
-      default y             if AEOLIAN_DEV_DEBUG
+      default y                 if AEOLIAN_DEV_DEBUG
       default n
 
     if USING_JTAG
