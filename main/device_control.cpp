@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include <esp_http_server.h>
-#include <esp32/rom/rtc.h>
 #include <esp_system.h>
 #include <esp_netif.h>
 #include <esp_wifi.h>
@@ -577,7 +576,7 @@ int _get_sunset (char *buf, int bufsize, int param)
 // ***********************************************
 int _get_sysRstInfo (char *buf, int bufsize, int param)
 {
-  strcpy (buf, verbose_print_reset_reason (rtc_get_reset_reason (0)));
+  strcpy (buf, verbose_print_reset_reason(rtc_get_reset_reason(0)));
   return strlen (buf);
 }
 // ***********************************************
