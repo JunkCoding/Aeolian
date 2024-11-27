@@ -565,13 +565,13 @@ wss_keep_alive_t wss_keep_alive_start(wss_keep_alive_config_t *config)
     ws_client_control->keep_alive_period_ms  = config->keep_alive_period_ms;
     ws_client_control->user_ctx              = config->user_ctx;
     ws_client_control->q                     = xQueueCreate(queue_size, sizeof(client_fd_action_t));
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
     xTaskCreate (keep_alive_task, "keep_alive_task", config->task_stack_size, ws_client_control, config->task_prio, NULL);
 #else
     xTaskCreatePinnedToCore (keep_alive_task, "keep_alive_task", config->task_stack_size, ws_client_control, config->task_prio, NULL, TASKS_CORE);
 #endif
 
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
     xTaskCreate (wss_server_send_messages, TASK_NAME_WSS, STACKSIZE_WSS, ws_client_control, TASK_PRIORITY_WSS, NULL);
 #else
     xTaskCreatePinnedToCore (wss_server_send_messages, TASK_NAME_WSS, STACKSIZE_WSS, ws_client_control, TASK_PRIORITY_WSS, NULL, TASKS_CORE);

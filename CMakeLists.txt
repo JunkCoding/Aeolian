@@ -7,8 +7,8 @@ project(aeolian)
 
 set(SDKCONFIG_DEFAULTS "sdkconfig.defaults")
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # #####################################################
 # # components, lots of components.

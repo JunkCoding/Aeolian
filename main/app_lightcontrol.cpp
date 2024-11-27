@@ -42,7 +42,7 @@
 
 // Force current test pattern if we are debugging
 // (avoid accidentally forcing patterns on other devices)
-#if defined(CONFIG_DEBUG)
+#if defined(AEOLIAN_DEBUG_DEV)
 //#define FORCE_PATTERN       "Police Lights"
 //#define FORCE_PATTERN       "Two Sin"
 //#define FORCE_PATTERN       "Pride"
@@ -198,6 +198,16 @@ overlay_t overlay[] = {
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false}};
+#elif defined (CONFIG_AEOLIAN_DEV_S3_MATRIX)
+overlay_t overlay[] = {
+  {NULL,  {  0,  16,  0,   MediumWhite},  0,  false},
+  {NULL,  { 16,  16,  0,   MediumWhite},  0,  false},
+  {NULL,  { 32,  16,  0,   MediumWhite},  0,  false},
+  {NULL,  { 48,  16,  0,   MediumWhite},  0,  false},
+  {NULL,  {  1,   1,  0,   MediumWhite},  0,  false},
+  {NULL,  {  3,   1,  0,   MediumWhite},  0,  false},
+  {NULL,  {  6,   2,  0,   MediumWhite},  0,  false},
+  {NULL,  {  8,   2,  0,   MediumWhite},  0,  false}};
 #else
 overlay_t overlay[] = {
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
@@ -514,7 +524,7 @@ IRAM_ATTR void lights_task (void *pvParameters)
 
   // Add ourselves to the task watchdog list
   // ------------------------------------------------------
-#if CONFIG_USE_TASK_WDT
+#if CONFIG_APP_TWDT
   CHECK_ERROR_CODE (esp_task_wdt_add(NULL), ESP_OK);
   CHECK_ERROR_CODE (esp_task_wdt_status(NULL), ESP_OK);
 #endif
@@ -524,7 +534,7 @@ IRAM_ATTR void lights_task (void *pvParameters)
   {
     // Reset the watchdog
     // ------------------------------------------------------
-#if CONFIG_USE_TASK_WDT
+#if CONFIG_APP_TWDT
     CHECK_ERROR_CODE (esp_task_wdt_reset(), ESP_OK);
 #endif
     //yield_delay_us (500);
@@ -711,7 +721,7 @@ IRAM_ATTR void lights_task (void *pvParameters)
           if ( show_overlay (overlay[c].zone_params.mask) )
           {
             update_leds = true;
-#if defined (CONFIG_RGB_ORDER)
+#if defined (CONFIG_AEOLIAN_RGB_ORDER)
             rgbFillSolid(overlay[c].zone_params.start, overlay[c].zone_params.count, overlay[c].zone_params.color, false, 0);
 #else
             rgbFillSolid(overlay[c].zone_params.start, overlay[c].zone_params.count, overlay[c].zone_params.color, false, 4);
@@ -825,7 +835,7 @@ IRAM_ATTR void lights_task (void *pvParameters)
 
     // Reset the watchdog
     // ------------------------------------------------------
-#if CONFIG_USE_TASK_WDT
+#if CONFIG_APP_TWDT
     CHECK_ERROR_CODE(esp_task_wdt_reset(), ESP_OK);
 #endif
   }
@@ -866,7 +876,7 @@ IRAM_ATTR void setPixelRGB (uint16_t n, cRGB rgb, bool saveColor, uint8_t ldim)
   if ( ldim )
   {
     uint8_t dim = ldim;
-#if defined (CONFIG_RGB_ORDER)
+#if defined (CONFIG_AEOLIAN_RGB_ORDER)
     outBuffer[n] = toRGBPixel ((int)rgb.r >> dim, (int)rgb.g >> dim, (int)rgb.b >> dim);
 #else
     outBuffer[n] = toRGBPixel ((int)rgb.g >> dim, (int)rgb.r >> dim, (int)rgb.b >> dim);
@@ -874,7 +884,7 @@ IRAM_ATTR void setPixelRGB (uint16_t n, cRGB rgb, bool saveColor, uint8_t ldim)
   }
   else
   {
-#if defined (CONFIG_RGB_ORDER)
+#if defined (CONFIG_AEOLIAN_RGB_ORDER)
     outBuffer[n] = toRGBPixel ((int)rgb.r, (int)rgb.g, (int)rgb.b);
 #else
     outBuffer[n] = toRGBPixel ((int)rgb.g, (int)rgb.r, (int)rgb.b);

@@ -111,7 +111,7 @@
 		"editor.tabSize": 2,
 		"idf.telemetry": false,
 		"cortex-debug.enableTelemetry": false,
-		"idf.enableSizeTaskAfterBuildTask": false,
+		"idf.enableSizeTaskAfterBuildTask": true,
 		"zenMode.centerLayout": false,
 		"zenMode.fullScreen": false,
 		"zenMode.hideLineNumbers": false,

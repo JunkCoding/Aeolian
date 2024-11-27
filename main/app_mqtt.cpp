@@ -158,7 +158,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         mqttSubscribe(dev_Pattern);
         mqttSubscribe(dev_hikAlarm);
         // These are for internal use
-#if defined (CONFIG_AEOLIAN_DEV_OLIMEX) || defined (CONFIG_AEOLIAN_DEV_TTGO) || defined (CONFIG_AEOLIAN_DEV_SEGGER) || defined (CONFIG_AEOLIAN_DEV_DEBUG)
+#if defined (CONFIG_AEOLIAN_DEV_OLIMEX) || defined (CONFIG_AEOLIAN_DEV_TTGO) || defined (CONFIG_AEOLIAN_DEV_SEGGER) || defined (CONFIG_AEOLIAN_DEV_DEBUG) || defined (CONFIG_AEOLIAN_DEV_S3_MATRIX)
         mqttSubscribe(dev_Network);
         mqttSubscribe(dev_Radar);
 #endif
@@ -345,7 +345,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
   {
     snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
 
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_BRIGHT_YELLOW, "i: %d, type: %d, start: %d, len = %d, token: %s", i, t[i].type, t[i].start, t[i].end - t[i].start, token);
 #endif
 
@@ -356,7 +356,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
       {
         if ( !shrt_cmp(JSON_STR_CMD, token) )
         {
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
           F_LOGV(true, true, LC_YELLOW, "type: %d, JSMN_STRING: %.*s", t[i].type, t[i].end - t[i].start, event->data + t[i].start);
 #endif
           // Ensure this is an object
@@ -396,7 +396,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
         }
         else if ( !shrt_cmp(JSON_STR_SYNC, token) )
         {
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
           F_LOGV(true, true, LC_GREY, "type: %d, JSMN_STRING: %.*s", t[i].type, t[i].end - t[i].start, event->data + t[i].start);
 #endif
           // Save some CPU cycles by Only processing these packets when we are a slave.
@@ -478,7 +478,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
                     break;
                 }
               }
-  #if defined (CONFIG_DEBUG)
+  #if defined (AEOLIAN_DEBUG_DEV)
               F_LOGV(true, true, LC_WHITE, "paused: %d (cvars paused: %d), pauseReason: %d", paused, BTST(control_vars.bitflags, DISP_BF_PAUSED), pauseReason);
   #endif
               // Does our state match the master's requested state?
@@ -653,7 +653,7 @@ DRAM_ATTR hik_alert_t hik_alert[] = {
   {4,        ENUM_VCA_EVENT_DURATION,                1,     1,     0,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  2000,    Yellow},        // Front, sidewalk (continuation)
   {4,        ENUM_VCA_EVENT_INTRUSION,               1,     1,     1,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  3000,    DarkOrange},    // Front, driveway, potential visitor?
   {4,        ENUM_VCA_EVENT_DURATION,                1,     1,     1,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  3000,    DarkOrange},    // Front, driveway,(continuation)
-  #if defined(CONFIG_CCTV)
+  #ifdef CONFIG_AEOLIAN_CCTV_CTRL
   {4,        ENUM_VCA_EVENT_INTRUSION,               1,     1,     2,     0xFF,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  5000,    DarkOrange},    // Front, driveway, potential visitor?
   {4,        ENUM_VCA_EVENT_DURATION,                1,     1,     2,     0xFF,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  3000,    DarkOrange},    // Front, driveway,(continuation)
   {4,        ENUM_VCA_EVENT_ENTER_AREA,              1,     1,     0,     0xFF,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  5000,    Red},           // Front, enter area in front of garage door
@@ -729,7 +729,7 @@ void proc_ev_dev_hikAlarm (esp_mqtt_event_handle_t event)
         // Check if we have a match and we light up zones accordingly
         if ( (hik_alert[i].eventType == eventType) && (hik_alert[i].ivmsChannel == ivmsChannel) && (hik_alert[i].ruleID == ruleID) && hik_alert[i].zone )
         {
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
           F_LOGI(true, true, LC_GREY, "devId: %2d, eventType: %2d, ivmsChannel: %2d, ruleID: %2d, zone: %2d", devId, eventType, ivmsChannel, ruleID, hik_alert[i].zone);
 #endif
           // Set security light?
@@ -741,13 +741,13 @@ void proc_ev_dev_hikAlarm (esp_mqtt_event_handle_t event)
             {
               set_light(SECURITY_LIGHT, true, hik_alert[i].sec_light);
             }
-#if defined(CONFIG_CCTV)
+#ifdef CONFIG_AEOLIAN_CCTV_CTRL
             // HikVision MQTT controlled light
             else if ( hik_alert[i].sec_light == 0xff )
             {
               toggle_cctv_daynight(devId);
             }
-#endif
+#endif /* CONFIG_AEOLIAN_CCTV_CTRL */
           }
 
           // Iterate through zones
