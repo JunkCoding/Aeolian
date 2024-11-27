@@ -1,9 +1,15 @@
 #ifndef __DEVICE_CONTROL_H__
 #define __DEVICE_CONTROL_H__
 
-#include <espfs.h>
+#if defined(CONFIG_IDF_TARGET_ESP32)
+#include <esp32/rom/rtc.h>
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#include <esp32s3/rom/rtc.h>
+#endif
+
 #include "app_httpd.h"
 #include "app_lightcontrol.h"
+#include "espfs.h"
 
 #define FILE_CHUNK_LEN 1024
 
@@ -62,6 +68,7 @@ esp_err_t   getDeviceSetting(char *buf, int *buflen, char *token);
 bool        set_implemented (int i);
 enum        schedule sched2int (char *schedule);
 const       char *int2sched (enum schedule sched);
+const       char *verbose_print_reset_reason (RESET_REASON reason);
 #if defined (CONFIG_HTTPD_USE_ASYNC)
 esp_err_t   tplDeviceConfig (struct async_resp_arg *resp_arg, char *token);
 #else

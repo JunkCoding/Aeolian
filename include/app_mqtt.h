@@ -1,10 +1,9 @@
 #ifndef __APP_MQTT_H__
 #define __APP_MQTT_H__
 
-#include <esp_log.h>
 #include "colours.h"
 
-#include <mqtt_config.h>
+#include "app_mqtt_config.h"
 
 //Behavior event type
 typedef enum _VCA_EVENT_TYPE_

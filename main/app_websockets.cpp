@@ -96,7 +96,7 @@ static int prepareSystemStatusMsg (char **buf)
 
   F_LOGV(true, true, LC_BRIGHT_GREEN, "%s", jsonBuffer);
 
-  *(buf) = jsonBuffer;
+  *(buf) = strndup(jsonBuffer, bufptr);
   return bufptr;
 }
 // --------------------------------------------------------------------------
@@ -122,8 +122,9 @@ static void send_status_update (async_resp_arg *resp_arg)
 #endif
 {
   char  *buf = NULL;
-  int buflen = prepareSystemStatusMsg (&buf);
+  int buflen = prepareSystemStatusMsg(&buf);
   send_async_frame(resp_arg, (uint8_t *)buf, buflen);
+  free(buf);
   vPortFree (resp_arg);
 }
 
@@ -307,14 +308,14 @@ IRAM_ATTR char *ws_scan_results (uint16_t *strLen)
 char *ws_scan_results (uint16_t *strLen)
 #endif
 {
-  struct scan_result_t cgiWifiAps = {};
+  scan_result_t cgiWifiAps = {0, 0};
   char *jsonStr = NULL;
   *strLen = 0;
 
   wifi_ap_record_t apinfo;
   esp_wifi_sta_get_ap_info(&apinfo);
 
-  wifi_getApScanResult (&cgiWifiAps);
+  wifi_getApScanResult(&cgiWifiAps);
 
   // Have we got any AP's from the last scan?
   if ( cgiWifiAps.apCount > 0 )
@@ -343,6 +344,14 @@ char *ws_scan_results (uint16_t *strLen)
     }
     *strLen += snprintf (&jsonStr[*strLen], SIZE_JSONBUF - *strLen, "]\n}");
   }
+
+  // Release memory
+  if ( cgiWifiAps.apList != NULL )
+  {
+    vPortFree(cgiWifiAps.apList);
+    cgiWifiAps.apList = NULL;
+  }
+
   return jsonStr;
 }
 
@@ -556,13 +565,13 @@ wss_keep_alive_t wss_keep_alive_start(wss_keep_alive_config_t *config)
     ws_client_control->keep_alive_period_ms  = config->keep_alive_period_ms;
     ws_client_control->user_ctx              = config->user_ctx;
     ws_client_control->q                     = xQueueCreate(queue_size, sizeof(client_fd_action_t));
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
     xTaskCreate (keep_alive_task, "keep_alive_task", config->task_stack_size, ws_client_control, config->task_prio, NULL);
 #else
     xTaskCreatePinnedToCore (keep_alive_task, "keep_alive_task", config->task_stack_size, ws_client_control, config->task_prio, NULL, TASKS_CORE);
 #endif
 
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
     xTaskCreate (wss_server_send_messages, TASK_NAME_WSS, STACKSIZE_WSS, ws_client_control, TASK_PRIORITY_WSS, NULL);
 #else
     xTaskCreatePinnedToCore (wss_server_send_messages, TASK_NAME_WSS, STACKSIZE_WSS, ws_client_control, TASK_PRIORITY_WSS, NULL, TASKS_CORE);

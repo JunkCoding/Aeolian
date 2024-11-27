@@ -38,11 +38,11 @@
         },
         "args": [
           "-f",
-          "openocd/esp-prog.cfg",
+          "openocd/segger.cfg",
           "-f",
           "target/esp32.cfg",
           "-c",
-          "program_esp build\\${command:espIdf.getProjectName}.bin 0x020000 verify reset exit"
+          "program_esp build/${command:espIdf.getProjectName}.bin 0x020000 verify reset exit"
         ]
       },
       "problemMatcher": []
@@ -88,11 +88,11 @@
         },
         "args": [
           "-f",
-          "${workspaceFolder}\\openocd\\segger.cfg",
+          "${workspaceFolder}/openocd/segger.cfg",
           "-f",
           "target/esp32.cfg",
           "-c",
-          "program_esp build\\${command:espIdf.getProjectName}.bin 0x1D0000 verify reset exit"
+          "program_esp build/${command:espIdf.getProjectName}.bin 0x1D0000 verify reset exit"
         ]
       },
       "problemMatcher": []
@@ -113,13 +113,13 @@
         "clear": false
       },
       "linux": {
-        "command": "openocd -f ${workspaceFolder}/openocd/segger.cfg -f target/esp32.cfg"
+        "command": "openocd -f ${workspaceFolder}/openocd/segger.cfg -f target/esp32.cfg -c 'init; halt; esp appimage_offset 0x020000'"
       },
       "osx": {
-        "command": "openocd -f ${workspaceFolder}/openocd/segger.cfg -f target/esp32.cfg"
+        "command": "openocd -f ${workspaceFolder}/openocd/segger.cfg -f target/esp32.cfg -c 'init; halt; esp appimage_offset 0x020000'"
       },
       "windows": {
-        "command": "openocd.exe -f ${workspaceFolder}\\openocd\\segger.cfg -f target/esp32.cfg",
+        "command": "openocd.exe -f ${workspaceFolder}\\openocd\\segger.cfg -f target\\esp32.cfg -c 'init; halt; esp appimage_offset 0x020000'",
         "options": {
           "env": {
             "PATH": "${env:PATH};${config:idf.customExtraPaths}"
@@ -161,13 +161,13 @@
         "clear": false
       },
       "linux": {
-        "command": "openocd -f openocd/esp-prog.cfg -f target/esp32.cfg"
+        "command": "openocd -f openocd/esp-prog.cfg -f target/esp32.cfg -c 'init; halt; esp appimage_offset 0x020000'"
       },
       "osx": {
-        "command": "openocd -f openocd/esp-prog.cfg -f target/esp32.cfg"
+        "command": "openocd -f openocd/esp-prog.cfg -f target/esp32.cfg -c 'init; halt; esp appimage_offset 0x020000'"
       },
       "windows": {
-        "command": "openocd.exe -f openocd/esp-prog.cfg -f target/esp32.cfg",
+        "command": "openocd.exe -f openocd/esp-prog.cfg -f target/esp32.cfg -c 'init; halt; esp appimage_offset 0x020000'",
         "options": {
           "env": {
             "PATH": "${env:PATH};${config:idf.customExtraPaths}"
@@ -265,21 +265,27 @@
         "command": "openocd",
         "args": [
           "-f",
-          "board/esp_usb_jtag.cfg"
+          "board/esp_usb_jtag.cfg",
+          "-c",
+          "init; halt; esp appimage_offset 0x020000"
         ]
       },
       "osx": {
         "command": "openocd",
         "args": [
           "-f",
-          "board/esp_usb_jtag.cfg"
+          "board/esp_usb_jtag.cfg",
+          "-c",
+          "init; halt; esp appimage_offset 0x020000"
         ]
       },
       "windows": {
         "command": "openocd.exe",
         "args": [
           "-f",
-          "board/esp_usb_jtag.cfg"
+          "board/esp_usb_jtag.cfg",
+          "-c",
+          "init; halt; esp appimage_offset 0x020000"
         ]
       },
       "problemMatcher": {
@@ -324,21 +330,27 @@
         "command": "openocd",
         "args": [
           "-f",
-          "interface/ft232r.cfg"
+          "interface/ft232r.cfg",
+          "-c",
+          "init; halt; esp appimage_offset 0x020000"
         ]
       },
       "osx": {
         "command": "openocd",
         "args": [
           "-f",
-          "interface/ft232r.cfg"
+          "interface/ft232r.cfg",
+          "-c",
+          "init; halt; esp appimage_offset 0x020000"
         ]
       },
       "windows": {
         "command": "openocd.exe",
         "args": [
           "-f",
-          "interface/ft232r.cfg"
+          "interface/ft232r.cfg",
+          "-c",
+          "init; halt; esp appimage_offset 0x020000"
         ]
       },
       "problemMatcher": {
@@ -368,7 +380,7 @@
         "-DWIFI_SSID=${env:WIFI_SSID:-}"
       ],
       "windows": {
-        "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\tools\\idf.py build",
+        "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}/tools/idf.py build",
         "options": {
           "env": {
             "PATH": "${env:PATH};${config:idf.customExtraPaths}",
@@ -453,7 +465,7 @@
       "type": "shell",
       "command": "${config:idf.pythonBinPath} ${config:idf.espIdfPath}/tools/idf.py fullclean",
       "windows": {
-        "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\tools\\idf.py fullclean",
+        "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}/tools/idf.py fullclean",
         "options": {
           "env": {
             "PATH": "${env:PATH};${config:idf.customExtraPaths}"

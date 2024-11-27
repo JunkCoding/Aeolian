@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include "app_configs.h"
-#include "mqtt_settings.h"
+#include "app_mqtt_settings.h"
 #include "app_utils.h"
 
 // --------------------------------------------------------------------------
@@ -17,43 +17,43 @@
 // --------------------------------------------------------------------------
 
 #define Default_0x11    "Light"                 // Name
-#define Default_0x12    "AXRGB/light"           // Topic_sub
-#define Default_0x13    "AXRGB/stat/%c/light"   // Topic_pub
+#define Default_0x12    "Aeolian/light"           // Topic_sub
+#define Default_0x13    "Aeolian/stat/%c/light"   // Topic_pub
 #define Default_0x14    "1"                     // Enable_publish
 #define Default_0x15    "0"                     // Retained
 #define Default_0x16    "0"                     // QoS
 
 #define Default_0x21    "LEDs"                  // Name
-#define Default_0x22    "AXRGB/leds"            // Topic_sub
-#define Default_0x23    "AXRGB/stat/%c/leds"    // Topic_pub
+#define Default_0x22    "Aeolian/leds"            // Topic_sub
+#define Default_0x23    "Aeolian/stat/%c/leds"    // Topic_pub
 #define Default_0x24    "1"                     // Enable_publish
 #define Default_0x25    "0"                     // Retained
 #define Default_0x26    "0"                     // QoS
 
 #define Default_0x31    "Pattern"               // Name
-#define Default_0x32    "AXRGB/pattern"         // Topic_sub
-#define Default_0x33    "AXRGB/stat/%c/pattern" // Topic_pub
+#define Default_0x32    "Aeolian/pattern"         // Topic_sub
+#define Default_0x33    "Aeolian/stat/%c/pattern" // Topic_pub
 #define Default_0x34    "1"                     // Enable_publish
 #define Default_0x35    "1"                     // Retained
 #define Default_0x36    "0"                     // QoS
 
 #define Default_0x41    "Connect"               // Name
-#define Default_0x42    "AXRGB/clients"         // Topic_sub
-#define Default_0x43    "AXRGB/clients/%c"      // Topic_pub
+#define Default_0x42    "Aeolian/clients"         // Topic_sub
+#define Default_0x43    "Aeolian/clients/%c"      // Topic_pub
 #define Default_0x44    "1"                     // Enable_publish
 #define Default_0x45    "1"                     // Retained
 #define Default_0x46    "0"                     // QoS
 
 #define Default_0x51    "Disconnect"            // Name
-#define Default_0x52    "AXRGB/clients"         // Topic_sub
-#define Default_0x53    "AXRGB/clients/%c"      // Topic_pub
+#define Default_0x52    "Aeolian/clients"         // Topic_sub
+#define Default_0x53    "Aeolian/clients/%c"      // Topic_pub
 #define Default_0x54    "1"                     // Enable_publish
 #define Default_0x55    "0"                     // Retained
 #define Default_0x56    "0"                     // QoS
 
 #define Default_0x61    "hikAlarm"              // Name
-#define Default_0x62    "AXRGB/hikAlarm"        // Topic_sub
-#define Default_0x63    "AXRGB/hikctrl/%c"      // Topic_pub
+#define Default_0x62    "Aeolian/hikAlarm"        // Topic_sub
+#define Default_0x63    "Aeolian/hikctrl/%c"      // Topic_pub
 #define Default_0x64    "1"                     // Enable_publish
 #define Default_0x65    "0"                     // Retained
 #define Default_0x66    "0"                     // QoS

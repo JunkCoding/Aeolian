@@ -14,7 +14,7 @@
 // ***************************************************************
 // Random movement of PTZ CCTV device
 // ***************************************************************
-#if defined (CONFIG_CCTV)
+#ifdef CONFIG_AEOLIAN_CCTV_CTRL
 // Call patrols
 #define CALL_PATROL_1   35
 #define CALL_PATROL_2   36
@@ -286,4 +286,4 @@ void cctv_task(void *pvParameters)
     delay_ms(1000);
   }
 }
-#endif /* CONFIG_CCTV */
+#endif /* CONFIG_AEOLIAN_CCTV_CTRL */

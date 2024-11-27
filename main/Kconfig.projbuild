@@ -1,13 +1,13 @@
-menu "AXRGB Configuration"
+menu "Aeolian Configuration"
 
-  config USE_BOTH_CORES
+  config APP_ALL_CORES
     bool "Use both cores for all tasks"
     default true
     help
       Use both cores for all tasks or bind LEDs to core1 and all other tasks to core0.
       Depending on the number of LEDs and the loop delay, some flickering may be apparent when using both cores for all tasks.
 
-  config USE_TASK_WDT
+  config APP_TWDT
     bool "Use watchdog timer"
     default true
     help
@@ -37,6 +37,7 @@ menu "AXRGB Configuration"
     config APP_LOG_VERBOSE
       bool "Verbose"
   endchoice
+
   config APP_LOG_LEVEL
     int
     default 0 if APP_LOG_NONE
@@ -46,7 +47,7 @@ menu "AXRGB Configuration"
     default 4 if APP_LOG_DEBUG
     default 5 if APP_LOG_VERBOSE
 
-  config LOG_MAX_LINES
+  config APP_LOG_LINES
     int "Maximum number of log entries to store in the buffer"
     default 100
     help
@@ -54,70 +55,76 @@ menu "AXRGB Configuration"
 
   config LIGHT_PIN
     int "Security Light Output Pin"
-    default 23
+    default 19
     help
       The output pin for turning on/off an external security light
 
   choice TARGET_DEVICE
     prompt "Idiosyncratic Target"
-    default AXRGB_DEV_DEBUG
+    default AEOLIAN_DEV_DEBUG
     help
       No help
 
-    config AXRGB_DEV_CARAVAN
+    config AEOLIAN_DEV_CARAVAN
       bool "Caravan"
 
-    config AXRGB_DEV_DEBUG
+    config AEOLIAN_DEV_DEBUG
       bool "Debug"
 
-    config AXRGB_DEV_SEGGER
+    config AEOLIAN_DEV_SEGGER
       bool "SEGGER"
 
-    config AXRGB_DEV_OLIMEX
+    config AEOLIAN_DEV_OLIMEX
       bool "OLIMEX"
 
-    config AXRGB_DEV_TTGO
+    config AEOLIAN_DEV_TTGO
       bool "TTGO Audio"
 
-    config AXRGB_DEV_WORKSHOP
+    config AEOLIAN_DEV_S3_MATRIX
+      bool "ESP32-S3-Matrix"
+
+    config AEOLIAN_DEV_WORKSHOP
       bool "Workshop"
 
-    config AXRGB_DEV_ROCKET
+    config AEOLIAN_DEV_ROCKET
       bool "Rocket Launch"
   endchoice
-    config TARGET_DEVICE_STR
-      string
-      default "Caravan"    if AXRGB_DEV_CARAVAN
-      default "Debug"      if AXRGB_DEV_DEBUG
-      default "Segger"     if AXRGB_DEV_SEGGER
-      default "Olimex"     if AXRGB_DEV_OLIMEX
-      default "TTGO_Audio" if AXRGB_DEV_TTGO
-      default "Workshop"   if AXRGB_DEV_WORKSHOP
-      default "WSA"        if AXRGB_DEV_ROCKET
-    config RGB_ORDER
-      bool
-      default n            if AXRGB_DEV_OLIMEX
-      default n            if AXRGB_DEV_TTGO
-      default y
-    config USING_JTAG
-      bool
-      default y             if AXRGB_DEV_OLIMEX
-      default y             if AXRGB_DEV_SEGGER
-      default n
-    config DEBUG
-      bool
-      default y             if AXRGB_DEV_DEBUG
-      default y             if AXRGB_DEV_OLIMEX
-      default y             if AXRGB_DEV_SEGGER
-      default n
-    config CCTV
-      bool
-      default y             if AXRGB_DEV_DEBUG
-      default n
 
-    if USING_JTAG
-      config APPTRACE_DEST_JTAG
-    endif
+  config TARGET_DEVICE_STR
+    string
+    default "Caravan"         if AEOLIAN_DEV_CARAVAN
+    default "Debug"           if AEOLIAN_DEV_DEBUG
+    default "Segger"          if AEOLIAN_DEV_SEGGER
+    default "Olimex"          if AEOLIAN_DEV_OLIMEX
+    default "TTGO_Audio"      if AEOLIAN_DEV_TTGO
+    default "ESP32-S3-Matrix" if AEOLIAN_DEV_S3_MATRIX
+    default "Workshop"        if AEOLIAN_DEV_WORKSHOP
+    default "WSA"             if AEOLIAN_DEV_ROCKET
+  config AEOLIAN_RGB_ORDER
+    bool
+    default n                 if AEOLIAN_DEV_OLIMEX
+    default n                 if AEOLIAN_DEV_TTGO
+    default y
+  config AEOLIAN_USE_JTAG
+    bool
+    default y                 if AEOLIAN_DEV_OLIMEX
+    default y                 if AEOLIAN_DEV_SEGGER
+    default y                 if AEOLIAN_DEV_S3_MATRIX
+    default n
+  config AEOLIAN_DEBUG_DEV
+    bool
+    default y                 if AEOLIAN_DEV_DEBUG
+    default y                 if AEOLIAN_DEV_OLIMEX
+    default y                 if AEOLIAN_DEV_S3_MATRIX
+    default n
+  config CONFIG_AEOLIAN_CCTV_CTRL
+    bool
+    default y                 if AEOLIAN_DEV_WORKSHOP
+    default n
+
+  if AEOLIAN_USE_JTAG
+    config APPTRACE_DEST_JTAG
+  endif
 
   menu "Wireless STA Configuration"
     config DEFAULT_STA_SSID
@@ -131,31 +138,29 @@ menu "AXRGB Configuration"
       default ""
       help
         Password of the wireless AP we should connect to
-
   endmenu
 
   menu "WS2812 Configuration"
-
     config WS2812_PIN
       int "WS2812 Output Pin"
-      default 22
+      default 23
       help
         Select output data pin for WS2812 lights
 
-  config USE_RMT_INTERRUPT
-    bool "Update LEDs using RMT interrupt"
-    default false
-    help
-      Update the LEDs with an alternative method using interrupts.
+    config USE_RMT_INTERRUPT
+      bool "Update LEDs using RMT interrupt"
+      default false
+      help
+        Update the LEDs with an alternative method using interrupts.
 
-  config LED_LOOP_US
-    int "The minium duration of one display cycle"
-    default 14400
-    help
-      This is the minimum display cycle in milliseconds.
-      Use this to sync multiple devices together. Keep in mind, updating one RGB LED
-      takes around 30us. Updating 400 takes around 12ms, depending on other running
-      tasks and which RMT method you are using.
+    config LED_LOOP_US
+      int "The minium duration of one display cycle"
+      default 14400
+      help
+        This is the minimum display cycle in milliseconds.
+        Use this to sync multiple devices together. Keep in mind, updating one RGB LED
+        takes around 30us. Updating 400 takes around 12ms, depending on other running
+        tasks and which RMT method you are using.
 
     config PIXELS
       int "Pixel Count"
@@ -171,30 +176,29 @@ menu "AXRGB Configuration"
 
     choice DEFAULT_DIM
       prompt "Default Brightness"
-      default AXRGB_DIM_MED
+      default AEOLIAN_DIM_MED
       help
         Default WS2812 brightness level
 
-      config AXRGB_DIM_MIN
+      config AEOLIAN_DIM_MIN
         bool "Minimum"
-      config AXRGB_DIM_LOW
+      config AEOLIAN_DIM_LOW
         bool "Low"
-      config AXRGB_DIM_MED
+      config AEOLIAN_DIM_MED
         bool "Medium"
-      config AXRGB_DIM_HIGH
+      config AEOLIAN_DIM_HIGH
         bool "High"
-      config AXRGB_DIM_MAX
+      config AEOLIAN_DIM_MAX
         bool "Max"
     endchoice
 
     config DEFAULT_DIM
       int
-      default 0 if AXRGB_DIM_MAX
-      default 1 if AXRGB_DIM_HIGH
-      default 2 if AXRGB_DIM_MED
-      default 3 if AXRGB_DIM_LOW
-      default 4 if AXRGB_DIM_MIN
-
+      default 0 if AEOLIAN_DIM_MAX
+      default 1 if AEOLIAN_DIM_HIGH
+      default 2 if AEOLIAN_DIM_MED
+      default 3 if AEOLIAN_DIM_LOW
+      default 4 if AEOLIAN_DIM_MIN
   endmenu
 
   menu "Motion Detection"
@@ -204,45 +208,42 @@ menu "AXRGB Configuration"
       help
         Enable gpio inputs triggers for motion detection devices
 
-      config MOTION_INPUT_1
-        depends on MOTION_DETECTION
-        int "GPIO Input 1"
-        default 35
+    config MOTION_INPUT_1
+      depends on MOTION_DETECTION
+      int "GPIO Input 1"
+      default 35
 
-      config MOTION_INPUT_2
-        depends on MOTION_DETECTION
-        int "GPIO Input 2"
-        default 33
+    config MOTION_INPUT_2
+      depends on MOTION_DETECTION
+      int "GPIO Input 2"
+      default 33
 
-      config MOTION_INPUT_3
-        depends on MOTION_DETECTION
-        int "GPIO Input 3"
-        default 25
+    config MOTION_INPUT_3
+      depends on MOTION_DETECTION
+      int "GPIO Input 3"
+      default 25
 
-      config MOTION_INPUT_4
-        depends on MOTION_DETECTION
-        int "GPIO Input 4"
-        default 26
-
+    config MOTION_INPUT_4
+      depends on MOTION_DETECTION
+      int "GPIO Input 4"
+      default 26
   endmenu
 
   menu "Web Server Configuration"
+    config LED_GPIO
+      int "Led GPIO number"
+        range 0 34
+        default 2
+        help
+          GPIO number (IOxx) to blink on and off.
+          Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used to blink.
+          GPIOs 35-39 are input-only so cannot be used as outputs.
 
-  config LED_GPIO
-    int "Led GPIO number"
-      range 0 34
-      default 2
-      help
-        GPIO number (IOxx) to blink on and off.
-        Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used to blink.
-        GPIOs 35-39 are input-only so cannot be used as outputs.
-
-  config HTTPD_USE_ASYNC
-    bool "HTTPD uses async sockets"
-      default true
-      help
-        The builtin HTTP server uses async sockets rather than a more standard approach.
-
+    config HTTPD_USE_ASYNC
+      bool "HTTPD uses async sockets"
+        default true
+        help
+          The builtin HTTP server uses async sockets rather than a more standard approach.
   endmenu
 
 endmenu

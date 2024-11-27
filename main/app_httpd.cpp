@@ -336,9 +336,13 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 #endif
   espfs_stat_t stat;
 
-  //F_LOGW(true, true, LC_BRIGHT_YELLOW, "sendEspFs() %s\n", req->uri);
+  F_LOGD(true, true, LC_BRIGHT_MAGENTA, "sendEspFs() %s\n", req->uri);
 
-  if ( espfs_stat(fs, req->uri, &stat) )
+  if ( fs == NULL )
+  {
+    F_LOGE(true, true, LC_BRIGHT_RED, "espfs not initialised");
+  }
+  else if ( espfs_stat(fs, req->uri, &stat) )
   {
     if ( stat.type == ESPFS_TYPE_FILE )
     {
@@ -663,7 +667,7 @@ esp_err_t check_espfs (void)
     };
 #pragma GCC diagnostic pop                                      // Restore previous default behaviour
 
-    fs = espfs_init (&espfs_config);
+    fs = espfs_init(&espfs_config);
   }
 
   return (fs == NULL?ESP_FAIL:ESP_OK);

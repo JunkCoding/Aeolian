@@ -192,7 +192,7 @@ void execRuntimeStats (void)
 
         const char core = pTask->xCoreID == tskNO_AFFINITY?'*':('0' + pTask->xCoreID);
 
-        buflen += snprintf (&jsonTasksBuffer[buflen], (JSON_BUFSIZE - buflen), "{\n\t\t\"pid\": %d,\n\t\t\"bp\": %d,\n\t\t\"cp\": %d,\n\t\t\"tn\": \"%s\",\n\t\t\"hwm\": %d,\n\t\t\"c8\": %u,\n\t\t\"c32\": %u,\n\t\t\"rt\": %u,\n\t\t\"st\": \"%c\",\n\t\t\"core\": \"%c\",\n\t\t\"use\": %ld},",
+        buflen += snprintf (&jsonTasksBuffer[buflen], (JSON_BUFSIZE - buflen), "{\n\t\t\"pid\": %u,\n\t\t\"bp\": %d,\n\t\t\"cp\": %d,\n\t\t\"tn\": \"%s\",\n\t\t\"hwm\": %lu,\n\t\t\"c8\": %lu,\n\t\t\"c32\": %lu,\n\t\t\"rt\": %lu,\n\t\t\"st\": \"%c\",\n\t\t\"core\": \"%c\",\n\t\t\"use\": %ld},",
           pTask->xTaskNumber, pTask->uxBasePriority, pTask->uxCurrentPriority, pTask->pcTaskName, pTask->usStackHighWaterMark, cap8, cap32, pTask->ulRunTimeCounter, state, core, ulStatsAsPercentage);
         if ( ulStatsAsPercentage > 0UL )
         {

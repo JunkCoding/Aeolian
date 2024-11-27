@@ -2,19 +2,22 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <esp_err.h>
-#include <esp_log.h>
-#include <esp_vfs.h>
-#include <esp_spi_flash.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <sys/ioctl.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
+
+#include <esp_err.h>
+#include <esp_vfs.h>
+
+#include <esp_spi_flash.h>
+
 
 #include "espfs_priv.h"
 #include "espfs_log.h"
@@ -589,28 +592,28 @@ esp_err_t esp_vfs_espfs_register(const esp_vfs_espfs_conf_t *conf)
     assert(conf->fs != NULL);
 
     const esp_vfs_t vfs = {
-        .flags = ESP_VFS_FLAG_CONTEXT_PTR,
-        .write_p = &vfs_espfs_write,
-        .lseek_p = &vfs_espfs_lseek,
-        .read_p = &vfs_espfs_read,
-        .open_p = &vfs_espfs_open,
-        .close_p = &vfs_espfs_close,
-        .fstat_p = &vfs_espfs_fstat,
-        .stat_p = &vfs_espfs_stat,
-        .link_p = &vfs_espfs_link,
-        .unlink_p = &vfs_espfs_unlink,
-        .rename_p = &vfs_espfs_rename,
-        .opendir_p = &vfs_espfs_opendir,
-        .readdir_p = &vfs_espfs_readdir,
-        .readdir_r_p = &vfs_espfs_readdir_r,
-        .telldir_p = &vfs_espfs_telldir,
-        .seekdir_p = &vfs_espfs_seekdir,
-        .closedir_p = &vfs_espfs_closedir,
-        .mkdir_p = &vfs_espfs_mkdir,
-        .rmdir_p = &vfs_espfs_rmdir,
-        .fcntl_p = &vfs_espfs_fcntl,
-        .ioctl_p = &vfs_espfs_ioctl,
-        .fsync_p = &vfs_espfs_fsync,
+        .flags        = ESP_VFS_FLAG_CONTEXT_PTR,
+        .write_p      = &vfs_espfs_write,
+        .lseek_p      = &vfs_espfs_lseek,
+        .read_p       = &vfs_espfs_read,
+        .open_p       = &vfs_espfs_open,
+        .close_p      = &vfs_espfs_close,
+        .fstat_p      = &vfs_espfs_fstat,
+        .stat_p       = &vfs_espfs_stat,
+        .link_p       = &vfs_espfs_link,
+        .unlink_p     = &vfs_espfs_unlink,
+        .rename_p     = &vfs_espfs_rename,
+        .opendir_p    = &vfs_espfs_opendir,
+        .readdir_p    = &vfs_espfs_readdir,
+        .readdir_r_p  = &vfs_espfs_readdir_r,
+        .telldir_p    = &vfs_espfs_telldir,
+        .seekdir_p    = &vfs_espfs_seekdir,
+        .closedir_p   = &vfs_espfs_closedir,
+        .mkdir_p      = &vfs_espfs_mkdir,
+        .rmdir_p      = &vfs_espfs_rmdir,
+        .fcntl_p      = &vfs_espfs_fcntl,
+        .ioctl_p      = &vfs_espfs_ioctl,
+        .fsync_p      = &vfs_espfs_fsync,
     };
 
     int index;
@@ -621,7 +624,7 @@ esp_err_t esp_vfs_espfs_register(const esp_vfs_espfs_conf_t *conf)
     vfs_espfs_t *vfs_espfs = calloc(1, sizeof(vfs_espfs_t) +
             (sizeof(vfs_espfs_file_t *) * conf->max_files));
     if (vfs_espfs == NULL) {
-        ESPFS_LOGE(__func__, "vfs_espfs could not be alloc'd");
+        //ESPFS_LOGE(__func__, "vfs_espfs could not be alloc'd");
         return ESP_ERR_NO_MEM;
     }
 

@@ -5,14 +5,17 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
-#include <driver/timer.h>
 #include <freertos/event_groups.h>
+
+#include <driver/gptimer.h>
+#include <driver/gpio.h>
+
 #include <esp_task_wdt.h>
 #include <esp_err.h>
+
 #include <sys/time.h>
-#include <lwip/apps/sntp.h>
 #include <soc/rtc.h>
-#include <driver/gpio.h>
+#include <esp_pm.h>
 
 #include <time.h>
 
@@ -24,7 +27,7 @@
 #include "app_mqtt.h"
 #include "app_utils.h"
 #include "app_timer.h"
-
+#include "app_flash.h"
 
 // ------------------------------------------------------
 // This is the minium runtime.
@@ -39,7 +42,7 @@
 
 // Force current test pattern if we are debugging
 // (avoid accidentally forcing patterns on other devices)
-#if defined(CONFIG_DEBUG)
+#if defined(AEOLIAN_DEBUG_DEV)
 //#define FORCE_PATTERN       "Police Lights"
 //#define FORCE_PATTERN       "Two Sin"
 //#define FORCE_PATTERN       "Pride"
@@ -145,7 +148,7 @@ cRGB *rgbBuffer = NULL;
 cRGB *outBuffer = NULL;
 
 // Our overlay for when motion is detected in a specific quadrant
-#if defined (CONFIG_AXRGB_DEV_CARAVAN)
+#if defined (CONFIG_AEOLIAN_DEV_CARAVAN)
 overlay_t overlay[] = {
   {NULL,  { 16,  44,  0,   MediumWhite},  0,  false},
   {NULL,  { 60, 154,  0,   MediumWhite},  0,  false},
@@ -155,7 +158,7 @@ overlay_t overlay[] = {
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false}};
-#elif defined (CONFIG_AXRGB_DEV_DEBUG)
+#elif defined (CONFIG_AEOLIAN_DEV_DEBUG)
 overlay_t overlay[] = {
   {NULL,  { 45,   2,  0,   MediumWhite},  0,  false},
   {NULL,  { 43,   2,  0,   MediumWhite},  0,  false},
@@ -165,7 +168,7 @@ overlay_t overlay[] = {
   {NULL,  { 33,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 20,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 21,   1,  0,   MediumWhite},  0,  false}};
-#elif defined (CONFIG_AXRGB_DEV_OLIMEX)
+#elif defined (CONFIG_AEOLIAN_DEV_OLIMEX)
 overlay_t overlay[] = {
   {NULL,  {  0,   3,  0,   MediumWhite},  0,  false},
   {NULL,  {  3,   3,  0,   MediumWhite},  0,  false},
@@ -175,7 +178,7 @@ overlay_t overlay[] = {
   {NULL,  { 11,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 12,   1,  0,   MediumWhite},  0,  false},
   {NULL,  { 13,   1,  0,   MediumWhite},  0,  false}};
-#elif defined (CONFIG_AXRGB_DEV_TTGO)
+#elif defined (CONFIG_AEOLIAN_DEV_TTGO)
 overlay_t overlay[] = {
   {NULL,  {  0,   3,  0,   MediumWhite},  0,  false},
   {NULL,  {  3,   3,  0,   MediumWhite},  0,  false},
@@ -185,7 +188,7 @@ overlay_t overlay[] = {
   {NULL,  { 18,   1,  0,   MediumWhite},  0,  false},
   {NULL,  {  7,   1,  0,   MediumWhite},  0,  false},
   {NULL,  {  8,   1,  0,   MediumWhite},  0,  false}};
-#elif defined (CONFIG_AXRGB_DEV_WORKSHOP)
+#elif defined (CONFIG_AEOLIAN_DEV_WORKSHOP)
 overlay_t overlay[] = {
   {NULL,  {367,  84,  0,   MediumWhite},  0,  false},
   {NULL,  { 67, 110,  0,   MediumWhite},  0,  false},
@@ -195,6 +198,16 @@ overlay_t overlay[] = {
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false}};
+#elif defined (CONFIG_AEOLIAN_DEV_S3_MATRIX)
+overlay_t overlay[] = {
+  {NULL,  {  0,  16,  0,   MediumWhite},  0,  false},
+  {NULL,  { 16,  16,  0,   MediumWhite},  0,  false},
+  {NULL,  { 32,  16,  0,   MediumWhite},  0,  false},
+  {NULL,  { 48,  16,  0,   MediumWhite},  0,  false},
+  {NULL,  {  1,   1,  0,   MediumWhite},  0,  false},
+  {NULL,  {  3,   1,  0,   MediumWhite},  0,  false},
+  {NULL,  {  6,   2,  0,   MediumWhite},  0,  false},
+  {NULL,  {  8,   2,  0,   MediumWhite},  0,  false}};
 #else
 overlay_t overlay[] = {
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
@@ -203,8 +216,8 @@ overlay_t overlay[] = {
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
   {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
-  {NULL,  {  0,   0,  0,   MediumWhite},  0,  false},
-  {NULL,  {  0,   0,  0,   MediumWhite},  0,  false}};
+  {NULL,  {  10,  1,  0,   MediumWhite},  0,  false},
+  {NULL,  {  11,  1,  0,   MediumWhite},  0,  false}};
 #endif
 #define NUM_OVERLAYS  (sizeof(overlay) / sizeof(overlay_t))
 
@@ -370,6 +383,39 @@ bool check_valid_output (uint8_t pin)
 }
 
 // **********************************************************************
+// Toggle PM on/off (if user has enabled it)
+// PM doesn't really work well with a fast, responsive LED display, so
+// we will toggle it on and off when required.
+// **********************************************************************
+#ifdef CONFIG_PM_ENABLE
+IRAM_ATTR void set_pm(bool switch_on)
+{
+  F_LOGI(true, true, LC_BRIGHT_BLUE, "set_pm(%s) - current cpu MHz: %d", switch_on?"true":"false", get_cpu_mhz());
+
+  int min_freq = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ;
+  if ( switch_on == true )
+  {
+    min_freq = (int) rtc_clk_xtal_freq_get();
+  }
+
+  esp_pm_config_t pm_config = {
+    .max_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ,
+    .min_freq_mhz = min_freq,
+#if CONFIG_FREERTOS_USE_TICKLESS_IDLE
+    .light_sleep_enable = true
+#else
+    .light_sleep_enable = false
+#endif
+  };
+  esp_err_t err = esp_pm_configure(&pm_config);
+  if ( err != ESP_OK )
+  {
+    F_LOGE(true, true, LC_YELLOW, "Problem running esp_pm_configure()");
+  }
+}
+#endif /* CONFIG_PM_ENABLE */
+
+// **********************************************************************
 // Initialise the LED display task
 // **********************************************************************
 #define BLANK_COUNT     2
@@ -474,11 +520,11 @@ IRAM_ATTR void lights_task (void *pvParameters)
   uint32_t skips           = 0;            // Loops without an update
   // Reduce our work load
   uint16_t blank_leds      = BLANK_COUNT;  // Doesn't always blank first shot
-  bool    update_leds      = false;
+  bool     update_leds     = false;
 
   // Add ourselves to the task watchdog list
   // ------------------------------------------------------
-#if CONFIG_USE_TASK_WDT
+#if CONFIG_APP_TWDT
   CHECK_ERROR_CODE (esp_task_wdt_add(NULL), ESP_OK);
   CHECK_ERROR_CODE (esp_task_wdt_status(NULL), ESP_OK);
 #endif
@@ -488,7 +534,7 @@ IRAM_ATTR void lights_task (void *pvParameters)
   {
     // Reset the watchdog
     // ------------------------------------------------------
-#if CONFIG_USE_TASK_WDT
+#if CONFIG_APP_TWDT
     CHECK_ERROR_CODE (esp_task_wdt_reset(), ESP_OK);
 #endif
     //yield_delay_us (500);
@@ -579,9 +625,9 @@ IRAM_ATTR void lights_task (void *pvParameters)
 // -------------------------------------------------------------------------------------------------
 // --  Some ranbdom light flickering to simulate a dying bulb or loosa connection in the breeze.  --
 // -------------------------------------------------------------------------------------------------
-#if defined (CONFIG_AXRGB_DEV_WORKSHOP)
+#if defined (CONFIG_AEOLIAN_DEV_WORKSHOP)
     else if ( lightcheck.isdark )
-//#if defined (CONFIG_AXRGB_DEV_OLIMEX)
+//#if defined (CONFIG_AEOLIAN_DEV_OLIMEX)
     {
       static uint32_t dt = 5000;
       static uint16_t cp = 0;
@@ -675,7 +721,7 @@ IRAM_ATTR void lights_task (void *pvParameters)
           if ( show_overlay (overlay[c].zone_params.mask) )
           {
             update_leds = true;
-#if defined (CONFIG_RGB_ORDER)
+#if defined (CONFIG_AEOLIAN_RGB_ORDER)
             rgbFillSolid(overlay[c].zone_params.start, overlay[c].zone_params.count, overlay[c].zone_params.color, false, 0);
 #else
             rgbFillSolid(overlay[c].zone_params.start, overlay[c].zone_params.count, overlay[c].zone_params.color, false, 4);
@@ -687,15 +733,39 @@ IRAM_ATTR void lights_task (void *pvParameters)
 
     // Send our LED buffer to the WS2812 light string
     // ------------------------------------------------------
+#ifdef CONFIG_PM_ENABLE
+    static bool pm_enabled    = true;  // deault to true, so we always turn it off first
+    static uint16_t pm_delay  = 0;     // Delay for turning PM off
+#endif /* CONFIG_PM_ENABLE */
+
     if ( update_leds )
     {
-      // Update LEDs
-      ws2812_setColors (control_vars.pixel_count, outBuffer);
+#ifdef CONFIG_PM_ENABLE
+      if ( pm_enabled == true )
+      {
+        set_pm(false);
+        pm_enabled = false;
+        pm_delay = 0;
+      }
+      else if ( pm_delay <= 1 )
+      {
+        // Do nothing for now
+        pm_delay++;
+      }
+      else
+      {
+#endif /* CONFIG_PM_ENABLE */
+        // Update LEDs
+        ws2812_setColors (control_vars.pixel_count, outBuffer);
 
-      // Reset update boolean
-      update_leds = false;
-      blank_leds  = BLANK_COUNT;
-      updates++;
+        // Reset update boolean
+        update_leds = false;
+        blank_leds  = BLANK_COUNT;
+        updates++;
+#ifdef CONFIG_PM_ENABLE
+        pm_delay = 0;    // Delay turning PM back on to stop flicker
+      }
+#endif /* CONFIG_PM_ENABLE */
     }
     else if ( BTST(control_vars.bitflags, DISP_BF_PAUSED) && blank_leds )
     {
@@ -706,9 +776,27 @@ IRAM_ATTR void lights_task (void *pvParameters)
       ws2812_setColors (control_vars.pixel_count, outBuffer);
       blank_leds--;
       updates++;
+#ifdef CONFIG_PM_ENABLE
+      pm_delay = 0;    // Delay turning PM back on to stop flicker
+#endif /* CONFIG_PM_ENABLE */
     }
     else
     {
+#ifdef CONFIG_PM_ENABLE
+      // Delay turning PM back on, so we aren't constantly swapping and changing
+      // and causing disruption to the display.
+      if ( pm_delay < 400 )
+      {
+        pm_delay++;
+      }
+      else if ( pm_enabled == false )
+      {
+        set_pm(true);
+        pm_enabled = true;
+        pm_delay = 0;
+      }
+      else
+#endif /* CONFIG_PM_ENABLE */
       skips++;
     }
 
@@ -747,8 +835,8 @@ IRAM_ATTR void lights_task (void *pvParameters)
 
     // Reset the watchdog
     // ------------------------------------------------------
-#if CONFIG_USE_TASK_WDT
-    CHECK_ERROR_CODE(esp_task_wdt_reset (), ESP_OK);
+#if CONFIG_APP_TWDT
+    CHECK_ERROR_CODE(esp_task_wdt_reset(), ESP_OK);
 #endif
   }
   while ( true );
@@ -788,7 +876,7 @@ IRAM_ATTR void setPixelRGB (uint16_t n, cRGB rgb, bool saveColor, uint8_t ldim)
   if ( ldim )
   {
     uint8_t dim = ldim;
-#if defined (CONFIG_RGB_ORDER)
+#if defined (CONFIG_AEOLIAN_RGB_ORDER)
     outBuffer[n] = toRGBPixel ((int)rgb.r >> dim, (int)rgb.g >> dim, (int)rgb.b >> dim);
 #else
     outBuffer[n] = toRGBPixel ((int)rgb.g >> dim, (int)rgb.r >> dim, (int)rgb.b >> dim);
@@ -796,7 +884,7 @@ IRAM_ATTR void setPixelRGB (uint16_t n, cRGB rgb, bool saveColor, uint8_t ldim)
   }
   else
   {
-#if defined (CONFIG_RGB_ORDER)
+#if defined (CONFIG_AEOLIAN_RGB_ORDER)
     outBuffer[n] = toRGBPixel ((int)rgb.r, (int)rgb.g, (int)rgb.b);
 #else
     outBuffer[n] = toRGBPixel ((int)rgb.g, (int)rgb.r, (int)rgb.b);
