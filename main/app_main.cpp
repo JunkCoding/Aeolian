@@ -97,7 +97,7 @@ extern "C" void app_main(void)
   wdt_hal_write_protect_enable(&rtc_wdt_ctx);
 #endif
 
-#if CONFIG_USE_TASK_WDT
+#if CONFIG_APP_TWDT
   F_LOGI(true, true, LC_GREY, "Checking TWDT...");
   esp_task_wdt_config_t twdt_config = {
     .timeout_ms     = TWDT_TIMEOUT_S * 1000,
@@ -140,12 +140,12 @@ extern "C" void app_main(void)
     F_LOGW(true, true, LC_RED, "TWDT configuration failed... restarting");
     esp_restart();
   }
-#endif /* CONFIG_USE_TASK_WDT */
+#endif /* CONFIG_APP_TWDT */
 
   // -----------------------------------------------------------
   // Warn GDBSTUB_ENABLED is set
   // -----------------------------------------------------------
-#if defined (CONFIG_ESP_GDBSTUB_ENABLED)
+#if CONFIG_ESP_GDBSTUB_ENABLED
   F_LOGW(false, true, LC_BRIGHT_RED, "*** gdbstub enabled ***");
 #endif
 
@@ -199,22 +199,22 @@ extern "C" void app_main(void)
   // MQTT Initialisation
   // -----------------------------------------------------------
   init_mqtt_client();
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
   xTaskCreate(mqtt_send_task, TASK_NAME_MQTT_BROKER, STACKSIZE_MQTT_BROKER, NULL, TASK_PRIORITY_MQTT, &xMQTTHandle);
 #else
   xTaskCreatePinnedToCore(mqtt_send_task, TASK_NAME_MQTT_BROKER, STACKSIZE_MQTT_BROKER, NULL, TASK_PRIORITY_MQTT, &xMQTTHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+#endif /* CONFIG_APP_ALL_CORES */
 
   // -----------------------------------------------------------
   // Random CCTV Movement
   // -----------------------------------------------------------
-#if defined(CONFIG_CCTV)
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_AEOLIAN_CCTV_CTRL
+#if CONFIG_APP_ALL_CORES
   xTaskCreate(cctv_task, TASK_NAME_CCTV, STACKSIZE_CCTV, NULL, TASK_PRIORITY_CCTV, &xCCTVHandle);
 #else
   xTaskCreatePinnedToCore(cctv_task, TASK_NAME_CCTV, STACKSIZE_CCTV, NULL, TASK_PRIORITY_CCTV, &xCCTVHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
-#endif /* CONFIG_CCTV */
+#endif /* CONFIG_APP_ALL_CORES */
+#endif /* CONFIG_AEOLIAN_CCTV_CTRL */
 
   // -----------------------------------------------------------
   // Set a random pattern at boot time.
@@ -226,11 +226,11 @@ extern "C" void app_main(void)
   // -----------------------------------------------------------
   if ( lights_init() == ESP_OK )
   {
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
     xTaskCreate(lights_task, TASK_NAME_LIGHTS, STACKSIZE_LIGHTS, NULL, TASK_PRIORITY_LIGHTS, &xLightsHandle);
 #else
     xTaskCreatePinnedToCore(lights_task, TASK_NAME_LIGHTS, STACKSIZE_LIGHTS, NULL, TASK_PRIORITY_LIGHTS, &xLightsHandle, LIGHTS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+#endif /* CONFIG_APP_ALL_CORES */
   }
 
   // -----------------------------------------------------------
@@ -238,11 +238,11 @@ extern "C" void app_main(void)
   // -----------------------------------------------------------
   init_gpio_pins(&control_vars);
 #if CONFIG_MOTION_DETECTION
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
   xTaskCreate(gpio_task, TASK_NAME_GPIO, STACKSIZE_GPIO, NULL, TASK_PRIORITY_GPIO, &xGpioHandle);
 #else
   xTaskCreatePinnedToCore(gpio_task, TASK_NAME_GPIO, STACKSIZE_GPIO, NULL, TASK_PRIORITY_GPIO, &xGpioHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+#endif /* CONFIG_APP_ALL_CORES */
 #endif /* CONFIG_MOTION_DETECTION */
 
   // -----------------------------------------------------------
@@ -263,11 +263,11 @@ extern "C" void app_main(void)
   // Are we showing runtime stats?
   // -----------------------------------------------------------
 #if (CONFIG_FREERTOS_VTASKLIST_INCLUDE_COREID && CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS)
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
   xTaskCreate(stats_task, TASK_NAME_STATS, STACKSIZE_STATS, NULL, TASK_PRIORITY_STATS, &xStatsHandle);
 #else
   xTaskCreatePinnedToCore(stats_task, TASK_NAME_STATS, STACKSIZE_STATS, NULL, TASK_PRIORITY_STATS, &xStatsHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+#endif /* CONFIG_APP_ALL_CORES */
 #endif
 
   // -----------------------------------------------------------

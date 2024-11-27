@@ -136,7 +136,7 @@ void print_app_info (void)
   cpu_mhz = get_cpu_mhz();
 
   _print_divider();
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
   F_LOGI(true, true, LC_GREY, "%22s = true", "Local build");
 #endif
   F_LOGI(true, true, LC_GREY, "%22s = %d (last ota @ %d)", "Boot count", boot_count, ota_update);
@@ -165,7 +165,7 @@ void print_app_info (void)
   F_LOGI(true, true, LC_GREY, "%22s = %d", "LED count", control_vars.pixel_count);
   F_LOGI(true, true, LC_GREY, "%22s = %d", "LED GPIO Pin", control_vars.led_gpio_pin);
   F_LOGI(true, true, LC_GREY, "%22s = %d", "Light GPIO Pin", control_vars.light_gpio_pin);
-  F_LOGI(true, true, LC_GREY, "%22s = %s", "Task watchdog", (CONFIG_USE_TASK_WDT?"yes":"no"));
+  F_LOGI(true, true, LC_GREY, "%22s = %s", "Task watchdog", (CONFIG_APP_TWDT?"yes":"no"));
   F_LOGI(true, true, LC_GREY, "%22s = %s", "Power management", PM_ENABLED);
   _print_divider();
 
@@ -177,7 +177,7 @@ void print_app_info (void)
  // _print_divider ();
 }
 
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
 void show_nvs_usage (void)
 {
   _print_divider ();
@@ -252,7 +252,7 @@ void printHeapInfo (void)
   F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Largest 32-bit capable", free32);
   F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Task stack", uxTaskGetStackHighWaterMark (NULL));
 }
-#endif // CONFIG_DEBUG
+#endif // AEOLIAN_DEBUG_DEV
 
 // **********************************************************************
 // * Calculate all entries in a namespace.
@@ -342,7 +342,7 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
   void *eventList = NULL;
 
   // Namespace info...
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
   _show_namespace_used_entries (ns);
 #endif
 

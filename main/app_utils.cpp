@@ -85,7 +85,7 @@ typedef struct
   void         *next_logmesg;
   void         *prev_logmesg;
 } backlog_struct_t;
-#define MAX_LOG_LINES   CONFIG_LOG_MAX_LINES
+#define MAX_LOG_LINES   CONFIG_APP_LOG_LINES
 #define LOG_BUFSIZE     255
 
 // logging history (for web interface, etc.)

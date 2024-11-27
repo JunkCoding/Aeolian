@@ -453,7 +453,7 @@ static bool check_weekly_event (struct tm tm)
     // Iterate through weekly events, if necessary
     for ( ;eval_pos < num_weekly_events; eval_pos++ )
     {
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_GREY, "Evaluating: %s, %02d:%02d to %02d:%02d, theme: %s (%s)",
       dayNames[weekly_events[eval_pos].day],
       weekly_events[eval_pos].start.hour, weekly_events[eval_pos].start.minute,
@@ -466,7 +466,7 @@ static bool check_weekly_event (struct tm tm)
         uint16_t sst = (weekly_events[eval_pos].start.hour * 60) + weekly_events[eval_pos].start.minute;
         uint16_t est = (weekly_events[eval_pos].end.hour * 60) + weekly_events[eval_pos].end.minute;
 
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
         F_LOGD(true, true, LC_BRIGHT_YELLOW, "tod = %d, sst = %d, est = %d (cur_weekly_event: %d, num_weekly_events: %d)", tod, sst, est, cur_weekly_event, num_weekly_events);
 #endif
         // Current time less than end time?
@@ -481,7 +481,7 @@ static bool check_weekly_event (struct tm tm)
             // Save this as the last known valid match
             valid_pos = eval_pos;
 
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
             F_LOGW(true, true, LC_GREEN, "Match: %s, %02d:%02d to %02d:%02d, theme: %s (%s)",
               dayNames[weekly_events[eval_pos].day],
               weekly_events[eval_pos].start.hour, weekly_events[eval_pos].start.minute,
@@ -517,7 +517,7 @@ static bool check_weekly_event (struct tm tm)
       cur_weekly_event = eval_pos;
     }
 
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_WHITE, "Next event: %s, %02d:%02d to %02d:%02d, theme: %s (%s)",
       dayNames[weekly_events[eval_pos].day],
       weekly_events[eval_pos].start.hour, weekly_events[eval_pos].start.minute,
@@ -576,7 +576,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
     // Iterate through events, if necessary
     for ( ;eval_pos < num_annual_events; eval_pos++ )
     {
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
       F_LOGV(true, true, LC_GREY, "Evaluating: %s %2d%2s to %2d%2s, %02d:%02d to %02d:%02d, theme: %s (%s)",
           monNames[annual_events[eval_pos].month],
           annual_events[eval_pos].dayStart, nth (annual_events[eval_pos].dayStart),
@@ -599,7 +599,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
 
             // Save this as the last known valid match
             valid_pos = eval_pos;
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
             F_LOGW(true, true, LC_GREEN, "Match: %s %2d%2s to %2d%2s, %02d:%02d to %02d:%02d, theme: %s (%s)",
                 monNames[annual_events[eval_pos].month],
                 annual_events[eval_pos].dayStart, nth (annual_events[eval_pos].dayStart),
@@ -638,7 +638,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
     }
 
     // Log our current comparison
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_WHITE, "Next event: %s %2d%2s to %2d%2s, %02d:%02d to %02d:%02d, theme: %s (%s)",
       monNames[annual_events[eval_pos].month],
       annual_events[eval_pos].dayStart, nth (annual_events[eval_pos].dayStart),

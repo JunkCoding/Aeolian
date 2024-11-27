@@ -943,14 +943,14 @@ void rachels (uint16_t start, uint16_t count, uint8_t step, controlvars_t *cvars
     }
   }
 
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
   if ( (prng() % 1000) == 1 )
 #else
   if ( (prng() % 4000) == 1 )
 #endif
   {
     shuffle (pl, pc);
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
     F_LOGW(true, true, LC_BRIGHT_YELLOW, "Shuffle:");
     for ( uint8_t x = 0; x < cvars->num_overlays; x++ )
     {
@@ -959,7 +959,7 @@ void rachels (uint16_t start, uint16_t count, uint8_t step, controlvars_t *cvars
 #endif
   }
 
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
   uint8_t pat = 2;
   //((*patterns[pat].pointer) (overlay[0].start, overlay[0].count, 0, cvars));
   ((*patterns[pat].pointer) (overlay[1].zone_params.start, overlay[1].zone_params.count, 0, cvars));

@@ -215,6 +215,8 @@ int _set_mqtt_setting (char *buf, int bufsize, char *param, char *value, int set
       {
         saveType = TYPE_STR;
         memcpy(MQTT_Client_Cfg.Client_ID, value, SSID_STRLEN);
+        // Hostname is also client ID
+        save_nvs_str(NVS_SYS_INFO, NVS_HOSTNAME_KEY, value);
         // Restart the client, if necessary
         mqtt_restart();
       }
