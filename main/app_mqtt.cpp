@@ -2,7 +2,8 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <string.h>
 
 #include <freertos/FreeRTOS.h>
@@ -10,18 +11,22 @@
 #include <freertos/semphr.h>
 #include <freertos/queue.h>
 #include <freertos/event_groups.h>
-#include <soc/rtc_wdt.h>
-#include <esp_task_wdt.h>
 
-#include <esp_types.h>
-#include <esp_spi_flash.h>
 #include <lwip/ip_addr.h>
-#include <esp_netif.h>
+#include <lwip/sockets.h>
+#include <lwip/dns.h>
+#include <lwip/netdb.h>
 
+#include <esp_task_wdt.h>
+#include <esp_types.h>
+#include <esp_netif.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
+#include <esp_system.h>
 #include <nvs_flash.h>
-#include <mqtt_config.h>
+
+#include <nvs_flash.h>
+
 #include <mqtt_client.h>
 
 #include <jsmn.h>
@@ -44,8 +49,8 @@ const char *STR_RULEID      = "RuleId";
 #define   MQTT_EVT_BUFSIZE    128
 #define   MQTT_BUFSIZE        512
 
-xQueueHandle mqtt_send_queue = NULL;
-EventGroupHandle_t mqtt_event_group = NULL;
+static QueueHandle_t mqtt_send_queue = NULL;
+static EventGroupHandle_t mqtt_event_group = NULL;
 
 const int MQTT_CONNECTED = BIT0;
 
@@ -103,12 +108,15 @@ bool on_off (int len, char *data)
   return value;
 }
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
+IRAM_ATTR static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 #else
-esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
+static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 #endif
 {
   char evtBuf[MQTT_EVT_BUFSIZE + 1] = {};
+  esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
+  esp_mqtt_client_handle_t client = event->client;
+  int msg_id;
 
   switch ( event->event_id )
   {
@@ -150,7 +158,7 @@ esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
         mqttSubscribe(dev_Pattern);
         mqttSubscribe(dev_hikAlarm);
         // These are for internal use
-#if defined (CONFIG_AXRGB_DEV_OLIMEX) || defined (CONFIG_AXRGB_DEV_TTGO) || defined (CONFIG_AXRGB_DEV_SEGGER) || defined (CONFIG_AXRGB_DEV_DEBUG)
+#if defined (CONFIG_AEOLIAN_DEV_OLIMEX) || defined (CONFIG_AEOLIAN_DEV_TTGO) || defined (CONFIG_AEOLIAN_DEV_SEGGER) || defined (CONFIG_AEOLIAN_DEV_DEBUG) || defined (CONFIG_AEOLIAN_DEV_S3_MATRIX)
         mqttSubscribe(dev_Network);
         mqttSubscribe(dev_Radar);
 #endif
@@ -234,8 +242,6 @@ esp_err_t mqtt_event_handler (esp_mqtt_event_handle_t event)
         break;
       }
   }
-
-  return ESP_OK;
 }
 
 void proc_command(uint16_t cmd, char *param, uint16_t reason)
@@ -323,7 +329,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
   jsmn_parser p;
   jsmntok_t t[30];
 
-  jsmn_init (&p);
+  jsmn_init(&p);
   int r = jsmn_parse(&p, event->data, event->data_len, t, sizeof(t) / sizeof(t[0]));
   // ToDo: Add to all jsmn_parse()
   if ( r < 0 )
@@ -339,7 +345,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
   {
     snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
 
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_BRIGHT_YELLOW, "i: %d, type: %d, start: %d, len = %d, token: %s", i, t[i].type, t[i].start, t[i].end - t[i].start, token);
 #endif
 
@@ -350,7 +356,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
       {
         if ( !shrt_cmp(JSON_STR_CMD, token) )
         {
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
           F_LOGV(true, true, LC_YELLOW, "type: %d, JSMN_STRING: %.*s", t[i].type, t[i].end - t[i].start, event->data + t[i].start);
 #endif
           // Ensure this is an object
@@ -360,8 +366,8 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
             uint16_t reason = PAUSE_NOTPROVIDED;
 
             // Number of objects
-            uint objs = t[i++].size;
-            for ( uint v = 0; v < objs; v++, i++ )
+            uint16_t objs = t[i++].size;
+            for ( uint16_t v = 0; v < objs; v++, i++ )
             {
               snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
               //F_LOGW(true, true, LC_YELLOW, "Loop: %s", token);
@@ -390,7 +396,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
         }
         else if ( !shrt_cmp(JSON_STR_SYNC, token) )
         {
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
           F_LOGV(true, true, LC_GREY, "type: %d, JSMN_STRING: %.*s", t[i].type, t[i].end - t[i].start, event->data + t[i].start);
 #endif
           // Save some CPU cycles by Only processing these packets when we are a slave.
@@ -400,8 +406,8 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
             if ( t[i].type == JSMN_ARRAY )
             {
               uint16_t paused = 0, pauseReason = 0, themeID = 0;
-              uint objs = t[i++].size;
-              for ( uint v = 0; v < objs; v++, i++ )
+              uint16_t objs = t[i++].size;
+              for ( uint16_t v = 0; v < objs; v++, i++ )
               {
                 snprintf(param, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
                 switch(v)
@@ -472,7 +478,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
                     break;
                 }
               }
-  #if defined (CONFIG_DEBUG)
+  #if defined (AEOLIAN_DEBUG_DEV)
               F_LOGV(true, true, LC_WHITE, "paused: %d (cvars paused: %d), pauseReason: %d", paused, BTST(control_vars.bitflags, DISP_BF_PAUSED), pauseReason);
   #endif
               // Does our state match the master's requested state?
@@ -498,22 +504,14 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
         else if ( !shrt_cmp(JSON_STR_THEME, token) )
         {
           snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
+          set_theme(atoi(token));
           i++;
-          if ( token != NULL )
-          {
-            //F_LOGW(true, true, LC_YELLOW, "theme: %s", token);
-            set_theme(atoi(token));
-          }
         }
         else if ( !shrt_cmp(JSON_STR_PATTERN, token) )
         {
           snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
+          set_pattern(atoi(token));
           i++;
-          if ( token != NULL )
-          {
-            //F_LOGW(true, true, LC_YELLOW, "pattern: %s", token);
-            set_pattern(atoi(token));
-          }
         }
         break;
       }
@@ -535,7 +533,7 @@ DRAM_ATTR hik_alert_t hik_alert[] = {
   //                             <--   Received   -->                    |
   //         |                                      |      | ivms | rule | sec.  | on                                      | on            | dura-  |
   //  devId  | eventType                            | chan | Chan | ID   | light | zones                                   | mask          | tion   | color
-#if defined (CONFIG_AXRGB_DEV_WORKSHOP)
+#if defined (CONFIG_AEOLIAN_DEV_WORKSHOP)
   // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   // 1. Caravan Camera
   {1,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     0,     0x00,   (overlay_zone)(OV_ZONE_03),               OV_EXT_LIGHTS,  30000,   MediumWhite},   // Caravan, line crossing (close left)
@@ -564,7 +562,7 @@ DRAM_ATTR hik_alert_t hik_alert[] = {
   {4,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     1,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  1000,    HotPink},       // Front, line crossing (car any direction)
   {4,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     2,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  1000,    HotPink},       // Front, line crossing (car any direction)
   {4,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     3,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  1000,    Violet},        // Front, line crossing (car downhill travel)
-#elif defined (CONFIG_AXRGB_DEV_CARAVAN)
+#elif defined (CONFIG_AEOLIAN_DEV_CARAVAN)
   // --------------------------------------------------------------------------------------------------------------
   // Caravan Camera
   {1,        ENUM_VCA_EVENT_TRAVERSE_PLANE,          1,     1,     0,     0x05,   (overlay_zone)(OV_ZONE_01|OV_ZONE_04),    OV_EXT_LIGHTS,  30000,   MediumWhite},   // Caravan, line crossing (close left)
@@ -655,7 +653,7 @@ DRAM_ATTR hik_alert_t hik_alert[] = {
   {4,        ENUM_VCA_EVENT_DURATION,                1,     1,     0,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  2000,    Yellow},        // Front, sidewalk (continuation)
   {4,        ENUM_VCA_EVENT_INTRUSION,               1,     1,     1,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  3000,    DarkOrange},    // Front, driveway, potential visitor?
   {4,        ENUM_VCA_EVENT_DURATION,                1,     1,     1,     0x00,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  3000,    DarkOrange},    // Front, driveway,(continuation)
-  #if defined(CONFIG_CCTV)
+  #ifdef CONFIG_AEOLIAN_CCTV_CTRL
   {4,        ENUM_VCA_EVENT_INTRUSION,               1,     1,     2,     0xFF,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  5000,    DarkOrange},    // Front, driveway, potential visitor?
   {4,        ENUM_VCA_EVENT_DURATION,                1,     1,     2,     0xFF,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  3000,    DarkOrange},    // Front, driveway,(continuation)
   {4,        ENUM_VCA_EVENT_ENTER_AREA,              1,     1,     0,     0xFF,   (overlay_zone)(OV_ZONE_01),               OV_INT_LIGHTS,  5000,    Red},           // Front, enter area in front of garage door
@@ -678,7 +676,10 @@ void proc_ev_dev_hikAlarm (esp_mqtt_event_handle_t event)
 {
   /* Process JSON Data */
   char token[64] __attribute__ ((aligned(4))) = {};
+#pragma GCC diagnostic push                                     // Save the current warning state
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"      // Disable unused variables
   int devId = 0, eventType = 0, channel = 0, ivmsChannel = 0, ruleID = 0;
+#pragma GCC diagnostic pop                                      // Restore previous default behaviour
   int i, r, v = 0;
   char *endptr;
   jsmn_parser p;
@@ -728,7 +729,7 @@ void proc_ev_dev_hikAlarm (esp_mqtt_event_handle_t event)
         // Check if we have a match and we light up zones accordingly
         if ( (hik_alert[i].eventType == eventType) && (hik_alert[i].ivmsChannel == ivmsChannel) && (hik_alert[i].ruleID == ruleID) && hik_alert[i].zone )
         {
-#if defined (CONFIG_DEBUG)
+#if defined (AEOLIAN_DEBUG_DEV)
           F_LOGI(true, true, LC_GREY, "devId: %2d, eventType: %2d, ivmsChannel: %2d, ruleID: %2d, zone: %2d", devId, eventType, ivmsChannel, ruleID, hik_alert[i].zone);
 #endif
           // Set security light?
@@ -740,13 +741,13 @@ void proc_ev_dev_hikAlarm (esp_mqtt_event_handle_t event)
             {
               set_light(SECURITY_LIGHT, true, hik_alert[i].sec_light);
             }
-#if defined(CONFIG_CCTV)
+#ifdef CONFIG_AEOLIAN_CCTV_CTRL
             // HikVision MQTT controlled light
             else if ( hik_alert[i].sec_light == 0xff )
             {
               toggle_cctv_daynight(devId);
             }
-#endif
+#endif /* CONFIG_AEOLIAN_CCTV_CTRL */
           }
 
           // Iterate through zones
@@ -841,7 +842,7 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
   r = jsmn_parse(&p, event->data, event->data_len, t, sizeof (t) / sizeof (t[0]));
 
   bool eng_pkt = false;
-  uint i = 1;
+  uint16_t i = 1;
   while ( i < r )
   {
     snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
@@ -866,21 +867,21 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
       if ( t[i].type == JSMN_OBJECT )
       {
         // Number of objects
-        uint objs = t[i++].size;
+        uint16_t objs = t[i++].size;
 
-        for ( uint v = 0; v < objs; v++ )
+        for ( uint16_t v = 0; v < objs; v++ )
         {
           if ( !shrt_cmp ("mov", event->data + t[i].start) )
           {
             if ( t[++i].type == JSMN_ARRAY )
             {
               // Store the length of the array
-              uint elements = t[i++].size;
+              uint16_t elements = t[i++].size;
 
               // Create a code friendly pointer to the elements
               //g = &t[i];
 
-              for ( uint z = 0; z < elements; z++ )
+              for ( uint16_t z = 0; z < elements; z++ )
               {
                 mov[z] = (uint16_t)strtol(event->data + t[i].start, &endptr, 10);
                 i++;
@@ -892,12 +893,12 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
             if ( t[++i].type == JSMN_ARRAY )
             {
               // Store the length of the array
-              uint elements = t[i++].size;
+              uint16_t elements = t[i++].size;
 
               // Create a code friendly pointer to the elements
               //g = &t[i];
 
-              for ( uint z = 0; z < elements; z++ )
+              for ( uint16_t z = 0; z < elements; z++ )
               {
                 sta[z] = (uint16_t)strtol(event->data + t[i].start, &endptr, 10);
                 i++;
@@ -912,9 +913,9 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
       if ( t[i].type == JSMN_OBJECT )
       {
         // Number of objects
-        uint objs = t[i++].size;
+        uint16_t objs = t[i++].size;
 
-        for ( uint v = 0; v < objs; v++ )
+        for ( uint16_t v = 0; v < objs; v++ )
         {
           if ( !shrt_cmp ("dst", event->data + t[i].start) )
           {
@@ -934,9 +935,9 @@ void proc_ev_radar (esp_mqtt_event_handle_t event)
       if ( t[i].type == JSMN_OBJECT )
       {
         // Number of objects
-        uint objs = t[i++].size;
+        uint16_t objs = t[i++].size;
 
-        for ( uint v = 0; v < objs; v++ )
+        for ( uint16_t v = 0; v < objs; v++ )
         {
           if ( !shrt_cmp ("dst", event->data + t[i].start) )
           {
@@ -1110,13 +1111,13 @@ void proc_mqtt_data (esp_mqtt_event_handle_t event)
 {
   uint16_t dev;
 
-  //F_LOGI(true, true, LC_BRIGHT_WHITE, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
+  //F_LOGD(true, true, LC_BRIGHT_WHITE, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
   for ( dev = dev_Light; dev < num_devices; dev++ )
   {
-    //F_LOGI(true, true, LC_BRIGHT_BLUE, "proc_mqtt_data: %s -> %.*s", MQTT_server_cfg[dev].Topic_sub, event->topic_len, event->topic);
+    //F_LOGD(true, true, LC_BRIGHT_BLUE, "proc_mqtt_data: %s -> %.*s", MQTT_server_cfg[dev].Topic_sub, event->topic_len, event->topic);
     if ( topic_cmp(MQTT_server_cfg[dev].Topic_sub, event->topic, event->topic_len) == 1 )
     {
-      F_LOGD(true, true, LC_MAGENTA, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
+      //F_LOGD(true, true, LC_MAGENTA, "proc_mqtt_data: %.*s -> %.*s", event->topic_len, event->topic, event->data_len, event->data);
       switch ( (mqtt_devices_t)dev )
       {
         case dev_Light:
@@ -1177,6 +1178,25 @@ void proc_mqtt_data (esp_mqtt_event_handle_t event)
   }
 }
 
+/*
+  const esp_mqtt_client_config_t mqtt_cfg = {
+    .broker.address.uri = NULL
+  };
+      .broker.address.uri = MQTT_Client_Cfg.Uri,
+      .port               = MQTT_Client_Cfg.Port,
+      .client_id          = MQTT_Client_Cfg.Client_ID,
+      .username           = MQTT_Client_Cfg.Username,
+      .password           = MQTT_Client_Cfg.Password,
+      //.transport          = ssl ? MQTT_TRANSPORT_OVER_SSL : MQTT_TRANSPORT_OVER_TCP,
+      //.cert_pem           = server_cert,
+      //.client_cert_pem    = client_cert,
+      //.client_key_pem     = client_key,
+      //.user_context       = 0,
+      .lwt_topic          = get_lwt_topic (),
+      .lwt_msg            = "Disconnected",
+      .lwt_retain         = 1,
+      .keepalive          = MQTT_Client_Cfg.Keep_Alive
+*/
 // --------------------------------------------------------------------------
 //
 // --------------------------------------------------------------------------
@@ -1184,44 +1204,47 @@ void start_mqtt_client(esp_mqtt_client_handle_t *MQTTClient)
 {
   esp_err_t err = ESP_FAIL;
 #pragma GCC diagnostic push                                     // Save the current warning state
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"   // Disable missing-field-initilizers
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"   // We know about this, so ignore plz.
   esp_mqtt_client_config_t mqtt_cfg = {
-      .event_handle    = mqtt_event_handler,
-      //.host            = resolve_host(host),
-      .uri             = MQTT_Client_Cfg.Uri,
-      .port            = MQTT_Client_Cfg.Port,
-      .client_id       = MQTT_Client_Cfg.Client_ID,
-      .username        = MQTT_Client_Cfg.Username,
-      .password        = MQTT_Client_Cfg.Password,
-      //.transport       = ssl ? MQTT_TRANSPORT_OVER_SSL : MQTT_TRANSPORT_OVER_TCP,
-      //.cert_pem        = server_cert,
-      //.client_cert_pem = client_cert,
-      //.client_key_pem  = client_key,
-      //.user_context    = 0,
-      .lwt_topic       = get_lwt_topic (),
-      .lwt_msg         = "Disconnected",
-      .lwt_retain      = 1,
-      .keepalive       = MQTT_Client_Cfg.Keep_Alive
+    .broker = {
+      .address = {
+        .uri          = MQTT_Client_Cfg.Uri,
+        .port         = MQTT_Client_Cfg.Port,
+      },
+    },
+    .credentials = {
+      .username       = MQTT_Client_Cfg.Username,
+      .client_id      = MQTT_Client_Cfg.Client_ID,
+      .authentication = { .password = MQTT_Client_Cfg.Password },
+    },
+    .session = {
+      .last_will = {
+        .topic        = get_lwt_topic(),
+        .msg          = "disconnected",
+        .retain       = 1,
+      },
+    }
   };
 #pragma GCC diagnostic pop                                      // Restore previous default behaviour
 
   // Attempt to initialise MQTT client
-  if ( strlen (mqtt_cfg.uri) > 0 )
+  if ( strlen(mqtt_cfg.broker.address.uri) > 0 )
   {
     *MQTTClient = esp_mqtt_client_init(&mqtt_cfg);
-  }
+    esp_mqtt_client_register_event(*MQTTClient, MQTT_EVENT_ANY, mqtt_event_handler, NULL);
 
-  // If MQTT was successfully initialised then we attempt to start the client
-  if ( *MQTTClient )
-  {
-    err = esp_mqtt_client_start(*MQTTClient);
-  }
+    // If MQTT was successfully initialised then we attempt to start the client
+    if ( *MQTTClient )
+    {
+      err = esp_mqtt_client_start(*MQTTClient);
+    }
 
-  if ( err )
-  {
-    F_LOGE(true, true, LC_RED, "esp_mqtt_client_start, %s", esp_err_to_name (err));
-    stop_mqtt_client(*MQTTClient);
-    *MQTTClient = NULL;
+    if ( err )
+    {
+      F_LOGE(true, true, LC_RED, "esp_mqtt_client_start, %s", esp_err_to_name (err));
+      stop_mqtt_client(*MQTTClient);
+      *MQTTClient = NULL;
+    }
   }
 }
 // --------------------------------------------------------------------------

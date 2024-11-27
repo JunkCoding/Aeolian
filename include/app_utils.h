@@ -6,10 +6,10 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
-#include <esp_log.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#include <esp_log.h>
 
 #undef MIN
 #undef MAX

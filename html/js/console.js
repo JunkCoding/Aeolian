@@ -40,9 +40,9 @@ function wsOpen()
     {
       if ( evt.data )
       {
-        // Use this to see if we want to autoscroll
-        var as = (rcvd.scrollTop == (rcvd.scrollHeight - rcvd.clientHeight));
-        //var as = (rcvd.scrollTop == rcvd.scrollTopMax);
+        // Save the current position
+        var preTop = rcvd.scrollTop;
+        var as = (preTop == (rcvd.scrollHeight - rcvd.offsetHeight))
 
         var tmpStr = ansi_up.ansi_to_html(evt.data);
         rcvd.innerHTML += tmpStr.replace(new RegExp('\r?\n','g'), '<br />');
@@ -50,7 +50,12 @@ function wsOpen()
         // Autoscroll if we were at the bottom of the log output
         if ( as == true )
         {
-          rcvd.scrollTop = rcvd.scrollTopMax;
+          // Use this to see if we want to autoscroll
+          rcvd.scrollTop = (rcvd.scrollHeight - rcvd.offsetHeight);
+        }
+        else
+        {
+          rcvd.scrollTop = preTop;
         }
       }
     };

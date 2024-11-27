@@ -2,6 +2,7 @@
 #define __APP_TIMER_H__
 
 #include <string.h>
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
@@ -21,7 +22,7 @@ typedef struct
   TaskHandle_t        taskHandle;
 } timer_info_t;
 
-void timer_init_with_taskHandle (timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint interval, TaskHandle_t handle);
-void timer_init_with_semaphore  (timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint interval, SemaphoreHandle_t handle);
+void timer_init_with_taskHandle (timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint16_t interval, TaskHandle_t handle);
+void timer_init_with_semaphore  (timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint16_t interval, SemaphoreHandle_t handle);
 
 #endif

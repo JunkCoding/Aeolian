@@ -13,7 +13,7 @@
 #include "app_timer.h"
 #include "app_utils.h"
 
-timer_info_t *_timer_init(int group, int timer_idx, uint16_t divider, uint interval);
+timer_info_t *_timer_init(int group, int timer_idx, uint16_t divider, uint16_t interval);
 
 #define   USE_ISR_CALLBACK    true
 
@@ -78,7 +78,7 @@ IRAM_ATTR static void timer_isr ( void *args )
 }
 #endif
 
-timer_info_t *_timer_init ( timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint interval )
+timer_info_t *_timer_init ( timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint16_t interval )
 {
   timer_config_t config = {
     .alarm_en              = TIMER_ALARM_EN,          // Alarm Enable
@@ -86,6 +86,7 @@ timer_info_t *_timer_init ( timer_group_t group, timer_idx_t timer_idx, uint16_t
     .intr_type             = TIMER_INTR_LEVEL,        // Is interrupt triggered on timer’s alarm (timer_intr_mode_t)
     .counter_dir           = TIMER_COUNT_UP,          // Does counter increment or decrement (timer_count_dir_t)
     .auto_reload           = TIMER_AUTORELOAD_EN,     // If counter should auto_reload a specific initial value on the timer’s alarm, or continue incrementing or decrementing.
+    .clk_src               = TIMER_SRC_CLK_DEFAULT,   // Use default clock source
     .divider               = divider,                 // Divisor of the incoming 80 MHz (12.5nS) APB_CLK clock. E.g. 80 = 1uS per timer tick
   };
 
@@ -112,7 +113,7 @@ timer_info_t *_timer_init ( timer_group_t group, timer_idx_t timer_idx, uint16_t
 #endif
   return timer_info;
 }
-void timer_init_with_semaphore ( timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint interval, SemaphoreHandle_t handle )
+void timer_init_with_semaphore ( timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint16_t interval, SemaphoreHandle_t handle )
 {
   timer_info_t *timer_info = _timer_init ( group, timer_idx, divider, interval );
   timer_info->semaphore    = handle;
@@ -120,7 +121,7 @@ void timer_init_with_semaphore ( timer_group_t group, timer_idx_t timer_idx, uin
   timer_enable_intr ( group, timer_idx );
   timer_start ( group, timer_idx );
 }
-void timer_init_with_taskHandle ( timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint interval, TaskHandle_t handle )
+void timer_init_with_taskHandle ( timer_group_t group, timer_idx_t timer_idx, uint16_t divider, uint16_t interval, TaskHandle_t handle )
 {
   timer_info_t *timer_info = _timer_init ( group, timer_idx, divider, interval );
   timer_info->semaphore    = NULL;

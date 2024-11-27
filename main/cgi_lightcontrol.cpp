@@ -20,11 +20,13 @@ extern themes_t themes[];
 
 // Cgi that turns the security light on or off according to the 'led' param in the POST data
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-IRAM_ATTR esp_err_t cgiLed (struct async_resp_arg* resp_arg)
+//IRAM_ATTR esp_err_t cgiLed (struct async_resp_arg* resp_arg)
+esp_err_t cgiLed (struct async_resp_arg* resp_arg)
 {
   struct async_resp_arg* req = (struct async_resp_arg*)resp_arg;
 #else
-IRAM_ATTR esp_err_t cgiLed (httpd_req_t * req)
+//IRAM_ATTR esp_err_t cgiLed (httpd_req_t * req)
+esp_err_t cgiLed (httpd_req_t * req)
 {
 #endif
   esp_err_t err = ESP_FAIL;
@@ -62,11 +64,13 @@ IRAM_ATTR esp_err_t cgiLed (httpd_req_t * req)
 }
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-IRAM_ATTR esp_err_t cgiThemes(struct async_resp_arg* resp_arg)
+//IRAM_ATTR esp_err_t cgiThemes(struct async_resp_arg* resp_arg)
+esp_err_t cgiThemes(struct async_resp_arg* resp_arg)
 {
   struct async_resp_arg* req = (struct async_resp_arg*)resp_arg;
 #else
-IRAM_ATTR esp_err_t cgiThemes(httpd_req_t * req)
+//IRAM_ATTR esp_err_t cgiThemes(httpd_req_t * req)
+esp_err_t cgiThemes(httpd_req_t * req)
 {
 #endif
   esp_err_t err = ESP_FAIL;
@@ -165,11 +169,13 @@ IRAM_ATTR esp_err_t cgiThemes(httpd_req_t * req)
 }
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-IRAM_ATTR esp_err_t cgiSchedule (struct async_resp_arg* resp_arg)
+//IRAM_ATTR esp_err_t cgiSchedule (struct async_resp_arg* resp_arg)
+esp_err_t cgiSchedule (struct async_resp_arg* resp_arg)
 {
   struct async_resp_arg* req = (struct async_resp_arg*)resp_arg;
 #else
-IRAM_ATTR esp_err_t cgiSchedule (httpd_req_t * req)
+//IRAM_ATTR esp_err_t cgiSchedule (httpd_req_t * req)
+esp_err_t cgiSchedule (httpd_req_t * req)
 {
 #endif
   esp_err_t err = ESP_FAIL;
@@ -245,11 +251,13 @@ IRAM_ATTR esp_err_t cgiSchedule (httpd_req_t * req)
 }
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-IRAM_ATTR esp_err_t cgiPatterns (struct async_resp_arg* resp_arg)
+//IRAM_ATTR esp_err_t cgiPatterns (struct async_resp_arg* resp_arg)
+esp_err_t cgiPatterns (struct async_resp_arg* resp_arg)
 {
   struct async_resp_arg* req = (struct async_resp_arg*)resp_arg;
 #else
-IRAM_ATTR esp_err_t cgiPatterns (httpd_req_t * req)
+//IRAM_ATTR esp_err_t cgiPatterns (httpd_req_t * req)
+esp_err_t cgiPatterns (httpd_req_t * req)
 {
 #endif
   esp_err_t err = ESP_FAIL;

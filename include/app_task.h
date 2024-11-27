@@ -15,7 +15,6 @@
 #define     STACKSIZE_SCHEDULER       4096
 #define     STACKSIZE_SNTP            4096
 #define     STACKSIZE_STATS           3072
-#define     STACKSIZE_WEB             4096
 #define     STACKSIZE_WSS             4096
 
 // Task names

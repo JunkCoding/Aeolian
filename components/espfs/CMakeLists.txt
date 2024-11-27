@@ -8,7 +8,8 @@ if (CMAKE_HOST_WIN32)
   find_package(Python3)
 endif()
 
-set(include_dirs "include")
+set(includes "include")
+set(priv_includes "third-party/heatshrink")
 
 list(APPEND sources
   "espfs/espfs.c"
@@ -58,16 +59,16 @@ list(APPEND webpages
 
 # For ref
 # ---------------------------------------------------------
-if(AXRGB_DEV_ROCKET)
+if(AEOLIAN_DEV_ROCKET)
   list(APPEND weboages "${PROJECT_DIR}/html/wsa.html")
 endif()
 
 # Register components
 # ---------------------------------------------------------
 idf_component_register(SRCS ${sources}
-                    INCLUDE_DIRS ${include_dirs}
-                    PRIV_INCLUDE_DIRS "third-party/heatshrink"
-                    PRIV_REQUIRES spi_flash spiffs)
+                    INCLUDE_DIRS ${includes}
+                    PRIV_INCLUDE_DIRS ${priv_includes}
+                    PRIV_REQUIRES spi_flash spiffs vfs)
 
 # Generate: "build/esp-idf/libespfs/webpages.espfs"
 # ---------------------------------------------------------

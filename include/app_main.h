@@ -1,11 +1,13 @@
 #ifndef   __MAIN_H__
 #define   __MAIN_H__
 
-#include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
 #include <freertos/portmacro.h>
 #include <freertos/task.h>
+
+#include <esp_sntp.h>
+
 #include "app_task.h"
 #include "ws2812_driver.h"
 
@@ -111,6 +113,12 @@ typedef enum
 #define JSON_FAILURE_STR            "\n\t\"success\": false\n}"
 #define JSON_REBOOT_STR             "{\n\t\"message\": \"Rebooting...\",\n\t\"success\": true\n}"
 
+#if not defined AEOLIAN_DEBUG_DEV
+#if defined (CONFIG_ESP_GDBSTUB_ENABLED)
+#pragma once
+#warning GDBSTUB enabled
+#endif /* CONFIG_ESP_GDBSTUB_ENABLED */
+#endif /* AEOLIAN_DEBUG_DEV */
 
 /*
  * Macro to check the outputs of TWDT functions and trigger an abort if an

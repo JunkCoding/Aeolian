@@ -3,35 +3,37 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/time.h>
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
+#include <freertos/event_groups.h>
 #include <freertos/portmacro.h>
 #include <freertos/task.h>
-#include <esp_heap_task_info.h>
-#include <freertos/event_groups.h>
-#include <esp_timer.h>
-#include <soc/rmt_struct.h>
-#include <driver/periph_ctrl.h>
-#include <driver/timer.h>
-#include <driver/i2s.h>
-#include <driver/uart.h>
-#include <soc/rtc_wdt.h>
-#include <esp_task_wdt.h>
 
+#include <soc/rmt_struct.h>
+
+#include <lwip/sys.h>
+#include <lwip/err.h>
+
+#include <driver/gptimer.h>
+#include <driver/uart.h>
+
+#include <esp_task_wdt.h>
+#include <esp_heap_task_info.h>
+#include <esp_heap_caps.h>
+#include <esp_timer.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
-#include <esp_heap_caps.h>
-#include <esp32/clk.h>
 #include <esp_pm.h>
 
-#include <lwip/err.h>
-#include <lwip/sys.h>
+#include <hal/wdt_hal.h>
+#include <rtc_wdt.h>
 
 #include "app_wifi.h"
 #include "app_httpd.h"
-
 #include "app_main.h"
 #include "app_utils.h"
 #include "app_lightcontrol.h"
@@ -42,7 +44,7 @@
 #include "app_flash.h"
 #include "app_cctv.h"
 #include "app_gpio.h"
-#include "mqtt_config.h"
+#include "app_mqtt_config.h"
 #include "app_mqtt.h"
 #include "app_httpd.h"
 #include "moonphase.h"
@@ -55,7 +57,7 @@ lightcheck_t lightcheck = {0, 0, 0, 0, 0, 0, false};
 // ************************************************************
 extern "C" void app_main(void)
 {
-  //esp_err_t err;
+  esp_err_t err;
   // -----------------------------------------------------------
   // Set our console to our requested monitor
   // rate (CONFIG_ESPTOOLPY_MONITOR_BAUD)
@@ -83,34 +85,68 @@ extern "C" void app_main(void)
   // -----------------------------------------------------------
   prng_seed();
 
-#if CONFIG_BOOTLOADER_WDT_DISABLE_IN_USER_CODE
+#ifdef CONFIG_BOOTLOADER_WDT_DISABLE_IN_USER_CODE
   // -----------------------------------------------------------
   // If this option is set, the app must explicitly reset, feed,
   // or disable the rtc_wdt in it's own code.
   // -----------------------------------------------------------
-  rtc_wdt_disable();
+  //wdt_hal_context_t rtc_wdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
+  wdt_hal_context_t rtc_wdt_ctx = {.inst = WDT_RWDT, .rwdt_dev = &RTCCNTL};
+  wdt_hal_write_protect_disable(&rtc_wdt_ctx);
+  wdt_hal_disable(&rtc_wdt_ctx);
+  wdt_hal_write_protect_enable(&rtc_wdt_ctx);
 #endif
 
-#if CONFIG_USE_TASK_WDT
-  F_LOGI(true, true, LC_GREY, "Initialising TWDT");
-  CHECK_ERROR_CODE(esp_task_wdt_init(TWDT_TIMEOUT_S, true), ESP_OK);
-#endif /* CONFIG_USE_TASK_WDT */
+#if CONFIG_APP_TWDT
+  F_LOGI(true, true, LC_GREY, "Checking TWDT...");
+  esp_task_wdt_config_t twdt_config = {
+    .timeout_ms     = TWDT_TIMEOUT_S * 1000,
+    .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,
+    .trigger_panic  = true,
+  };
 
+  if ( (err = esp_task_wdt_init(&twdt_config)) == ESP_ERR_INVALID_STATE )
+  {
+    F_LOGI(true, true, LC_GREY, "TWDT already running, reconfiguring with a timeout of %d seconds...", TWDT_TIMEOUT_S);
+    err = esp_task_wdt_reconfigure(&twdt_config);
+  }
+
+/*  I think, the next code is legacy as it is not needed since they are
+    configured as part of the statement above
+  if ( err == ESP_OK )
+  {
+    F_LOGW(true, true, LC_GREY, "Checking TWDT idle tasks...");
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0
-  // F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
-  // FIXME: esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
-#endif /* CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0 */
+    F_LOGW(true, true, LC_GREY, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
+    esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
+    if ( esp_task_wdt_status(xTaskGetIdleTaskHandleForCPU(0)) != ESP_OK )
+    {
+      F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
+    }
+#endif // CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0
 
 #ifndef CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1
-  // F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1))");
-  // FIXME: esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1));
-#endif /* CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1 */
+    F_LOGW(true, true, LC_GREY, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1))");
+    esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1));
+    if ( esp_task_wdt_status(xTaskGetIdleTaskHandleForCPU(1)) != ESP_OK )
+    {
+      F_LOGW(true, true, LC_BRIGHT_YELLOW, "esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0))");
+    }
+#endif // CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1
+  }
+  */
+  if ( err != ESP_OK )
+  {
+    F_LOGW(true, true, LC_RED, "TWDT configuration failed... restarting");
+    esp_restart();
+  }
+#endif /* CONFIG_APP_TWDT */
 
   // -----------------------------------------------------------
   // Warn GDBSTUB_ENABLED is set
   // -----------------------------------------------------------
-#if defined (CONFIG_ESP_GDBSTUB_ENABLED)
-  F_LOGW(true, true, LC_BRIGHT_RED, "gdbstub enabled");
+#if CONFIG_ESP_GDBSTUB_ENABLED
+  F_LOGW(false, true, LC_BRIGHT_RED, "*** gdbstub enabled ***");
 #endif
 
   // -----------------------------------------------------------
@@ -129,27 +165,6 @@ extern "C" void app_main(void)
   get_nvs_led_info();
 
   // -----------------------------------------------------------
-  // Configure dynamic frequency scaling
-  // -----------------------------------------------------------
-#if CONFIG_PM_ENABLE
-  esp_pm_config_esp32_t pm_config = {
-    .max_freq_mhz = ESP_PM_CPU_FREQ_MAX,
-    //.min_freq_mhz = (int) rtc_clk_xtal_freq_get(),
-    .min_freq_mhz = esp_clk_xtal_freq() / 1000000,
-#if CONFIG_FREERTOS_USE_TICKLESS_IDLE
-    .light_sleep_enable = true
-#else
-    .light_sleep_enable = false
-#endif
-  };
-  err = esp_pm_configure(&pm_config);
-  if ( err != ESP_OK )
-  {
-    F_LOGE(true, true, LC_YELLOW, "Problem running esp_pm_configure()");
-  }
-#endif // CONFIG_PM_ENABLE
-
-  // -----------------------------------------------------------
   // setup configuration
   // -----------------------------------------------------------
   static Configuration_List_t cfg_list[2];
@@ -160,7 +175,7 @@ extern "C" void app_main(void)
   // Display some useful info on boot
   // -----------------------------------------------------------
   print_app_info();
-#if defined(CONFIG_DEBUG)
+#if defined(AEOLIAN_DEV_DEBUG)
   show_nvs_usage();
   printHeapInfo();
 #endif
@@ -171,35 +186,35 @@ extern "C" void app_main(void)
   static httpd_handle_t httpServer = NULL;
 
   // -----------------------------------------------------------
-  // WiFi Initialisation
-  // -----------------------------------------------------------
-  init_wifi(&httpServer);
-
-  // -----------------------------------------------------------
   // HTTP Initialisation
   // -----------------------------------------------------------
   init_http_server(&httpServer);
 
   // -----------------------------------------------------------
+  // WiFi Initialisation
+  // -----------------------------------------------------------
+  init_wifi(&httpServer);
+
+  // -----------------------------------------------------------
   // MQTT Initialisation
   // -----------------------------------------------------------
   init_mqtt_client();
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
   xTaskCreate(mqtt_send_task, TASK_NAME_MQTT_BROKER, STACKSIZE_MQTT_BROKER, NULL, TASK_PRIORITY_MQTT, &xMQTTHandle);
 #else
   xTaskCreatePinnedToCore(mqtt_send_task, TASK_NAME_MQTT_BROKER, STACKSIZE_MQTT_BROKER, NULL, TASK_PRIORITY_MQTT, &xMQTTHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+#endif /* CONFIG_APP_ALL_CORES */
 
   // -----------------------------------------------------------
   // Random CCTV Movement
   // -----------------------------------------------------------
-#if defined(CONFIG_CCTV)
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_AEOLIAN_CCTV_CTRL
+#if CONFIG_APP_ALL_CORES
   xTaskCreate(cctv_task, TASK_NAME_CCTV, STACKSIZE_CCTV, NULL, TASK_PRIORITY_CCTV, &xCCTVHandle);
 #else
   xTaskCreatePinnedToCore(cctv_task, TASK_NAME_CCTV, STACKSIZE_CCTV, NULL, TASK_PRIORITY_CCTV, &xCCTVHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
-#endif /* CONFIG_CCTV */
+#endif /* CONFIG_APP_ALL_CORES */
+#endif /* CONFIG_AEOLIAN_CCTV_CTRL */
 
   // -----------------------------------------------------------
   // Set a random pattern at boot time.
@@ -211,11 +226,11 @@ extern "C" void app_main(void)
   // -----------------------------------------------------------
   if ( lights_init() == ESP_OK )
   {
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
     xTaskCreate(lights_task, TASK_NAME_LIGHTS, STACKSIZE_LIGHTS, NULL, TASK_PRIORITY_LIGHTS, &xLightsHandle);
 #else
     xTaskCreatePinnedToCore(lights_task, TASK_NAME_LIGHTS, STACKSIZE_LIGHTS, NULL, TASK_PRIORITY_LIGHTS, &xLightsHandle, LIGHTS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+#endif /* CONFIG_APP_ALL_CORES */
   }
 
   // -----------------------------------------------------------
@@ -223,11 +238,11 @@ extern "C" void app_main(void)
   // -----------------------------------------------------------
   init_gpio_pins(&control_vars);
 #if CONFIG_MOTION_DETECTION
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
   xTaskCreate(gpio_task, TASK_NAME_GPIO, STACKSIZE_GPIO, NULL, TASK_PRIORITY_GPIO, &xGpioHandle);
 #else
   xTaskCreatePinnedToCore(gpio_task, TASK_NAME_GPIO, STACKSIZE_GPIO, NULL, TASK_PRIORITY_GPIO, &xGpioHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+#endif /* CONFIG_APP_ALL_CORES */
 #endif /* CONFIG_MOTION_DETECTION */
 
   // -----------------------------------------------------------
@@ -248,11 +263,11 @@ extern "C" void app_main(void)
   // Are we showing runtime stats?
   // -----------------------------------------------------------
 #if (CONFIG_FREERTOS_VTASKLIST_INCLUDE_COREID && CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS)
-#if CONFIG_USE_BOTH_CORES
+#if CONFIG_APP_ALL_CORES
   xTaskCreate(stats_task, TASK_NAME_STATS, STACKSIZE_STATS, NULL, TASK_PRIORITY_STATS, &xStatsHandle);
 #else
   xTaskCreatePinnedToCore(stats_task, TASK_NAME_STATS, STACKSIZE_STATS, NULL, TASK_PRIORITY_STATS, &xStatsHandle, TASKS_CORE);
-#endif /* CONFIG_USE_BOTH_CORES */
+#endif /* CONFIG_APP_ALL_CORES */
 #endif
 
   // -----------------------------------------------------------

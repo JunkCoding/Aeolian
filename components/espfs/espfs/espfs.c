@@ -17,7 +17,7 @@
 #include <freertos/FreeRTOS.h>
 #include <esp_partition.h>
 #include <esp_flash_spi_init.h>
-#include <esp_spi_flash.h>
+#include <spi_flash_mmap.h>
 #include "espfs_priv.h"
 #include "espfs_log.h"
 #include "espfs_format.h"
@@ -30,12 +30,12 @@ espfs_fs_t* espfs_init (espfs_config_t* conf)
   espfs_fs_t* fs = pvPortMalloc (sizeof (espfs_fs_t));
   if ( fs == NULL )
   {
-    ESPFS_LOGE (__func__, "pvPortMalloc failed allocating 'fs'");
+    //ESPFS_LOGE (__func__, "pvPortMalloc failed allocating 'fs'");
     return NULL;
   }
   memset (fs, 0, sizeof (espfs_fs_t));
 
-  ESPFS_LOGV (__func__, "%p", fs);
+  //ESPFS_LOGV (__func__, "%p", fs);
 
   fs->header = ( espfs_fs_header_t* )conf->addr;
   if ( fs->header == NULL )
@@ -48,7 +48,7 @@ espfs_fs_t* espfs_init (espfs_config_t* conf)
 
     if ( partition == NULL )
     {
-      ESPFS_LOGE (__func__, "unable to find espfs partition");
+      //ESPFS_LOGE (__func__, "unable to find espfs partition");
       goto err_out;
     }
 
@@ -56,27 +56,26 @@ espfs_fs_t* espfs_init (espfs_config_t* conf)
       SPI_FLASH_MMAP_DATA, ( const void** )&fs->header,
       &fs->mmap_handle) != ESP_OK )
     {
-      ESPFS_LOGE (__func__, "mmap failed");
+      //ESPFS_LOGE (__func__, "mmap failed");
       goto err_out;
     }
 #else
-    ESPFS_LOGE (__func__, "flash mmap not enabled and addr is NULL");
+    //ESPFS_LOGE (__func__, "flash mmap not enabled and addr is NULL");
     goto err_out;
 #endif
   }
 
   if ( fs->header->magic != ESPFS_MAGIC )
   {
-    ESPFS_LOGE (__func__, "magic not found");
-    ESPFS_LOGE (__func__, "%08X <> %08X", fs->header->magic, ESPFS_MAGIC);
+    //ESPFS_LOGE (__func__, "magic not found");
+    //ESPFS_LOGE (__func__, "%08X <> %08X", fs->header->magic, ESPFS_MAGIC);
     //ESPFS_LOGE(__func__, "%08X ", &fs->header->magic);
     goto err_out;
   }
 
   if ( fs->header->version_major != ESPFS_VERSION_MAJOR )
   {
-    ESPFS_LOGE (__func__, "espfs version %d.%d not supported",
-            fs->header->version_major, fs->header->version_minor);
+    //ESPFS_LOGE (__func__, "espfs version %d.%d not supported", fs->header->version_major, fs->header->version_minor);
     goto err_out;
   }
 
@@ -92,7 +91,7 @@ err_out:
 
 void espfs_deinit (espfs_fs_t* fs)
 {
-  ESPFS_LOGV (__func__, "%p", fs);
+  //ESPFS_LOGV (__func__, "%p", fs);
 
 #if defined(ESP_PLATFORM)
   if ( fs->mmap_handle )
@@ -141,10 +140,10 @@ static const void* find_object (espfs_fs_t* fs, const char* path)
   {
     path++;
   }
-  ESPFS_LOGV (__func__, "%s", path);
+  //ESPFS_LOGV (__func__, "%s", path);
 
   uint32_t hash = hash_path (path);
-  ESPFS_LOGV (__func__, "hash %08x", hash);
+  //ESPFS_LOGV (__func__, "hash %08x", (unsigned int)hash);
 
   int first = 0;
   int last = fs->header->num_objects - 1;
@@ -171,7 +170,7 @@ static const void* find_object (espfs_fs_t* fs, const char* path)
 
   if ( first > last )
   {
-    ESPFS_LOGV (__func__, "no match");
+    //ESPFS_LOGV (__func__, "no match");
     return NULL;
   }
 
@@ -179,12 +178,12 @@ static const void* find_object (espfs_fs_t* fs, const char* path)
   espfs_object_header_t* object = ( void* )fs->header + entry->offset;
   if ( strcmp (path, ( char* )object + object->len) == 0 )
   {
-    ESPFS_LOGV (__func__, "object %d", middle);
+    //ESPFS_LOGV (__func__, "object %d", middle);
     return object;
   }
 
   /* hash collision, move entry to the first match */
-  ESPFS_LOGV (__func__, "hash collision");
+  //ESPFS_LOGV (__func__, "hash collision");
   int skip = middle;
   while ( middle > 0 )
   {
@@ -204,7 +203,7 @@ static const void* find_object (espfs_fs_t* fs, const char* path)
       object = ( void* )fs->header + entry->offset;
       if ( strcmp (path, ( const char* )object + object->len) == 0 )
       {
-        ESPFS_LOGV (__func__, "object %d", middle);
+        //ESPFS_LOGV (__func__, "object %d", middle);
         return object;
       }
     }
@@ -213,7 +212,7 @@ static const void* find_object (espfs_fs_t* fs, const char* path)
   }
   while ( (middle < fs->header->num_objects) && (entry->hash == hash) );
 
-  ESPFS_LOGW (__func__, "unable to find object");
+  //ESPFS_LOGW (__func__, "unable to find object");
   return NULL;
 }
 
@@ -224,7 +223,7 @@ bool espfs_stat (espfs_fs_t* fs, const char* path, espfs_stat_t* stat)
   const espfs_object_header_t* object = find_object (fs, path);
   if ( object == NULL )
   {
-    ESPFS_LOGD (__func__, "object not found: %s", path);
+    //ESPFS_LOGD (__func__, "object not found: %s", path);
     return false;
   }
 
@@ -250,7 +249,7 @@ espfs_file_t* espfs_fopen (espfs_fs_t* fs, const char* path)
   const espfs_object_header_t* object = find_object (fs, path);
   if ( (object == NULL) || (object->type != ESPFS_TYPE_FILE) )
   {
-    ESPFS_LOGD (__func__, "file not found: %s", path);
+    //ESPFS_LOGD (__func__, "file not found: %s", path);
     return NULL;
   }
 
@@ -259,12 +258,12 @@ espfs_file_t* espfs_fopen (espfs_fs_t* fs, const char* path)
   espfs_file_t* f = pvPortMalloc (sizeof (espfs_file_t));
   if ( f == NULL )
   {
-    ESPFS_LOGE (__func__, "pvPortMalloc failed allocating 'f'");
+    //ESPFS_LOGE (__func__, "pvPortMalloc failed allocating 'f'");
     goto err_out;
   }
   memset (f, 0, sizeof (espfs_file_t));
 
-  ESPFS_LOGV (__func__, "%p", f);
+  //ESPFS_LOGV (__func__, "%p", f);
 
   f->fs = fs;
   f->fh = fh;
@@ -283,7 +282,7 @@ espfs_file_t* espfs_fopen (espfs_fs_t* fs, const char* path)
     }
     else
     {
-      ESPFS_LOGE (__func__, "unrecognized compression type %d", fh->compression);
+      //ESPFS_LOGE (__func__, "unrecognized compression type %d", fh->compression);
       goto err_out;
     }
 
@@ -303,7 +302,7 @@ void espfs_fclose (espfs_file_t* f)
     return;
   }
 
-  ESPFS_LOGV (__func__, "%p", f);
+  //ESPFS_LOGV (__func__, "%p", f);
 
 
   if ( f->fh->compression == ESPFS_COMPRESSION_HEATSHRINK )
@@ -311,7 +310,7 @@ void espfs_fclose (espfs_file_t* f)
     heatshrink_decoder* hsd = f->user;
     if ( hsd != NULL )
     {
-      ESPFS_LOGV (__func__, "heatshrink_decoder_free");
+      //ESPFS_LOGV (__func__, "heatshrink_decoder_free");
       heatshrink_decoder_free (hsd);
     }
   }
@@ -364,12 +363,12 @@ ssize_t espfs_fread (espfs_file_t* f, void* buf, size_t len)
     {
       espfs_heatshrink_header_t* hsh = ( void* )&f->fh->object +
         f->fh->object.len + f->fh->object.path_len;
-      ESPFS_LOGV (__func__, "heatshrink_decoder_alloc");
+      //ESPFS_LOGV (__func__, "heatshrink_decoder_alloc");
       hsd = heatshrink_decoder_alloc (16, hsh->window_sz2,
               hsh->lookahead_sz2);
       if ( hsd == NULL )
       {
-        ESPFS_LOGE (__func__, "heatshrink_decoder_alloc");
+        //ESPFS_LOGE (__func__, "heatshrink_decoder_alloc");
         return -1;
       }
 
@@ -389,7 +388,7 @@ ssize_t espfs_fread (espfs_file_t* f, void* buf, size_t len)
                 (remain > 16)?16:remain, &rlen);
         if ( res < 0 )
         {
-          ESPFS_LOGE (__func__, "heatshrink_decoder_sink");
+          //ESPFS_LOGE (__func__, "heatshrink_decoder_sink");
           return -1;
         }
         f->raw_ptr += rlen;
@@ -399,7 +398,7 @@ ssize_t espfs_fread (espfs_file_t* f, void* buf, size_t len)
               len - decoded, &rlen);
       if ( res < 0 )
       {
-        ESPFS_LOGE (__func__, "heatshrink_decoder_poll");
+        //ESPFS_LOGE (__func__, "heatshrink_decoder_poll");
         return -1;
       }
       f->file_pos += rlen;
@@ -413,10 +412,10 @@ ssize_t espfs_fread (espfs_file_t* f, void* buf, size_t len)
           HSD_finish_res res = heatshrink_decoder_finish (hsd);
           if ( res < 0 )
           {
-            ESPFS_LOGE (__func__, "heatshrink_decoder_finish");
+            //ESPFS_LOGE (__func__, "heatshrink_decoder_finish");
             return -1;
           }
-          ESPFS_LOGV (__func__, "heatshrink_decoder_finish");
+          //ESPFS_LOGV (__func__, "heatshrink_decoder_finish");
         }
         return decoded;
       }
@@ -519,7 +518,7 @@ ssize_t espfs_fseek (espfs_file_t* f, long offset, int mode)
     {
       if ( hsd != NULL )
       {
-        ESPFS_LOGV (__func__, "heatshrink_decoder_reset");
+        //ESPFS_LOGV (__func__, "heatshrink_decoder_reset");
         heatshrink_decoder_reset (hsd);
       }
       f->file_pos = 0;

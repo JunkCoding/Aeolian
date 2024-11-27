@@ -10,24 +10,26 @@
 #include <freertos/semphr.h>
 #include <freertos/queue.h>
 #include <freertos/event_groups.h>
+
 #include <esp_app_format.h>
-#include <hal/efuse_hal.h>
-#include <hal/efuse_ll.h>
-#include <esp_system.h>
-#include <nvs_flash.h>
-#include <esp_event.h>
-
-#include <esp_ota_ops.h>
-#include <driver/rtc_io.h>
 #include <esp_partition.h>
-#include <esp_spi_flash.h>
+#include <esp_image_format.h>
 #include <esp_heap_caps.h>
+#include <esp_system.h>
+#include <esp_ota_ops.h>
+#include <esp_event.h>
+#include <esp_flash.h>
+#include <esp_cpu.h>
 
-#include <clk.h>
+#include <hal/efuse_hal.h>
+
+#include <nvs_flash.h>
+
+#include <driver/rtc_io.h>
+
 #include <rom/rtc.h>
 #include <rom/cache.h>
 #include <rom/ets_sys.h>
-#include <rom/spi_flash.h>
 #include <rom/crc.h>
 
 #include "app_main.h"
@@ -67,8 +69,10 @@ static int getOtaSel()
   int selectedPart;
   ota_select sa1, sa2;
   const esp_partition_t *otaselpart = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_OTA, NULL);
-  spi_flash_read(( uint32_t )otaselpart->address, ( uint32_t * )&sa1, sizeof(ota_select));
-  spi_flash_read(( uint32_t )otaselpart->address + 0x1000, ( uint32_t * )&sa2, sizeof(ota_select));
+
+  esp_flash_read(otaselpart->flash_chip, (uint32_t *)&sa1, (uint32_t)otaselpart->address, sizeof(ota_select));
+  esp_flash_read(otaselpart->flash_chip, (uint32_t *)&sa2, (uint32_t)otaselpart->address + 0x1000, sizeof(ota_select));
+  
   if ( ota_select_valid(&sa1) && ota_select_valid(&sa2) )
   {
     selectedPart = (((sa1.ota_seq > sa2.ota_seq) ? sa1.ota_seq : sa2.ota_seq)) % 2;
@@ -107,8 +111,10 @@ int esp32flashSetOtaAsCurrentImage()
   const esp_partition_t *otaselpart = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_OTA, NULL);
   int selSect = -1;
   ota_select sa1, sa2, newsa;
-  spi_flash_read(( uint32_t )otaselpart->address, ( uint32_t * )&sa1, sizeof(ota_select));
-  spi_flash_read(( uint32_t )otaselpart->address + 0x1000, ( uint32_t * )&sa2, sizeof(ota_select));
+  
+  esp_flash_read(otaselpart->flash_chip, (uint32_t *)&sa1, (uint32_t)otaselpart->address, sizeof(ota_select));
+  esp_flash_read(otaselpart->flash_chip, (uint32_t *)&sa2, (uint32_t)otaselpart->address + 0x1000, sizeof(ota_select));
+
   if ( ota_select_valid(&sa1) && ota_select_valid(&sa2) )
   {
     selSect = (sa1.ota_seq > sa2.ota_seq) ? 1 : 0;
@@ -130,16 +136,16 @@ int esp32flashSetOtaAsCurrentImage()
     newsa.ota_seq = sa2.ota_seq + 1;
     F_LOGI(true, true, LC_BRIGHT_YELLOW, "Writing seq %d to ota select sector 1", newsa.ota_seq);
     newsa.crc = ota_select_crc(&newsa);
-    spi_flash_erase_sector(otaselpart->address / 0x1000);
-    spi_flash_write(otaselpart->address, ( uint32_t * )&newsa, sizeof(ota_select));
+    esp_flash_erase_region(otaselpart->flash_chip, otaselpart->address / 0x1000, 0x1000);
+    esp_flash_write(otaselpart->flash_chip, (uint32_t *)&newsa, otaselpart->address, sizeof(ota_select));
   }
   else
   {
     F_LOGI(true, true, LC_BRIGHT_YELLOW, "Writing seq %d to ota select sector 2", newsa.ota_seq);
     newsa.ota_seq = sa1.ota_seq + 1;
     newsa.crc = ota_select_crc(&newsa);
-    spi_flash_erase_sector(otaselpart->address / 0x1000 + 1);
-    spi_flash_write(otaselpart->address + 0x1000, ( uint32_t * )&newsa, sizeof(ota_select));
+    esp_flash_erase_region(otaselpart->flash_chip, otaselpart->address / 0x1000 + 1, 0x1000);
+    esp_flash_write(otaselpart->flash_chip, (uint32_t *)&newsa, otaselpart->address + 0x1000, sizeof(ota_select));
   }
   return 1;
 }
@@ -274,7 +280,7 @@ esp_err_t otaUpdateWriteHexData(const char *hexData, int len)
   {
     int flashSectorToErase = update_pointer / 0x1000;
 
-    spi_flash_erase_sector(flashSectorToErase);
+    esp_flash_erase_region(NULL, flashSectorToErase, 0x1000);
   }
 
   err = esp_ota_write(update_handle, hexData, len);
@@ -291,6 +297,8 @@ esp_err_t otaUpdateWriteHexData(const char *hexData, int len)
 
 void otaDumpInformation()
 {
+  const esp_partition_t *otaselpart = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_OTA, NULL);
+
   esp_err_t result;
   uint8_t *buf = (uint8_t *)pvPortMalloc(OTA_BUF_SIZE);
   if ( buf )
@@ -300,48 +308,49 @@ void otaDumpInformation()
     {
       F_LOGI(true, true, LC_GREY, "otaDumpInformation");
 
-      size_t chipSize = spi_flash_get_chip_size();
+      uint32_t chipSize = 0;
+      esp_flash_get_physical_size(otaselpart->flash_chip, &chipSize);
       F_LOGI(true, true, LC_GREY, "flash chip size = %d", chipSize);
 
       F_LOGI(true, true, LC_GREY, "Reading flash at 0x00000000....");
-      result = spi_flash_read(0, buf, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf, 0, OTA_BUF_SIZE);
       F_LOGI(true, true, LC_GREY, "Result = %d", result);
       otaDump128bytes(0, buf);
 
       F_LOGI(true, true, LC_GREY, "Reading flash at 0x00001000....");
-      result = spi_flash_read(0x1000, buf, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf, 0x1000, OTA_BUF_SIZE);
       F_LOGI(true, true, LC_GREY, "Result = %d", result);
       otaDump128bytes(0x1000, buf);
 
       F_LOGI(true, true, LC_GREY, "Reading flash at 0x00004000....");
-      result = spi_flash_read(0x4000, buf, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf, 0x4000, OTA_BUF_SIZE);
       F_LOGI(true, true, LC_GREY, "Result = %d", result);
       otaDump128bytes(0x4000, buf);
 
       F_LOGI(true, true, LC_GREY, "Reading flash at 0x0000D000....");
-      result = spi_flash_read(0xD000, buf, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf, 0xD000, OTA_BUF_SIZE);
       otaDump128bytes(0xD000, buf);
-      result = spi_flash_read(0xE000, buf, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf, 0xE000, OTA_BUF_SIZE);
       F_LOGI(true, true, LC_GREY, "Result = %d", result);
       otaDump128bytes(0xE000, buf);
 
       F_LOGI(true, true, LC_GREY, "Reading flash at 0x00010000....");
-      result = spi_flash_read(0x10000, buf, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf, 0x10000, OTA_BUF_SIZE);
       F_LOGI(true, true, LC_GREY, "Result = %d", result);
       otaDump128bytes(0x10000, buf);
 
       F_LOGI(true, true, LC_GREY, "Reading flash at 0x00020000....");
-      result = spi_flash_read(0x20000, buf2, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf2, 0x20000, OTA_BUF_SIZE);
       F_LOGI(true, true, LC_GREY, "Result = %d", result);
       otaDump128bytes(0x20000, buf2);
 
       F_LOGI(true, true, LC_GREY, "Reading flash at 0x00110000....");
-      result = spi_flash_read(0x110000, buf2, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf2, 0x110000, OTA_BUF_SIZE);
       F_LOGI(true, true, LC_GREY, "Result = %d", result);
       otaDump128bytes(0x110000, buf2);
 
       F_LOGI(true, true, LC_GREY, "Reading flash at 0x00210000....");
-      result = spi_flash_read(0x210000, buf2, OTA_BUF_SIZE);
+      result = esp_flash_read(otaselpart->flash_chip,  buf2, 0x210000, OTA_BUF_SIZE);
       F_LOGI(true, true, LC_GREY, "Result = %d", result);
       otaDump128bytes(0x210000, buf2);
 
@@ -833,12 +842,19 @@ esp_err_t cgiUploadFirmware(httpd_req_t *req)
         {
           // Save our current reboot number
           // *****************************************
-          nvs_handle handle;
-          nvs_open(NVS_SYS_INFO, NVS_READWRITE, &handle);
-          nvs_set_u32(handle, NVS_OTA_UPDATE_KEY, boot_count);
-          nvs_commit(handle);
-          nvs_close(handle);
-          F_LOGI(true, true, LC_BRIGHT_YELLOW, "OTA update: Complete");
+          nvs_handle_t nvs_handle;
+          err = nvs_open(NVS_SYS_INFO, NVS_READWRITE, &nvs_handle);
+          if ( err == ESP_OK )
+          {
+            nvs_set_u32(nvs_handle, NVS_OTA_UPDATE_KEY, boot_count);
+            nvs_commit(nvs_handle);
+            nvs_close(nvs_handle);
+            F_LOGI(true, true, LC_BRIGHT_YELLOW, "OTA update: Complete");
+          }
+          else
+          {
+            F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_WIFI_STA_CFG, __FILE__, __LINE__);
+          }
         }
       }
     }
@@ -870,8 +886,8 @@ esp_err_t cgiUploadFirmware(httpd_req_t *req)
 
 #define PARTITION_IS_FACTORY(partition) (partition->type == ESP_PARTITION_TYPE_APP) && (partition->subtype == ESP_PARTITION_SUBTYPE_APP_FACTORY))
 #define PARTITION_IS_OTA(partition) ((partition->type == ESP_PARTITION_TYPE_APP) && (partition->subtype >= ESP_PARTITION_SUBTYPE_APP_OTA_MIN) && (partition->subtype <= ESP_PARTITION_SUBTYPE_APP_OTA_MAX))
-#define APP_FMT_STR "{\n\t\t\t\"name\": \"%s\",\n\t\t\t\"size\": %d,\n\t\t\t\"version\": \"\",\n\t\t\t\"ota\": %s,\n\t\t\t\"running\": %s,\n\t\t\t\"bootset\": %s"
-#define DATA_FMT_STR "{\n\t\t\t\"name\": \"%s\",\n\t\t\t\"size\": %d,\n\t\t\t\"format\": %d\n\t\t}"
+#define APP_FMT_STR "{\n\t\t\t\"name\": \"%s\",\n\t\t\t\"size\": %lu,\n\t\t\t\"version\": \"\",\n\t\t\t\"ota\": %s,\n\t\t\t\"running\": %s,\n\t\t\t\"bootset\": %s"
+#define DATA_FMT_STR "{\n\t\t\t\"name\": \"%s\",\n\t\t\t\"size\": %lu,\n\t\t\t\"format\": %d\n\t\t}"
 #if defined (CONFIG_HTTPD_USE_ASYNC)
 IRAM_ATTR esp_err_t cgiGetFlashInfo(struct async_resp_arg *req)
 #else

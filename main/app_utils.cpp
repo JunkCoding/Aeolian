@@ -11,6 +11,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "esp_random.h"
+
 #include "app_utils.h"
 #include "app_yuarel.h"
 
@@ -27,7 +29,7 @@ IRAM_ATTR uint32_t clock_ms()
 }
 
 // Serial ports
-extern uint radSerial;
+extern uint16_t radSerial;
 
 const char *colour[] =
 {
@@ -83,7 +85,7 @@ typedef struct
   void         *next_logmesg;
   void         *prev_logmesg;
 } backlog_struct_t;
-#define MAX_LOG_LINES   CONFIG_LOG_MAX_LINES
+#define MAX_LOG_LINES   CONFIG_APP_LOG_LINES
 #define LOG_BUFSIZE     255
 
 // logging history (for web interface, etc.)

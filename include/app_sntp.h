@@ -1,8 +1,9 @@
 #ifndef  __SNTP_H__
 #define  __SNTP_H__
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+#include <esp_sntp.h>
 
 extern SemaphoreHandle_t sntp_mutex;
 

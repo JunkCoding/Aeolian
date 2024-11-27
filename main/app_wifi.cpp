@@ -6,17 +6,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/event_groups.h>
+
 #include <esp_system.h>
+#include <esp_mac.h>
 #include <esp_wifi.h>
+#include <esp_task_wdt.h>
 #include <esp_wifi_types.h>
+#include <esp_chip_info.h>
 #include <esp_event.h>
 #include <esp_netif.h>
+
 #include <nvs_flash.h>
+
 #include <lwip/err.h>
 #include <lwip/sys.h>
+
 #include <jsmn.h>
 
 #include "app_main.h"
@@ -24,8 +32,8 @@
 #include "app_wifi.h"
 #include "app_mqtt.h"
 #include "app_httpd.h"
-#include "mqtt_settings.h"
-#include "mqtt_config.h"
+#include "app_mqtt_settings.h"
+#include "app_mqtt_config.h"
 #include "app_configs.h"
 #include "app_sntp.h"
 #include "app_schedule.h"
@@ -66,7 +74,7 @@ static bool ssid_found              = false;
 esp_timer_handle_t xHandleCheckSTA  = NULL;
 static char ipAddr[16];
 
-WORD_ALIGNED_ATTR DRAM_ATTR EventGroupHandle_t wifi_event_group = NULL;
+static EventGroupHandle_t wifi_event_group = NULL;
 
 const int WIFI_INITIALIZED          = BIT0;
 const int WIFI_STA_CONNECTED        = BIT1;  // ESP32 is currently connected
@@ -255,8 +263,6 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
 
   switch ( event_id )
   {
-    // case SYSTEM_EVENT_WIFI_READY:             // ESP32 WiFi ready
-
     case WIFI_EVENT_WIFI_READY:
       {
         F_LOGI(true, true, LC_GREY, "WIFI_EVENT_WIFI_READY");
@@ -272,18 +278,19 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
         // No point processing if we don't have a queue
         if ( xApScanQueue != NULL )
         {
-          struct scan_result_t cgiWifiAps;
+          scan_result_t cgiWifiAps = {0, 0};
 
           // How many AP's did we find?
-          esp_wifi_scan_get_ap_num (&cgiWifiAps.apCount);
-          F_LOGI(true, true, LC_GREY, "Scan done: found %d APs", cgiWifiAps.apCount);
+          esp_wifi_scan_get_ap_num(&cgiWifiAps.apCount);
+          F_LOGV(true, true, LC_GREY, "Scan done: found %d APs", cgiWifiAps.apCount);
 
           if ( cgiWifiAps.apCount > 0 )
           {
-            esp_wifi_scan_get_ap_records (&cgiWifiAps.apCount, cgiWifiAps.apList);
+            cgiWifiAps.apList = (wifi_ap_record_t *)pvPortMalloc(sizeof(wifi_ap_record_t) * cgiWifiAps.apCount);
+            esp_wifi_scan_get_ap_records(&cgiWifiAps.apCount, cgiWifiAps.apList);
 
             // Is the queue available?
-            if ( xQueueSendToBack(xApScanQueue, ( void * )&cgiWifiAps, 0) != pdPASS )
+            if ( xQueueSendToBack(xApScanQueue, (void *)&cgiWifiAps, 0) != pdPASS )
             {
               F_LOGE(true, true, LC_BRIGHT_RED, "xQueueSendToBack failed to queue new item");
             }
@@ -295,10 +302,8 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
         break;
       }
       // **************************************************************************************************
-
       // STATION EVENTS
       // **************************************************************************************************
-
     case WIFI_EVENT_STA_START:
       {
         F_LOGI(true, true, LC_GREY, "WIFI_EVENT_STA_START");
@@ -383,13 +388,11 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
         break;
       }
       // **************************************************************************************************
-
       // ACCESS POINT EVENTS
       // **************************************************************************************************
-
     case WIFI_EVENT_AP_START:
       {
-        F_LOGW(true, true, LC_GREY, "WIFI_EVENT_AP_START");
+        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_AP_START");
         xEventGroupSetBits (wifi_event_group, WIFI_AP_STARTED);
 
         // Check if we need to start the webserver
@@ -415,10 +418,10 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
       }
     case WIFI_EVENT_AP_STACONNECTED:
       {
-        F_LOGW(true, true, LC_GREY, "WIFI_EVENT_AP_STACONNECTED");
+        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_AP_STACONNECTED");
 
         wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *)event_data;
-        F_LOGW(true, true, LC_GREY, "station " MACSTR " join, AID=%d", MAC2STR (event->mac), event->aid);
+        F_LOGI(true, true, LC_GREY, "station " MACSTR " join, AID=%d", MAC2STR (event->mac), event->aid);
 
         // Fin
         break;
@@ -431,35 +434,34 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
       }
     case WIFI_EVENT_AP_PROBEREQRECVED:
       {
-        F_LOGW(true, true, LC_YELLOW, "WIFI_EVENT_AP_PROBEREQRECVED");
+        F_LOGI(true, true, LC_YELLOW, "WIFI_EVENT_AP_PROBEREQRECVED");
         // Fin
         break;
       }
       // **************************************************************************************************
       // MISC
       // **************************************************************************************************
-
     case WIFI_EVENT_FTM_REPORT:
       {
-        F_LOGV(true, true, LC_GREY, "WIFI_EVENT_FTM_REPORT");
+        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_FTM_REPORT");
         // Fin
         break;
       }
     case WIFI_EVENT_STA_BSS_RSSI_LOW:
       {
-        F_LOGV(true, true, LC_GREY, "WIFI_EVENT_STA_BSS_RSSI_LOW");
+        F_LOGW(true, true, LC_GREY, "WIFI_EVENT_STA_BSS_RSSI_LOW");
         // Fin
         break;
       }
     case WIFI_EVENT_ACTION_TX_STATUS:
       {
-        F_LOGV(true, true, LC_GREY, "WIFI_EVENT_ACTION_TX_STATUS");
+        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_ACTION_TX_STATUS");
         // Fin
         break;
       }
     case WIFI_EVENT_ROC_DONE:
       {
-        F_LOGV(true, true, LC_GREY, "WIFI_EVENT_ROC_DONE");
+        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_ROC_DONE");
         // Fin
         break;
       }
@@ -469,6 +471,13 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
         // Fin
         break;
       }
+    case WIFI_EVENT_HOME_CHANNEL_CHANGE:
+      {
+        wifi_event_home_channel_change_t *chan_data = (wifi_event_home_channel_change_t *) event_data;
+        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_HOME_CHANNEL_CHANGE: channel changed from %u to %u.", chan_data->old_chan, chan_data->new_chan);
+        // Fin
+        break;
+      } 
     default:
       F_LOGE(true, true, LC_YELLOW, "Unhandled WiFi Event ID: %d", event_id);
       // Fin
@@ -523,21 +532,21 @@ void ip_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id, 
       }
     case IP_EVENT_GOT_IP6:
       {
-        F_LOGV(true, true, LC_GREY, "IP_EVENT_GOT_IP6");
+        F_LOGI(true, true, LC_GREY, "IP_EVENT_GOT_IP6");
 
         // Fin
         break;
       }
     case IP_EVENT_ETH_GOT_IP:
       {
-        F_LOGV(true, true, LC_GREY, "IP_EVENT_ETH_GOT_IP");
+        F_LOGI(true, true, LC_GREY, "IP_EVENT_ETH_GOT_IP");
 
         // Fin
         break;
       }
     case IP_EVENT_ETH_LOST_IP:
       {
-        F_LOGV(true, true, LC_GREY, "IP_EVENT_ETH_LOST_IP");
+        F_LOGI(true, true, LC_GREY, "IP_EVENT_ETH_LOST_IP");
 
         // Fin
         break;
@@ -561,8 +570,8 @@ void wifi_startScan (void)
 {
   EventBits_t uxBits = xEventGroupGetBits (wifi_event_group);
   if ( BTST(uxBits, WIFI_SCAN_INPROGRESS) )
-  {
-    F_LOGW(true, true, LC_YELLOW, "Scan already in progress...");
+  { 
+    F_LOGV(true, true, LC_YELLOW, "Scan already in progress...");
   }
   else
   {
@@ -615,9 +624,9 @@ void wifi_startScan (void)
       xEventGroupClearBits (wifi_event_group, WIFI_SCAN_DONE);
 
       // Non blocking scan
-      esp_wifi_scan_start (&scan_config, false);
+      esp_wifi_scan_start(&scan_config, false);
 
-      F_LOGI(true, true, LC_BRIGHT_YELLOW, "WiFi scan started");
+      F_LOGV(true, true, LC_BRIGHT_YELLOW, "WiFi scan started");
     }
     else
     {
@@ -630,9 +639,9 @@ void wifi_startScan (void)
 //
 // **************************************************************************************************
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR esp_err_t wifi_getApScanResult (struct scan_result_t *cgiWifiAps)
+IRAM_ATTR esp_err_t wifi_getApScanResult (scan_result_t *cgiWifiAps)
 #else
-esp_err_t wifi_getApScanResult (struct scan_result_t *cgiWifiAps)
+esp_err_t wifi_getApScanResult (scan_result_t *cgiWifiAps)
 #endif
 {
   esp_err_t err = ESP_FAIL;
@@ -796,18 +805,24 @@ void log_ap(const wifi_ap_record_t ap, const log_colour_t logCol)
 bool findBestAP(uint8_t *bssid, const uint8_t *ssid, uint8_t len)
 {
   // Prepare everything for our search
-  int x = 4;              // Max loops
+  int x = 10;             // Max loops
   int rssi = -2000;       // Impossibly high(low?) value
   bool foundAP = false;   // Did we find a match?
+
+  ESP_ERROR_CHECK(esp_task_wdt_add(NULL));
+  ESP_ERROR_CHECK(esp_task_wdt_status(NULL));
 
   // Loop until we time out or find a match
   do
   {
-    EventBits_t uxBits = xEventGroupGetBits (wifi_event_group);
+    esp_task_wdt_reset();
+    EventBits_t uxBits = xEventGroupGetBits(wifi_event_group);
     if ( !BTST(uxBits, WIFI_SCAN_INPROGRESS) )
     {
-      struct scan_result_t cgiWifiAps = {};
+      scan_result_t cgiWifiAps = {0, 0};
+
       wifi_getApScanResult(&cgiWifiAps);
+
       if ( cgiWifiAps.apCount > 0 )
       {
         for ( int i = 0; i < cgiWifiAps.apCount; i++ )
@@ -843,11 +858,36 @@ bool findBestAP(uint8_t *bssid, const uint8_t *ssid, uint8_t len)
           }
         }
       }
-      wifi_startScan();
-      x--;
+      // Release memory
+      if ( cgiWifiAps.apList != NULL )
+      {
+        vPortFree(cgiWifiAps.apList);
+        cgiWifiAps.apList = NULL;
+      }
+
+      // Start a new scan
+      if ( !foundAP )
+      {
+        wifi_startScan();
+      }
     }
+    else
+    {
+      // have a break
+      delay_ms(2000);
+    }
+    // Decrement out timeout
+    x--;
   } while ( x > 0 && !foundAP );
 
+  if ( x == 0 && !foundAP )
+  {
+    F_LOGE(true, true, LC_RED, "Could not find AP matching \"%s\"", ssid);
+  }
+
+  ESP_ERROR_CHECK(esp_task_wdt_delete(NULL));
+
+  F_LOGD(true, true, LC_RED, "x = %d, foundAP = %d", x, foundAP);
   return foundAP;
 }
 
@@ -886,6 +926,8 @@ static bool scan_for_ssid(void)
     wifi_config.sta.password[wifi_sta_cfg.pass_len] = 0x0;
 
     // Check results for an SSID matching our saved SSID/password combination
+    //scan_found = findBestAP(bssid, wifi_config.sta.ssid, wifi_sta_cfg.ssid_len);
+    //if ( scan_found == true )
     if ( (scan_found = findBestAP(bssid, wifi_config.sta.ssid, wifi_sta_cfg.ssid_len)) == true )
     {
       // Whether to set the MAC address of target AP or not.
@@ -915,31 +957,34 @@ void get_nvs_sta_cfg (wifi_sta_cfg_t *wifi_sta_cfg)
 {
   const char *default_sta_ssid = WIFI_SSID;
   const char *default_sta_pass = WIFI_PASS;
-  nvs_handle handle;
+  nvs_handle_t nvs_handle;
 
-  esp_err_t err = nvs_open (NVS_WIFI_STA_CFG, NVS_READONLY, &handle);
+  esp_err_t err = nvs_open(NVS_WIFI_STA_CFG, NVS_READONLY, &nvs_handle);
   if ( err == ESP_OK )
   {
     wifi_sta_cfg->ssid_len = SSID_STRLEN;
-    if ( nvs_get_str (handle, STR_STA_SSID, wifi_sta_cfg->ssid, &wifi_sta_cfg->ssid_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_STA_SSID, wifi_sta_cfg->ssid, &wifi_sta_cfg->ssid_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_sta_cfg->ssid_len = 0;
     }
 
     wifi_sta_cfg->pass_len = PASSW_STRLEN;
-    if ( nvs_get_str (handle, STR_STA_PASSW, wifi_sta_cfg->password, &wifi_sta_cfg->pass_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_STA_PASSW, wifi_sta_cfg->password, &wifi_sta_cfg->pass_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_sta_cfg->pass_len = 0;
     }
 
     /*
     wifi_sta_cfg->uname_len = UNAME_STRLEN;
-    if ( nvs_get_str (handle, STR_STA_UNAME, wifi_sta_cfg->username, &wifi_sta_cfg->uname_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str (nvs_handle, STR_STA_UNAME, wifi_sta_cfg->username, &wifi_sta_cfg->uname_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_sta_cfg->uname_len = 0;
     }*/
-
-    nvs_close (handle);
+    nvs_close(nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_WIFI_STA_CFG,  __FILE__, __LINE__);
   }
 
   // Check for zero config
@@ -957,33 +1002,36 @@ void get_nvs_sta_cfg (wifi_sta_cfg_t *wifi_sta_cfg)
 // **************************************************************************************************
 void get_nvs_ap_cfg (wifi_ap_cfg_t *wifi_ap_cfg)
 {
-  nvs_handle handle;
+  nvs_handle_t nvs_handle;
 
-  esp_err_t err = nvs_open(NVS_WIFI_AP_CFG, NVS_READONLY, &handle);
+  esp_err_t err = nvs_open(NVS_WIFI_AP_CFG, NVS_READONLY, &nvs_handle);
   if ( err == ESP_OK )
   {
     wifi_ap_cfg->ssid_len = SSID_STRLEN;
-    if ( nvs_get_str(handle, STR_AP_SSID, wifi_ap_cfg->ssid, &wifi_ap_cfg->ssid_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_AP_SSID, wifi_ap_cfg->ssid, &wifi_ap_cfg->ssid_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_ap_cfg->ssid_len = 0;
     }
 
     wifi_ap_cfg->pass_len = PASSW_STRLEN;
-    if ( nvs_get_str(handle, STR_AP_PASSW, wifi_ap_cfg->password, &wifi_ap_cfg->pass_len) == ESP_ERR_NVS_NOT_FOUND )
+    if ( nvs_get_str(nvs_handle, STR_AP_PASSW, wifi_ap_cfg->password, &wifi_ap_cfg->pass_len) == ESP_ERR_NVS_NOT_FOUND )
     {
       wifi_ap_cfg->pass_len = 0;
     }
 
     // Validation done later
-    nvs_get_u8(handle, STR_AP_PRIMARY, &wifi_ap_cfg->primary);
-    nvs_get_u8(handle, STR_AP_SECONDARY, &wifi_ap_cfg->secondary);
-    nvs_get_u8(handle, STR_AP_AUTHMODE, &wifi_ap_cfg->authmode);
-    nvs_get_u8(handle, STR_AP_CYPHER, &wifi_ap_cfg->cypher);
-    nvs_get_u8(handle, STR_AP_HIDDEN, &wifi_ap_cfg->hidden);
-    nvs_get_u8(handle, STR_AP_BANDWIDTH, &wifi_ap_cfg->bandwidth);
-    nvs_get_u8(handle, STR_AP_MAX_CONN, &wifi_ap_cfg->max_connection);
-
-    nvs_close(handle);
+    nvs_get_u8(nvs_handle, STR_AP_PRIMARY, &wifi_ap_cfg->primary);
+    nvs_get_u8(nvs_handle, STR_AP_SECONDARY, &wifi_ap_cfg->secondary);
+    nvs_get_u8(nvs_handle, STR_AP_AUTHMODE, &wifi_ap_cfg->authmode);
+    nvs_get_u8(nvs_handle, STR_AP_CYPHER, &wifi_ap_cfg->cypher);
+    nvs_get_u8(nvs_handle, STR_AP_HIDDEN, &wifi_ap_cfg->hidden);
+    nvs_get_u8(nvs_handle, STR_AP_BANDWIDTH, &wifi_ap_cfg->bandwidth);
+    nvs_get_u8(nvs_handle, STR_AP_MAX_CONN, &wifi_ap_cfg->max_connection);
+    nvs_close(nvs_handle);
+  }
+  else
+  {
+    F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_WIFI_AP_CFG,  __FILE__, __LINE__);
   }
 }
 
@@ -1076,7 +1124,7 @@ void init_wifi (httpd_handle_t *httpServer)
 
   if ( xApScanQueue == NULL )
   {
-    xApScanQueue = xQueueCreate(3, sizeof(struct scan_result_t));
+    xApScanQueue = xQueueCreate(3, sizeof(scan_result_t));
   }
 
   // Check if we had any issues
@@ -1099,22 +1147,21 @@ void init_wifi (httpd_handle_t *httpServer)
     esp_netif_init();
 
     // Create event loop
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    esp_event_loop_create_default();
 
     // Create interfaces
     netif_sta = esp_netif_create_default_wifi_sta();
     netif_ap = esp_netif_create_default_wifi_ap();
 
     // Set the hostname if available
-    char tmpbuf[WIFI_EVT_BUFSIZE + 1]  __attribute__ ((aligned (4)));
     if ( hostname_len > 0 )
     {
       set_hostname(hostname);
     }
 
     // initialize the wifi event handlers
-    //ESP_ERROR_CHECK(esp_wifi_set_default_wifi_sta_handlers());
-    //ESP_ERROR_CHECK(esp_wifi_set_default_wifi_ap_handlers());
+    ESP_ERROR_CHECK(esp_wifi_set_default_wifi_sta_handlers());
+    ESP_ERROR_CHECK(esp_wifi_set_default_wifi_ap_handlers());
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_eventHandler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_eventHandler, NULL));
 
@@ -1254,7 +1301,7 @@ esp_err_t cgiWifiSetAp (httpd_req_t *req)
   {
     struct yuarel_param params[MAX_URI_PARTS];
     char *ssid;
-    char *passw;
+    char *pass;
     int pc = 0;
 
     if ( (pc = yuarel_parse_query (rcvbuf, '&', params, MAX_URI_PARTS)) )
@@ -1267,7 +1314,7 @@ esp_err_t cgiWifiSetAp (httpd_req_t *req)
         }
         else if ( !str_cmp (STR_STA_PASSW, params[pc].key) )
         {
-          passw = params[pc].val;
+          pass = params[pc].val;
         }
       }
     }
@@ -1294,8 +1341,6 @@ esp_err_t  cgiWifiSetMode (httpd_req_t *req)
 #endif
 {
   esp_err_t err = ESP_FAIL;
-  struct  yuarel url;
-  struct  yuarel_param params[MAX_URI_PARTS];
 
   //printf("req->uri: %s (%d)\n", req->uri, req->content_len);
 

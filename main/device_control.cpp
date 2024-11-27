@@ -10,17 +10,19 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
 #include <pthread.h>
-#include <esp_system.h>
+
 #include <esp_http_server.h>
+#include <esp_system.h>
+#include <esp_netif.h>
+#include <esp_wifi.h>
+#include <esp_sntp.h>
+#include <esp_mac.h>
+
 #include <driver/gpio.h>
 
-#include <lwip/apps/sntp.h>
 #include <lwip/err.h>
-#include <esp_netif.h>
-#include <esp32/rom/rtc.h>
-#include <esp_wifi.h>
+
 #include <nvs_flash.h>
 
 #include "app_main.h"
@@ -32,7 +34,7 @@
 #include "device_control.h"
 #include "moonphase.h"
 #include "app_mqtt.h"
-#include "mqtt_settings.h"
+#include "app_mqtt_settings.h"
 
 #define   BUF_SIZE    512
 
@@ -56,51 +58,54 @@ const char *print_reset_reason (RESET_REASON reason)
 
   switch ( (uint16_t)reason )
   {
+    case 0:
+      reasonString = (char *)"ESP_RST_UNKNOWN";
+      break;                                                /**<0,  Reset reason can not be determined */
     case 1:
-      reasonString = (char *)"POWERON_RESET";
-      break;                                                /**<1,  Vbat power on reset*/
+      reasonString = (char *)"ESP_RST_POWERON";
+      break;                                                /**<1,  Reset due to power-on event */
     case 3:
-      reasonString = (char *)"SW_RESET";
-      break;                                                /**<3,  Software reset digital core*/
+      reasonString = (char *)"ESP_RST_EXT";
+      break;                                                /**<3,  Reset by external pin (not applicable for ESP32) */
     case 4:
-      reasonString = (char *)"OWDT_RESET";
-      break;                                                /**<4,  Legacy watch dog reset digital core*/
+      reasonString = (char *)"ESP_RST_SW";
+      break;                                                /**<4,  Software reset via esp_restart */
     case 5:
-      reasonString = (char *)"DEEPSLEEP_RESET";
-      break;                                                /**<5,  Deep Sleep reset digital core*/
+      reasonString = (char *)"ESP_RST_PANIC";
+      break;                                                /**<5,  Software reset due to exception/panic */
     case 6:
-      reasonString = (char *)"SDIO_RESET";
-      break;                                                /**<6,  Reset by SLC module, reset digital core*/
+      reasonString = (char *)"ESP_RST_INT_WDT";
+      break;                                                /**<6,  Reset (software or hardware) due to interrupt watchdog */
     case 7:
-      reasonString = (char *)"TG0WDT_SYS_RESET";
-      break;                                                /**<7,  Timer Group0 Watch dog reset digital core*/
+      reasonString = (char *)"ESP_RST_TASK_WDT";
+      break;                                                /**<7,  Reset due to task watchdog */
     case 8:
-      reasonString = (char *)"TG1WDT_SYS_RESET";
-      break;                                                /**<8,  Timer Group1 Watch dog reset digital core*/
+      reasonString = (char *)"ESP_RST_WDT";
+      break;                                                /**<8,  TReset due to other watchdogs */
     case 9:
-      reasonString = (char *)"RTCWDT_SYS_RESET";
-      break;                                                /**<9,  RTC Watch dog Reset digital core*/
+      reasonString = (char *)"ESP_RST_DEEPSLEEP";
+      break;                                                /**<9,  Reset after exiting deep sleep mode */
     case 10:
-      reasonString = (char *)"INTRUSION_RESET";
-      break;                                                /**<10, Instrusion tested to reset CPU*/
+      reasonString = (char *)"ESP_RST_BROWNOUT";
+      break;                                                /**<10, Brownout reset (software or hardware) */
     case 11:
-      reasonString = (char *)"TGWDT_CPU_RESET";
-      break;                                                /**<11, Time Group reset CPU*/
+      reasonString = (char *)"ESP_RST_SDIO";
+      break;                                                /**<11, TReset over SDIO */
     case 12:
-      reasonString = (char *)"SW_CPU_RESET";
-      break;                                                /**<12, Software reset CPU*/
+      reasonString = (char *)"ESP_RST_USB";
+      break;                                                /**<12, Reset by USB peripheral */
     case 13:
-      reasonString = (char *)"RTCWDT_CPU_RESET";
-      break;                                                /**<13, RTC Watch dog Reset CPU*/
+      reasonString = (char *)"ESP_RST_JTAG";
+      break;                                                /**<13, Reset by JTAG */
     case 14:
-      reasonString = (char *)"EXT_CPU_RESET";
-      break;                                                /**<14, for APP CPU, reseted by PRO CPU*/
+      reasonString = (char *)"ESP_RST_EFUSE";
+      break;                                                /**<14, Reset due to efuse error */
     case 15:
-      reasonString = (char *)"RTCWDT_BROWN_OUT_RESET";
-      break;                                                /**<15, Reset when the vdd voltage is not stable*/
+      reasonString = (char *)"ESP_RST_PWR_GLITCH";
+      break;                                                /**<15, Reset due to power glitch detected */
     case 16:
-      reasonString = (char *)"RTCWDT_RTC_RESET";
-      break;                                                /**<16, RTC Watch dog reset digital core and rtc module*/
+      reasonString = (char *)"ESP_RST_CPU_LOCKUP";
+      break;                                                /**<16, Reset due to CPU lock up */
     default:
       reasonString = (char *)"NO_MEAN";
   }
@@ -174,7 +179,7 @@ int _set_led_control (char *buf, int bufsize, char *param, char *value, int xtyp
 }
 
 // ***********************************************
-#if defined (CONFIG_AXRGB_DEV_ROCKET)
+#if defined (CONFIG_AEOLIAN_DEV_ROCKET)
 // Handle here to prevent overlapping timers (lazy coding)
 esp_timer_handle_t reset_task_handle = NULL;
 
@@ -232,7 +237,7 @@ int _launch_rocket (char *buf, int bufsize, char *param, char *value, int type)
 
   return true;
 }
-#endif // CONFIG_AXRGB_DEV_ROCKET
+#endif // CONFIG_AEOLIAN_DEV_ROCKET
 // --------------------------------------------------------------------------
 //
 // --------------------------------------------------------------------------
@@ -319,7 +324,7 @@ int _get_apAddress (char *buf, int bufsize, int unused)
 // ***********************************************
 int _get_bootCount (char *buf, int bufsize, int type)
 {
-  return snprintf (buf, bufsize, "%d (last ota @ %d)", boot_count, ota_update);
+  return snprintf (buf, bufsize, "%lu (last ota @ %lu)", boot_count, ota_update);
 }
 // ***********************************************
 int _get_buildTarget (char *buf, int bufsize, int type)
@@ -331,7 +336,7 @@ int _get_buildVersion (char *buf, int bufsize, int param)
 {
   // Something broke, so using an alternative method
   //return snprintf (buf, bufsize, "%s", esp_get_idf_version ());
-  return snprintf(buf, bufsize, "%s", AXRGB_FW_HASH);
+  return snprintf(buf, bufsize, "%s, %s", AEOLIAN_FW_BRANCH, AEOLIAN_FW_HASH);
 }
 // ***********************************************
 int _get_log_history (char *buf, int bufsize, int type)
@@ -390,7 +395,7 @@ int _get_dateTime (char *buf, int bufsize, int dmmy)
 // ***********************************************
 int _get_heap (char *buf, int bufsize, int dmmy)
 {
-  return snprintf (buf, bufsize, "%d", esp_get_free_heap_size ());
+  return snprintf (buf, bufsize, "%lu", esp_get_free_heap_size ());
 }
 // ***********************************************
 int _set_hostname (char *buf, int bufsize, char *param, char *value, int zone)
@@ -487,7 +492,7 @@ int _get_macAddress (char *buf, int bufsize, int type)
   if ( mode & WIFI_MODE_STA )
   {
     uint8_t macaddr[6] = {};
-    esp_efuse_mac_get_default (macaddr);
+    esp_efuse_mac_get_default(macaddr);
     len = snprintf (buf, bufsize, MACSTR, MAC2STR (macaddr));
   }
   else
@@ -532,17 +537,17 @@ int _get_zone_count (char *buf, int bufsize, int zone)
 // ***********************************************
 esp_err_t _set_zone (uint16_t zone)
 {
-  esp_err_t err;
-
+  nvs_handle_t nvs_handle;
   char zoneStr[64];
   sprintf(zoneStr, "zone_%2d", zone);
 
-  nvs_handle handle;
-  nvs_open (NVS_LIGHT_CONFIG, NVS_READWRITE, &handle);
-  err = nvs_set_blob (handle, zoneStr, &overlay[zone], sizeof (overlay_t));
-  nvs_commit (handle);
-  nvs_close (handle);
-
+  esp_err_t err = nvs_open(NVS_LIGHT_CONFIG, NVS_READWRITE, &nvs_handle);
+  if ( err == ESP_OK )
+  {
+    err = nvs_set_blob(nvs_handle, zoneStr, &overlay[zone], sizeof (overlay_t));
+    ESP_ERROR_CHECK(nvs_commit(nvs_handle));
+    nvs_close(nvs_handle);
+  }
   return err;
 }
 int _set_zone_start (char *buf, int bufsize, char *param, char *value, int zone)
@@ -571,7 +576,7 @@ int _get_sunset (char *buf, int bufsize, int param)
 // ***********************************************
 int _get_sysRstInfo (char *buf, int bufsize, int param)
 {
-  strcpy (buf, verbose_print_reset_reason (rtc_get_reset_reason (0)));
+  strcpy (buf, verbose_print_reset_reason(rtc_get_reset_reason(0)));
   return strlen (buf);
 }
 // ***********************************************
@@ -918,7 +923,7 @@ WORD_ALIGNED_ATTR DRAM_ATTR static status_command_t status_command[] = {
   {"idf_version",               _get_idf_version,      NULL,                   0},
   {"info_led",                  NULL,                  NULL,                   0},
   {"ip_address",                _get_ipAddress,        NULL,                   0},
-#if defined (CONFIG_AXRGB_DEV_ROCKET)
+#if defined (CONFIG_AEOLIAN_DEV_ROCKET)
   {"launch_rocket",             NULL,                  _launch_rocket,         TYPE_U8},
 #endif
   {"led_count",                 _get_led_count,        _set_led_control,       TYPE_U16},

@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
+#include "freertos/queue.h"
 #include <driver/gpio.h>
 
 #include "app_main.h"
@@ -14,7 +15,7 @@
 #include "app_utils.h"
 
 #if defined (CONFIG_MOTION_DETECTION)
-xQueueHandle gpio_evt_queue = NULL;
+static QueueHandle_t gpio_evt_queue = NULL;
 IRAM_ATTR static void gpio_isr_handler (void* arg)
 {
   uint8_t zone = 0;
@@ -152,7 +153,7 @@ esp_err_t init_gpio_pins(controlvars_t *control_vars)
   io_conf.intr_type    = GPIO_INTR_DISABLE;                            // Disable interrupt trigger
   io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;                        // Disable pulldown resistor
   io_conf.pull_up_en   = GPIO_PULLUP_DISABLE;                          // Disable pullup resistor
-#if defined (CONFIG_AXRGB_DEV_ROCKET)
+#if defined (CONFIG_AEOLIAN_DEV_ROCKET)
   io_conf.pin_bit_mask = (ROCKET_SETUP);
   gpio_config (&io_conf);
   gpio_set_drive_capability ((gpio_num_t)ROCKET_ONE, GPIO_DRIVE_CAP_1);
@@ -180,7 +181,7 @@ esp_err_t init_gpio_pins(controlvars_t *control_vars)
   // -----------------------------------------------------------
   // Create a queue to handle gpio event from isr
   // -----------------------------------------------------------
-  gpio_evt_queue = xQueueCreate (10, sizeof (zone_event_t));
+  gpio_evt_queue = xQueueCreate(10, sizeof (zone_event_t));
 
   // -----------------------------------------------------------
   // Trigger input pins
