@@ -270,7 +270,7 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
       }
     case WIFI_EVENT_SCAN_DONE:
       {
-        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_SCAN_DONE");
+        F_LOGV(true, true, LC_GREY, "WIFI_EVENT_SCAN_DONE");
 
         // We can set this one here, at the beginning
         xEventGroupSetBits (wifi_event_group, WIFI_SCAN_DONE);
@@ -282,7 +282,7 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
 
           // How many AP's did we find?
           esp_wifi_scan_get_ap_num(&cgiWifiAps.apCount);
-          F_LOGI(true, true, LC_GREY, "Scan done: found %d APs", cgiWifiAps.apCount);
+          F_LOGV(true, true, LC_GREY, "Scan done: found %d APs", cgiWifiAps.apCount);
 
           if ( cgiWifiAps.apCount > 0 )
           {
@@ -570,8 +570,8 @@ void wifi_startScan (void)
 {
   EventBits_t uxBits = xEventGroupGetBits (wifi_event_group);
   if ( BTST(uxBits, WIFI_SCAN_INPROGRESS) )
-  {
-    F_LOGW(true, true, LC_YELLOW, "Scan already in progress...");
+  { 
+    F_LOGV(true, true, LC_YELLOW, "Scan already in progress...");
   }
   else
   {
@@ -626,7 +626,7 @@ void wifi_startScan (void)
       // Non blocking scan
       esp_wifi_scan_start(&scan_config, false);
 
-      F_LOGI(true, true, LC_BRIGHT_YELLOW, "WiFi scan started");
+      F_LOGV(true, true, LC_BRIGHT_YELLOW, "WiFi scan started");
     }
     else
     {
