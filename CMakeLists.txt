@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.13.0)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 set(BUILD_DIR ${CMAKE_BINARY_DIR})
 
+#if(${IDF_TARGET} STREQUAL "esp32")
+#    set(BOOTLOADER_IGNORE_EXTRA_COMPONENT "main")
+#endif()
+
 project(aeolian)
 
 set(SDKCONFIG_DEFAULTS "sdkconfig.defaults")
