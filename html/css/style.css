@@ -461,7 +461,7 @@ progress::-webkit-progress-bar
 
 #tblApp input,
 #tblData input {
-  background-color: greenyellow;
+  background-color: #661515;
   padding: 1px 10px 1px 10px;
   margin: 0;
   height: 18px;
@@ -509,7 +509,8 @@ progress::-webkit-progress-bar
   border-left: 1px solid #bbb;
 }
 .hdr_table tr th {
-  background-color: #ccc;
+  background-color: #1a283d6e;
+  color: #444;
   /*border-top: 1px solid #bbb;*/
   text-align: left;
 }

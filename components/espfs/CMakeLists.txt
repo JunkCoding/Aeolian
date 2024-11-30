@@ -2,20 +2,23 @@ cmake_minimum_required(VERSION 3.5.2)
 
 idf_build_get_property(target IDF_TARGET)
 
+
 # Get a Python executable
 # ---------------------------------------------------------
 if (CMAKE_HOST_WIN32)
   find_package(Python3)
 endif()
+# ---------------------------------------------------------
 
-set(includes "include")
-set(priv_includes "third-party/heatshrink")
+# ---------------------------------------------------------
+set(INCLUDES "include")
+set(PRIV_INCLUDES "third-party/heatshrink")
 
-list(APPEND sources
+list(APPEND SOURCES
   "espfs/espfs.c"
   "espfs/espfs_vfs.c"
-  "espfs/heatshrink_decoder.c"
   "third-party/heatshrink/heatshrink_decoder.c")
+# ---------------------------------------------------------
 
 # FIXME: Make this dynamic
 # ---------------------------------------------------------
@@ -43,6 +46,7 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/js/common.js"
   "${PROJECT_DIR}/html/js/console.js"
   "${PROJECT_DIR}/html/js/flash.js"
+  "${PROJECT_DIR}/html/js/graphs.js"
   "${PROJECT_DIR}/html/js/index.js"
   "${PROJECT_DIR}/html/js/schedule.js"
   "${PROJECT_DIR}/html/js/smoothie.js"
@@ -56,21 +60,29 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/img/favicon.png"
   "${PROJECT_DIR}/html/img/wifi_icons.png"
   )
+# ---------------------------------------------------------
 
-# For ref
+# Relay control (a hack for November 5th)
 # ---------------------------------------------------------
 if(AEOLIAN_DEV_ROCKET)
-  list(APPEND weboages "${PROJECT_DIR}/html/wsa.html")
+  list(APPEND webpages "${PROJECT_DIR}/html/wsa.html")
 endif()
+# ---------------------------------------------------------
+
+# A list of things we require to work
+# ---------------------------------------------------------
+set(REQ_COMPONENTS spi_flash spiffs vfs)
+# ---------------------------------------------------------
 
 # Register components
 # ---------------------------------------------------------
-idf_component_register(SRCS ${sources}
-                    INCLUDE_DIRS ${includes}
-                    PRIV_INCLUDE_DIRS ${priv_includes}
-                    PRIV_REQUIRES spi_flash spiffs vfs)
+idf_component_register(SRCS               ${SOURCES}
+                       INCLUDE_DIRS       ${INCLUDES}
+                       PRIV_INCLUDE_DIRS  ${PRIV_INCLUDES}
+                       PRIV_REQUIRES      ${REQ_COMPONENTS})
+# ---------------------------------------------------------
 
-# Generate: "build/esp-idf/libespfs/webpages.espfs"
+# Generate: "build/esp-idf/espfs/webpages.espfs"
 # ---------------------------------------------------------
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/webpages.espfs"
                     COMMAND ${python} ${COMPONENT_DIR}/extra/mkespfsimage.py ${PROJECT_DIR}/html ${CMAKE_CURRENT_BINARY_DIR}/webpages.espfs
@@ -78,22 +90,23 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/webpages.espfs"
                     VERBATIM)
 # Get the above custom command to run...
 # ---------------------------------------------------------
-add_custom_target(espfs_image DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/webpages.espfs")
-add_dependencies(${COMPONENT_LIB} espfs_image)
-
-# Generate: "build/esp-idf/libespfs/libwebpages-espfs.a"
+add_custom_target(webpages-espfs DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/webpages.espfs")
+add_dependencies(${COMPONENT_LIB} webpages-espfs)
 # ---------------------------------------------------------
-add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/libwebpages-espfs.a" ALL
+
+# Generate: "build/esp-idf/espfs/webpages-espfs.o"
+# ---------------------------------------------------------
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/webpages-espfs.o" ALL
                     COMMAND xtensa-esp32-elf-objcopy -I binary -O elf32-xtensa-le -B xtensa --rename-section .data=.rodata webpages.espfs webpages-espfs.o.tmp
                     COMMAND xtensa-esp32-elf-cc -nostdlib -Wl,-r webpages-espfs.o.tmp -o webpages-espfs.o -Wl,-T ${COMPONENT_DIR}/webpages/webpages.espfs.ld
-                    COMMAND xtensa-esp32-elf-ar cr ${CMAKE_CURRENT_BINARY_DIR}/libwebpages-espfs.a webpages-espfs.o
-                    DEPENDS espfs_image
+                    DEPENDS webpages-espfs
                     VERBATIM)
 # Get the above custom command to run...
 # ---------------------------------------------------------
-add_custom_target(espfs_lib DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/libwebpages-espfs.a")
-add_dependencies(${COMPONENT_LIB} espfs_lib)
-
-# Finally!:
+add_custom_target(libwebpages DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/webpages-espfs.o")
+add_dependencies(${COMPONENT_LIB} libwebpages)
 # ---------------------------------------------------------
-target_link_libraries(${COMPONENT_LIB} "-L${CMAKE_CURRENT_BINARY_DIR} -l:libwebpages-espfs.a -l:libespfs.a")
+
+# And, finally...
+# ---------------------------------------------------------
+target_link_libraries(${COMPONENT_LIB} "${CMAKE_CURRENT_BINARY_DIR}/webpages-espfs.o")
