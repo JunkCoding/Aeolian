@@ -117,7 +117,7 @@ menu "Aeolian Configuration"
     default y                 if AEOLIAN_DEV_OLIMEX
     default y                 if AEOLIAN_DEV_S3_MATRIX
     default n
-  config CONFIG_AEOLIAN_CCTV_CTRL
+  config AEOLIAN_CCTV_CTRL
     bool
     default y                 if AEOLIAN_DEV_WORKSHOP
     default n

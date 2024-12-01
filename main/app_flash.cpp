@@ -94,14 +94,11 @@ const char *ota_state_to_str (esp_ota_img_states_t ota_state)
 // -----------------------------------------------------------
 IRAM_ATTR uint32_t get_cpu_mhz()
 {
-  uint32_t cpu_freq = 0;
-  esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_APB, ESP_CLK_TREE_SRC_FREQ_PRECISION_EXACT, &cpu_freq);
-  return (cpu_freq / 1000000);
   // Too short of a delay is inaccurate, too long is pointless.
-  //uint32_t start = esp_cpu_get_cycle_count();
-  //delay_ms(100);
-  //uint32_t end = esp_cpu_get_cycle_count();
-  //return uint((((end - start) / 10000) + 9) / 10);
+  uint32_t start = esp_cpu_get_cycle_count();
+  delay_ms(300);
+  uint32_t end = esp_cpu_get_cycle_count();
+  return uint((((end - start) / 30000) + 9) / 10);
 }
 
 // -----------------------------------------------------------
