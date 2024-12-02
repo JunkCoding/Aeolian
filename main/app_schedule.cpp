@@ -929,7 +929,7 @@ void scheduler_task(void *arg)
     // Check whether it is currently dark(ish) outside
     // -----------------------------------------------------------
     bool isDark = true;
-    if ( lightcheck.lux_level >= 440 || (now >= lightcheck.ts_sunrise && now <= lightcheck.ts_sunset) )
+    if ( lightcheck.lux_level >= 500 || (now >= lightcheck.ts_sunrise && now <= lightcheck.ts_sunset) )
     {
       isDark = false;
     }

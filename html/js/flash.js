@@ -138,6 +138,7 @@ function doUpgrade(partition, callback)
 
   _("progressBar").value = 0;
   _("progbar").style.display = 'block';
+  _("main").style.pointerEvents = "none";
 
   // Override the global xhr
   let xhr = new XMLHttpRequest();
@@ -169,6 +170,7 @@ function loadHandler(event)
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong>Success: Reboot to run new firmware</strong>";
     _("progbar").style.display = 'none';
+    _("main").style.pointerEvents = "";
   });
 }
 function errorHandler(event)
@@ -178,6 +180,7 @@ function errorHandler(event)
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong style=\"color: red;\">Error: An unknown error ocurred during upload</strong>";
     _("progbar").style.display = 'none';
+    _("main").style.pointerEvents = "";
   });
 }
 function abortHandler(event)
@@ -187,6 +190,7 @@ function abortHandler(event)
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong style=\"color: amber;\">Aborted: Firmware upload aborted</strong>";
     _("progbar").style.display = 'none';
+    _("main").style.pointerEvents = "";
   });
 }
 function timeoutHandler(event)
@@ -196,6 +200,7 @@ function timeoutHandler(event)
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="Upload timed out";
     _("progbar").style.display = 'none';
+    _("main").style.pointerEvents = "";
   });
 }
 function humanFileSize(B,i)

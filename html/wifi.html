@@ -38,7 +38,7 @@
     <a href="/console.html">Console</a>
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
-  <div class="main">
+  <div class="main" id="main">
     <div>
       <h1>WiFi Mode</h1>
       <table class="status_table">
@@ -187,7 +187,7 @@
             </tr>
           </tbody>
         </table>
-        <div class="credentials"><input type="submit" name="configure" value="Configure!" onclick="doConfigure()" />
+        <div class="submit"><input type="submit" name="configure" value="Configure!" onclick="doConfigure()" />
         </div>
       </form>
     </div>
@@ -207,7 +207,7 @@
             </tr>
           </tbody>
         </table>
-        <div class="credentials"><input type="submit" name="connect" value="Connect!" /></div>
+        <div class="submit"><input type="submit" name="connect" value="Connect!" /></div>
         <div class="freqscan"><input type="submit" name="scan" value="Scan" /></div>
       </form>
     </div>

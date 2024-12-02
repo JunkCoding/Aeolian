@@ -315,53 +315,50 @@ body {
   min-height: 40px;
 }
 /*********************************/
-#progbar {
+.prog-wrapper {
+  position: absolute;
+  transform: translate(-50%,-50%);
+  border-radius:20px;
+  background-color:#fff;
+  top: 50%;
+  left: 50%;
+  width: 30%;
+  height: 20px;
+}
+/*********************************/
+div#progbar {
   display: none;
+  z-index: 1001;
+}
+progress {
   position:fixed;
   top: 0%;
   left: 0%;
   width: 100%;
   height: 100%;
-  background-color: #70A0A0;
-  z-index: 1001;
-  -moz-opacity: 0.8;
-  opacity: .80;
-  filter: alpha(opacity=80);
+  background-color: #17114e;
+  border: 2px solid #ffffff;
+  border-radius: 20px;  
+  /*
+  -moz-opacity: 0.1;
+  opacity: .10;
+  filter: alpha(opacity=10);*/
 }
-.prog-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  width: 20%;
-  height: 20px;
+/* background: */
+progress::-webkit-progress-bar {
+  background-color: #17114e;
+  border-radius: 20px;  
 }
-progress
-{
-  border: 2px solid black;
-  width:100%;
-  height: 100%;
-  background-color: crimson;
-  border-radius: 19px;  
+/* value: */
+progress::-webkit-progress-value {
+  background-color: #a01414;
+  border-radius: 20px;  
 }
-progress::-moz-progress-bar
-{
-  background: #20A0F0;
-  border-radius: 19px;
-}
-
-progress::-webkit-progress-value
-{
-  background: white;
-  border-radius: 19px;
-}
-progress::-webkit-progress-bar
-{
-  background: white;
-  border-radius: 19px;
+progress::-moz-progress-bar {
+  background-color: #a01414;
+  border-radius: 20px;  
 }
 /*********************************/
-
 #spinner {
   display: none;
   position:fixed;
@@ -456,18 +453,21 @@ progress::-webkit-progress-bar
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 0px;
 }
-
 /* ------ */
-
+#tblApp input:hover,
+#tblData input:hover {
+  background-color: #c05a07;
+}
 #tblApp input,
 #tblData input {
-  background-color: #661515;
-  padding: 1px 10px 1px 10px;
+  background-color:#0d5f97;
   margin: 0;
-  height: 18px;
-  min-width: 130px;
-  border: 1px solid;
+  height: 24px;
+  min-width: 128px;
+  border: 2px solid black;
   cursor: pointer;
+  font-size: 13px;
+  color: #fff;
 }
 .hdr_table tr:hover {
   background-color: #ffff99;
@@ -501,7 +501,7 @@ progress::-webkit-progress-bar
 .hdr_table tr td {
   border-right: 1px solid #bbb;
   border-bottom: 1px solid #bbb;
-  padding: 5px 15px 5px;
+  padding: 2px 15px 2px;
   height: 29px;
 }
 .hdr_table tr th:first-child,
@@ -514,7 +514,6 @@ progress::-webkit-progress-bar
   /*border-top: 1px solid #bbb;*/
   text-align: left;
 }
-
 .hdr_table tr:first-child th:first-child {
   border-top-left-radius: 10px;
 }
@@ -527,14 +526,12 @@ progress::-webkit-progress-bar
 .hdr_table tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
 }
-
 .hdr_table th {
   /*background-color: #f6f8fa;*/
 }
 .hdr_table td {
   background-color: #f6f8fa;
 }
-
 /* ------ */
 .status_table {
   border-collapse: separate;
@@ -552,7 +549,7 @@ progress::-webkit-progress-bar
 .status_table tr td {
   border-right: 1px solid #bbb;
   border-bottom: 1px solid #bbb;
-  padding: 5px 15px 5px;
+  padding: 2px 15px 2px;
 }
 .status_table tr th:first-child,
 .status_table tr td:first-child {
@@ -652,19 +649,54 @@ input[type=radio]:checked:after {
 
 /* ------ */
 input {
-  color: #203040;
-  padding: 1px 4px 1px 4px;
-  border: 0px;
+  color: #ffffff;
+  /*padding: 1px 4px 1px 4px;*/
+  /*border: 0px;*/
   border-radius: 3px;
 }
 input[type=text]:focus {
   border-color:#e63e3e;
 }
 input[type=submit] {
-  border-radius: 8px;
+  border-radius: 14px;
 }
-
-
+input#reboot {
+  background: #830707;
+}
+input#reboot:hover {
+  background-color: #c12525;
+}
+div#selfw {
+  padding:3px 8px;
+  background:#104dab;
+  border:1px solid #ffffff;
+  position:relative;
+  color:#fff;
+  border-radius:22px;
+  font-size:14px;
+  text-align:center;
+  float:inline-start;
+  cursor:pointer
+}
+div#selfw:hover {
+  background:#0c75ee;
+}
+.hide_file {
+    position: absolute;
+    z-index: 1000;
+    opacity: 0;
+    cursor: pointer;
+    right: 0;
+    top: 0;
+    height: 100%;
+    font-size: 24px;
+    width: 100%;
+    
+}
+div#pad {
+  margin: 8px;
+  padding-bottom: 30px;
+}
 /* ------ */
 .table-row {
   display: flex;          display: -webkit-flex;

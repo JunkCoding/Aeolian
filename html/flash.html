@@ -25,10 +25,14 @@
     <a href="/console.html">Console</a>
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
-  <div class="main">
+  <div class="main" id="main">
     <h1>App Partitions</h1>
-    <p><b>&nbsp;Binary firmware&nbsp;</b><input type="file" id="firmware" /></p>
-    <br />
+    <div id="pad">
+      <div id="selfw">
+        Choose Firmware
+        <input type="file" class="hide_file" id="firmware">
+      </div>
+    </div>
     <table id="tblApp" class="hdr_table">
       <thead>
         <tr>
@@ -57,7 +61,7 @@
       <tbody></tbody>
     </table>
     <br />
-    <div class="credentials"><input type="submit" value="Reboot!" onclick="doReboot()" /></div>
+    <div class="credentials"><input type="submit" value="Reboot!" id="reboot" onclick="doReboot()" /></div>
     <div id="status" class="alert remark">Loading...</div>
     <div id="spinner"></div>
     <div id="progbar" class="html5-progress-bar">

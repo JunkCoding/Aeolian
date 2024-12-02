@@ -20,7 +20,8 @@ list(APPEND SOURCES
   "third-party/heatshrink/heatshrink_decoder.c")
 # ---------------------------------------------------------
 
-# FIXME: Make this dynamic
+# https://stackoverflow.com/questions/1027247/is-it-better-to-specify-source-files-with-glob-or-each-file-individually-in-cmak
+# (Keeping these as individually listed)
 # ---------------------------------------------------------
 list(APPEND webpages
   "${PROJECT_DIR}/html/404.html"
