@@ -115,7 +115,7 @@ window.onload = function(e)
   });
 }
 
-function wsOpen()
+function scanAPs()
 {
   var ws;
 
@@ -146,6 +146,7 @@ function wsOpen()
     };
     ws.close = function(evt)
     {
+      console.log("websocket closed.");
       setMsg("done", "WebSocket closed.");
     };
     ws.onmessage = function(evt)
@@ -153,6 +154,7 @@ function wsOpen()
       if ( evt.data )
       {
         var apList = JSON.parse(evt.data);
+        //console.log(apList);
         if(apList.curAP)
         {
           curAP = apList.curAP;
@@ -174,15 +176,20 @@ function wsOpen()
     retries = 0;
     window.onbeforeunload = function()
     {
-      ws.onclose = function () {};
-      ws.close(222, "Window closing");
+      console.log("window closing");
+      ws.onclose = function(){};
+      ws.close(1000, "Window closing");
     };
-  }
+  };
+  function close(evt)
+  {
+    console.log("closing: user interaction");
+    setMsg("done", "WebSocket closed.");
+    ws.close(1000, "user interaction");
+  };
 }
 
 function page_onload()
 {
-  wsOpen();
   init_all_dropboxex();
-  //scanAPs();
 }

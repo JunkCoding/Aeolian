@@ -121,14 +121,14 @@ function doEraseFlash(partition, callback)
 }
 function doUpgrade(partition, callback)
 {
-  var firmware =  document.querySelector('#firmware').files;
-  if ( firmware.length == 0 )
+  let firmware = document.getElementById("sel-fw");
+  if ( firmware.files.length == 0 )
   {
     _("status").innerHTML="<strong style=\"color: red;\">No file selected!</strong>";
     return;
   }
   // Only using the first file
-  firmware = firmware[0];
+  firmware = firmware.files[0];
   if ( firmware.size == 0 )
   {
     _("status").innerHTML="<strong style=\"color: red;\">File is empty!</strong>";
@@ -266,5 +266,37 @@ function page_onload()
   {
     closeAjaxSpinner();
     _("status").innerHTML="Ready.";
+  });
+
+  let sel_fw = document.getElementById("sel-fw");
+  let dis_fw = document.getElementById("fw-details");
+
+  sel_fw.addEventListener("change", () => {
+    if ( sel_fw.files.length > 0 )
+    {
+      let firmware = sel_fw.files[0];
+      if ( firmware.type != "application/octet-stream" )
+      {
+        _("status").innerHTML="<strong style=\"color: red;\">Invalid file</strong>";
+        dis_fw.innerHTML = "No firmware selected";
+        sel_fw.value = null;
+      }
+      else
+      {
+        let fileSize = (firmware.size / 1024).toFixed(1);
+        let suffix = "KB";
+        if ( fileSize >= 1024 )
+        {
+          fileSize = (fileSize / 1024).toFixed(1);
+          suffix = "MB";
+        } 
+        dis_fw.innerHTML = `<p>${firmware.name}</p>&nbsp;<p>(${fileSize}${suffix})</p>`;
+        _("status").innerHTML="Ready.";
+      }
+    }
+    else
+    {
+      dis_fw.innerHTML = "No firmware selected";
+    }
   });
 }

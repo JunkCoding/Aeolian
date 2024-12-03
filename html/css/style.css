@@ -592,6 +592,7 @@ progress::-moz-progress-bar {
   margin: 0;
   padding: 0;
   background-color: whitesmoke;
+  color:#222;
   border: 0;
   font-size: 16px;
   font-style: oblique;
@@ -650,15 +651,29 @@ input[type=radio]:checked:after {
 /* ------ */
 input {
   color: #ffffff;
-  /*padding: 1px 4px 1px 4px;*/
-  /*border: 0px;*/
+  /*padding: 1px 4px 1px 4px;
   border-radius: 3px;
+  border: 0px;*/
+  cursor:pointer;
 }
 input[type=text]:focus {
   border-color:#e63e3e;
 }
 input[type=submit] {
   border-radius: 14px;
+  min-width: 110px;
+  height: 25px;
+  background-color: green;
+  border: 2px solid #ffffff;
+  margin: 0px 0px 0px 14px;
+}
+input[type=submit]:hover {
+  background-color: #20a020;
+}
+input#config,
+input#connect,
+input#scan {
+  margin: 7px 0px 0px 14px;
 }
 input#reboot {
   background: #830707;
@@ -666,36 +681,81 @@ input#reboot {
 input#reboot:hover {
   background-color: #c12525;
 }
-div#selfw {
+.fw-group {
+  height: 25px;
+  font-size: 14px;
+}
+div#fw-selector {
   padding:3px 8px;
   background:#104dab;
-  border:1px solid #ffffff;
+  border:2px solid #ffffff;
+  margin: 0px 14px 8px 8px;
   position:relative;
   color:#fff;
   border-radius:22px;
   font-size:14px;
   text-align:center;
   float:inline-start;
-  cursor:pointer
+  cursor:pointer;
+  width:110px;
+  height: 25px;
 }
-div#selfw:hover {
+div#fw-selector:hover {
   background:#0c75ee;
 }
-.hide_file {
-    position: absolute;
-    z-index: 1000;
-    opacity: 0;
-    cursor: pointer;
-    right: 0;
-    top: 0;
-    height: 100%;
-    font-size: 24px;
-    width: 100%;
-    
+input[type=file] {
+  display:none;
+  /*
+  position: absolute;
+  z-index: 1000;
+  opacity: 0;
+  cursor: pointer;
+  right: 0;
+  top: 0;
+  height: 100%;
+  font-size: 24px;
+  width: 100%;
+  */
+}
+input[type=file]::file-selector-button {
+  margin-right: 20px;
+  border: none;
+  background: #084cdf;
+  padding: 10px 20px;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s ease-in-out;
+}
+input[type=file]::file-selector-button:hover {
+  background: #0d45a5;
 }
 div#pad {
   margin: 8px;
   padding-bottom: 30px;
+}
+label.inp_select {
+  cursor: pointer;
+}
+.fw-details {
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  height: 25px;
+  line-height: 25px;
+  text-align: left;
+}
+span#fw-details {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  /*
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+  */
 }
 /* ------ */
 .table-row {
