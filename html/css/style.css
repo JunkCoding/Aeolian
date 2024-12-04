@@ -454,17 +454,20 @@ progress::-moz-progress-bar {
     right: 0px;
 }
 /* ------ */
+/*
 #tblApp input:hover,
 #tblData input:hover {
   background-color: #c05a07;
-}
+}*/
 #tblApp input,
 #tblData input {
+  /*
   background-color:#0d5f97;
+  border: 2px solid black;
+  */
   margin: 0;
   height: 24px;
   min-width: 128px;
-  border: 2px solid black;
   cursor: pointer;
   font-size: 13px;
   color: #fff;
@@ -526,13 +529,76 @@ progress::-moz-progress-bar {
 .hdr_table tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
 }
+/*
 .hdr_table th {
-  /*background-color: #f6f8fa;*/
-}
+  background-color: #f6f8fa;
+}*/
 .hdr_table td {
   background-color: #f6f8fa;
 }
-/* ------ */
+/* WiFi */
+.btn_group {
+  display: inline-flex;
+  margin: 10px 0px 0px 0px;
+}
+input.wifi {
+  background-color: #209d20;
+  border: 2px solid black;
+  margin: 8px 0px 0px 8px;
+}
+input.wifi:hover {
+  background-color: #21ca2f;
+}
+input.scan_start {
+  background-color: #b8b917;
+  border: 2px solid black;
+  margin: 8px 0px 0px 8px;
+}
+input.scan_start:hover {
+  background-color: #d6d721;
+}
+input.scan_stop {
+  background-color: #880f0f;
+  border: 2px solid black;
+  margin: 8px 0px 0px 8px;
+}
+
+input.scan_stop:hover {
+  background-color: #c01818;
+}/* OTA Update */
+input.verify {
+  background-color: #0f750f;
+  border: 2px solid black;
+}
+input.verify:hover {
+  background-color: #21ca2f;
+}
+input.erase {
+  background-color: #a56916;
+  border: 2px solid black;
+}
+input.erase:hover {
+  background-color: #e09020;
+}
+input.upload {
+  background-color: #128d91;
+  border: 2px solid rgb(0, 0, 0);
+}
+input.upload:hover {
+  background-color: #17c6cc;
+}
+input.setboot {
+  background-color: #7e1870;
+  border: 2px solid rgb(0, 0, 0);
+}
+input.setboot:hover {
+  background-color: #ca21b4;
+}
+input.upload:disabled {
+  background-color: grey;
+  border: 2px solid black;
+  pointer-events: none;
+}
 .status_table {
   border-collapse: separate;
   /*border: #24ff50 1px solid;*/
@@ -663,13 +729,16 @@ input[type=submit] {
   border-radius: 14px;
   min-width: 110px;
   height: 25px;
-  background-color: green;
-  border: 2px solid #ffffff;
+  /*
+  background-color: #008000;
+  border: 2px solid #000000;
+  */
   margin: 0px 0px 0px 14px;
 }
+/*
 input[type=submit]:hover {
   background-color: #20a020;
-}
+}*/
 input#config,
 input#connect,
 input#scan {
@@ -927,7 +996,6 @@ span#fw-details {
 
 .dd-wrapper {
   margin: 0px;
-  *zoom: 1;
   font-weight: 400;
 }
 

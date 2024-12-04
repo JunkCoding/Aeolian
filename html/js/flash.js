@@ -229,10 +229,10 @@ function doInfo(callback)
                 + "<td>" + flinfo.app[i].name + "</td>"
                 + "<td>" + humanFileSize(flinfo.app[i].size,0) + "</td>"
                 + "<td>" + flinfo.app[i].version + "</td>"
-                + "<td>" + ((valid_apps[flinfo.app[i].name])?("&#10004;"):(('<input type="submit" value="Verify ' + flinfo.app[i].name + '!" onclick="doVerify( \'' + flinfo.app[i].name + '\')" />'))) + "</td>"
+                + "<td>" + ((valid_apps[flinfo.app[i].name])?("&#10004;"):(('<input type="submit" class="verify" value="Verify ' + flinfo.app[i].name + '!" onclick="doVerify( \'' + flinfo.app[i].name + '\')" />'))) + "</td>"
                 + "<td>" + ((flinfo.app[i].running)?("&#10004;"):("")) + "</td>"
-                + '<td>' + ((flinfo.app[i].bootset)?("&#10004;"):('<input type="submit" value="Set Boot ' + flinfo.app[i].name + '!" onclick="doSetBoot( \'' + flinfo.app[i].name + '\')" />')) + '</td>'
-                + '<td>' + (((flinfo.app[i].ota) && !(flinfo.app[i].running))?('<input type="submit" value="Upload to ' + flinfo.app[i].name + '!" onclick="doUpgrade( \'' + flinfo.app[i].name + '\')" />'):('')) + '</td>'
+                + '<td>' + ((flinfo.app[i].bootset)?("&#10004;"):('<input type="submit" class="setboot" value="Set Boot ' + flinfo.app[i].name + '!" onclick="doSetBoot( \'' + flinfo.app[i].name + '\')" />')) + '</td>'
+                + '<td>' + (((flinfo.app[i].ota) && !(flinfo.app[i].running))?('<input type="submit" class="upload" value="Upload to ' + flinfo.app[i].name + '!" onclick="doUpgrade(\'' + flinfo.app[i].name + '\')" disabled />'):('')) + '</td>'
                 + "</tr>";
       var nr = ntbdy.insertRow();
       nr.innerHTML = tr;
@@ -245,10 +245,10 @@ function doInfo(callback)
     for(var i=0;i<l;i++)
     {
       var tr = "<tr>"
-                + "<td>" + flinfo.data[i].name + "</td>"
-                + "<td>" + humanFileSize(flinfo.data[i].size,0) + "</td>"
-                + "<td>" + dataformats[flinfo.data[i].format] + "</td>"
-                + '<td>' + ('<input type="submit" value="Erase ' + flinfo.data[i].name + '!" onclick="doEraseFlash( \'' + flinfo.data[i].name + '\')" />') + '</td>'
+                + `<td>${flinfo.data[i].name}</td>`
+                + `<td>${humanFileSize(flinfo.data[i].size,0)}</td>`
+                + `<td>${dataformats[flinfo.data[i].format]}</td>`
+                + `<td><input type="submit" class="erase" value="Erase ${flinfo.data[i].name}!" onclick="doEraseFlash('${flinfo.data[i].name}')" /></td>`
                 + "</tr>";
       var nr = ntbdy.insertRow();
       nr.innerHTML = tr;
@@ -258,6 +258,14 @@ function doInfo(callback)
   });
   xhr.send();
   return false;
+}
+function enable_fw_upload(set_enabled)
+{
+  let el = document.getElementsByClassName("upload");
+  for(var i=0;i < el.length;i ++)
+  {
+    el[i].disabled = !set_enabled;
+  }
 }
 function page_onload()
 {
@@ -277,6 +285,7 @@ function page_onload()
       let firmware = sel_fw.files[0];
       if ( firmware.type != "application/octet-stream" )
       {
+        enable_fw_upload(false);
         _("status").innerHTML="<strong style=\"color: red;\">Invalid file</strong>";
         dis_fw.innerHTML = "No firmware selected";
         sel_fw.value = null;
@@ -290,12 +299,14 @@ function page_onload()
           fileSize = (fileSize / 1024).toFixed(1);
           suffix = "MB";
         } 
+        enable_fw_upload(true);
         dis_fw.innerHTML = `<p>${firmware.name}</p>&nbsp;<p>(${fileSize}${suffix})</p>`;
         _("status").innerHTML="Ready.";
       }
     }
     else
     {
+      enable_fw_upload(false);
       dis_fw.innerHTML = "No firmware selected";
     }
   });
