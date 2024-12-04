@@ -32,7 +32,7 @@ function wsOpen()
         setMsg("error", "WebSocket error!");
       }
     };
-    ws.close = function(evt)
+    ws.onclose = function(evt)
     {
       setMsg("done", "WebSocket closed.");
     };

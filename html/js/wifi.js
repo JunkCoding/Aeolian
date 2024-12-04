@@ -1,14 +1,13 @@
-var retries;
 var curAP = "";
 let xhr = new XMLHttpRequest();
 
-function updateSelSsid(sel)
+function updateSelSsid (sel)
 {
   //$("#sta_ssid").value = sel.value;
   document.getElementById("sta_ssid").value = sel.value;
 }
 
-function createRowForAp(row, ap)
+function createRowForAp (row, ap)
 {
   row.id = ap.bssid;
 
@@ -16,14 +15,14 @@ function createRowForAp(row, ap)
   radio.className = "radio_tick";
   radio.style.width = '22px';
   /*radio.id = "radio_tick";*/
-  var input = document.createElement("input")
+  var input = document.createElement("input");
   input.style.width = '22px';
   input.type = "radio";
   input.name = "ssid";
   input.value = ap.ssid;
-  input.addEventListener('change', function() {updateSelSsid(input)});
+  input.addEventListener('change', function () { updateSelSsid(input); });
   /*if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";*/
-  if(curAP == ap.bssid) input.checked = "1";
+  if (curAP == ap.bssid) input.checked = "1";
   input.id = "opt-" + ap.ssid;
   radio.appendChild(input);
   row.appendChild(radio);
@@ -33,13 +32,13 @@ function createRowForAp(row, ap)
   rssi.style.width = '32px';
 
   var rssi_img = document.createElement('div');
-  if(ap.rssi > -30)
+  if (ap.rssi > -30)
     rssi_img.className = "signal-bars sizing-box good five-bars";
-  else if(ap.rssi > -67)
+  else if (ap.rssi > -67)
     rssi_img.className = "signal-bars sizing-box good four-bars";
-  else if(ap.rssi > -70)
+  else if (ap.rssi > -70)
     rssi_img.className = "signal-bars sizing-box ok three-bars";
-  else if(ap.rssi > -80)
+  else if (ap.rssi > -80)
     rssi_img.className = "signal-bars sizing-box bad two-bars";
   else
     rssi_img.className = "signal-bars sizing-box bad one-bar";
@@ -97,10 +96,10 @@ function createRowForAp(row, ap)
 
   return row;
 }
-
+/*
 window.onload = function(e)
 {
-  const staform = document.getElementById('staform');
+  const staform = document.getElementById('f_sta');
   staform.addEventListener('submit', (event) =>
   {
     event.preventDefault();
@@ -114,82 +113,116 @@ window.onload = function(e)
     xhr.send(JSON.stringify(formJSON));
   });
 }
-
-function scanAPs()
+*/
+var scan = (function ()
 {
-  var ws;
+  var o = {};
+  var _ws = undefined;
+  var _retries = 0;
 
-  if ( ws === undefined || ws.readyState != 0 )
+  o.start = function ()
   {
-    if (retries)
+    if ((_ws === undefined) || _ws.readyState != WebSocket.OPEN)
     {
-      setMsg("error", "WebSocket timeout, retrying..");
+      if (_retries)
+      {
+        setMsg("error", "WebSocket timeout, retrying..");
+      }
+      else
+      {
+        setMsg("info", "Opening WebSocket..");
+      }
+
+      let uri = "/websocket/apscan";
+      _ws = new WebSocket("ws://" + location.host + uri);
+      _ws.binaryType = 'arraybuffer';
+      _ws.onopen = function (evt)
+      {
+        _retries = 0;
+        setMsg("done", "WebSocket opened.");
+      };
+      _ws.onerror = function (evt)
+      {
+        if (_ws.readyState == WebSocket.OPEN)
+        {
+          setMsg("error", "WebSocket error!");
+        }
+      };
+      _ws.onclose = function (evt)
+      {
+        console.log("websocket closed.");
+        setMsg("done", "WebSocket closed.");
+      };
+      _ws.onmessage = function (evt)
+      {
+        if (evt.data)
+        {
+          var apList = JSON.parse(evt.data);
+          //console.log(apList);
+          if (apList.curAP)
+          {
+            curAP = apList.curAP;
+          }
+          if (apList.APs && apList.APs.length > 0)
+          {
+            let ntbdy = document.createElement('tbody');
+            let l = apList.APs.length;
+            for (var i = 0; i < l; i++)
+            {
+              let nr = ntbdy.insertRow();
+              createRowForAp(nr, apList.APs[i]);
+            }
+            let otbdy = document.querySelector("#apList > tbody");
+            otbdy.parentNode.replaceChild(ntbdy, otbdy);
+          }
+        }
+      };
+      _retries = 0;
+      return true;
     }
     else
     {
-      setMsg("info", "Opening WebSocket..");
+      return false;
     }
-    var uri = "/websocket/apscan";
-    ws = new WebSocket("ws://" + location.host + uri);
-    ws.binaryType = 'arraybuffer';
-    ws.onopen = function(evt)
-    {
-      retries = 0;
-      setMsg("done", "WebSocket opened.");
-    };
-    ws.onerror = function(evt)
-    {
-      if ( ws.readyState == WebSocket.OPEN )
-      {
-        setMsg("error", "WebSocket error!");
-      }
-    };
-    ws.close = function(evt)
-    {
-      console.log("websocket closed.");
-      setMsg("done", "WebSocket closed.");
-    };
-    ws.onmessage = function(evt)
-    {
-      if ( evt.data )
-      {
-        var apList = JSON.parse(evt.data);
-        //console.log(apList);
-        if(apList.curAP)
-        {
-          curAP = apList.curAP;
-        }
-        if(apList.APs && apList.APs.length > 0)
-        {
-          let ntbdy = document.createElement('tbody');
-          let l = apList.APs.length;
-          for(var i = 0; i < l; i++)
-          {
-            let nr = ntbdy.insertRow();
-            createRowForAp(nr, apList.APs[i]);
-          }
-          let otbdy = document.querySelector("#apList > tbody");
-          otbdy.parentNode.replaceChild(ntbdy, otbdy);
-        }
-      }
-    };
-    retries = 0;
-    window.onbeforeunload = function()
-    {
-      console.log("window closing");
-      ws.onclose = function(){};
-      ws.close(1000, "Window closing");
-    };
   };
-  function close(evt)
+  o.running = function ()
   {
-    console.log("closing: user interaction");
-    setMsg("done", "WebSocket closed.");
-    ws.close(1000, "user interaction");
+    if ((_ws === undefined) || _ws.readyState != WebSocket.OPEN)
+    {
+      return false;
+    }
+    else
+    {
+      return true;
+    }
   };
+  o.stop = function ()
+  {
+    if ((_ws === undefined) || _ws.readyState != WebSocket.OPEN)
+    {
+      return false;
+    }
+    _ws.close();
+    return true;
+  };
+  return o;
+})();
+function toggleScan (id)
+{
+  if (scan.running() === true)
+  {
+    scan.stop();
+    document.getElementById(id).className = "scan_start";
+    document.getElementById(id).value = "Scan Start";
+  }
+  else
+  {
+    scan.start();
+    document.getElementById(id).className = "scan_stop";
+    document.getElementById(id).value = "Scan Stop";
+  }
 }
-
-function page_onload()
+function page_onload ()
 {
   init_all_dropboxex();
 }
