@@ -1,5 +1,47 @@
 /* ------ */
- 
+:root {
+  --des-color: #cfcfd4;
+  --common-bg: #1066c0;
+  --btn-bg: #3f92a1;
+  --blue-color: #6add59;
+  --flex-width: 429px;
+}
+* {
+  padding: 0px;
+  margin: 0px;
+}
+
+/* Eye Icon (for password label) */
+@font-face {
+  font-family: "iconfont";
+  src: url("iconfont.eot?t=1618968976066");
+  /* IE9 */
+  src: url("iconfont.eot?t=1618968976066#iefix") format("embedded-opentype"),
+    /* IE6-IE8 */
+    url("data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAAPsAAsAAAAACAwAAAOfAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDBgqDbIMzATYCJAMMCwgABCAFhG0HPxsCB8iuMSYy1L2IALq6Q0/KG13wuuybkx/glBcP/O9Xu0/mj+luW8yTy+liejq0ibg1SiBa9k4TDc3ndfsM57rmVIXjBwh4COdVsa2vo/pUnzuazP/NwgTGxF6i4dgYeCBxcdmedyBr66c70Ht+7fSmuCoBAuwb5co6W1tXA0RshAwZd/9zzHRRgvlta6CpVVN082hvtOl4QAOKzAuiO6AD4luG17oUDno/ATXjJGPW1zZ3Aw8ZGRYQzmCBBR4ZrdxQGFQERcXcLFxXUokX4gvXgt8PP82tQlRKyNgNx2ocoPzLv8A0/O/Y4yGIpzNDXkTCHEAm7Ku07uAcRedwVjNVLs2ZhSyIUwX+/ycQWZpio/94kVAg+Q0wA5TxosScRuALIQS1619EgRoeAt4DdlCSFR2fVmuMIZqTT79K80NevlQBPQh/80aLBXl+eLkBmBfUkzf8OXJ4+eZd7umT7dFbt287ZHjgzA0hwkLd3XVqR+iRVwTvDQt9b9eJHSGHX6ZbbtjOveF9NaE9Id3bAzPtenfuO3UitGfH7pDt+tCdYcy9e+t2AMPtva1QJ3h92/zv7jK/x3nL8vI4P6jfyWRS41cx4HwWpXyvdhWTpGz9oKp+La78ELx7XM/Znrf28qPv58YIfaHPMGBr4mRHg3zBc577S7tsCNcvi9m8PEas11KXef6bPcOa9091bEm8Ayqb7cz+eqEv6ndGvYidGie7p+sjvSb1dU33Z9pdm1Z7vatVXyOvvIq+5SObVy8zSbbzw+OMgmQ6eiZAS1+UYMS5L0lfWGBuSwfjSCS9jAvst6PwS//GrxTH/Jd/pZ7Bh/LoJtBm3TWVG7YFfqC4Y0W2pESXsiHiIseXHPKTzBEQKEb/sbPn3XDNSOd8goqRBKKyMUgqpiAzdg6U1M2HQsUqqJmtbnFdH+Es5CpmWYEg6LgEUcszSDoeITP2LZSM+gKFTglqtoX+mnXTOum1jiCWIgecmIGY0zWeGahXWNiJBFthSVoaEHsRsXAAZqSm5xN1SENkignWpJBJKQ95oquwFh2GFEWHBtElxNFUkVKjMC2Nr/qiVE5XgZd1CIRFIQ7QhBkQxtFpeK8x5VX4+U6IwKZgkYayJncvhLDg1qEMqdI7IOtUWqeyW3nEMkmQiaJ4EI/QqaBaZEYUGtVBRnUvCcKhUokDwoZCabga31WVurxGfb9NUEPGpxBDCln9LGY1S8Qq7ca6n8Max2oCAAA=") format("woff2"),
+    url("iconfont.woff?t=1618968976066") format("woff"),
+    url("iconfont.ttf?t=1618968976066") format("truetype"),
+    /* chrome, firefox, opera, Safari, Android, iOS 4.2+ */
+    url("iconfont.svg?t=1618968976066#iconfont") format("svg");
+  /* iOS 4.1- */
+}
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.eye {
+  cursor: pointer;
+}
+.icon-xianshimima:before {
+  content: "\e611";
+}
+.icon-yincang:before {
+  content: "\e620";
+}
+/****************************/
 .navbar {
   list-style-type: none;
   margin-bottom: 32px;
@@ -538,6 +580,9 @@ progress::-moz-progress-bar {
   background-color: #f6f8fa;
 }
 /* WiFi */
+.pwd_group {
+  display: inline-flex;
+}
 .btn_group {
   display: inline-flex;
   margin: 10px 0px 0px 0px;

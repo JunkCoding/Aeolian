@@ -239,6 +239,51 @@ function testSTAconfig (id)
     
   }
 }
+function pwdShowHide (_this)
+{
+  let parent = _this.parentNode;
+  var pwd_el = null;
+  for (var i = 0; i < parent.childNodes.length; i++)
+  {
+    if (parent.childNodes[i].className == "password")
+    {
+      pwd_el = parent.childNodes[i];
+      break;
+    }
+  }
+
+  if (pwd_el === null)
+  {
+    return;
+  }
+
+  if (_this.classList.contains('icon-yincang'))
+  {
+    _this.classList.remove('icon-yincang');
+    _this.classList.add('icon-xianshimima');
+    pwd_el.type = 'text';
+  } else
+  {
+    _this.classList.add('icon-yincang');
+    _this.classList.remove('icon-xianshimima');
+    pwd_el.type = 'password';
+  }
+}
+function keyDown (e)
+{
+  if (e.keyCode === 13)
+  {
+    login();
+  }
+}
+function validatePassword (el)
+{
+  if (el.value.length < 8)
+  {
+    return;
+  }
+  updateControl(el.id, el.value);
+}
 function page_onload ()
 {
   init_all_dropboxex();

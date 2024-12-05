@@ -89,7 +89,12 @@
           </tr>
           <tr>
             <th>Password:</th>
-            <td> <input id="ap_password" type="password" maxlength="64" size="45" name="ap_password" value="%ap_password%" onchange="updateControl(this.id, this.value)" /> </td>
+            <td>
+              <div class="pwd_group">
+                <input id="ap_password" class="password" type="password" placeholder="Leave blank if not changing/setting." maxlength="64" size="45" name="ap_password" value="" onchange="validatePassword(this)" />
+                <div id="show-pwd" class="iconfont eye icon-yincang" onclick="pwdShowHide(this)"></div>
+              </div>
+            </td>
           </tr>
           <tr>
             <th>Channel:</th>
@@ -210,7 +215,12 @@
           </tr>
           <tr>
             <th>Password:</th>
-            <td> <input id="sta_password" type="password" maxlength="64" size="45" name="sta_password" value="%sta_password%" onchange="updateControl(this.id, this.value)" /> </td>
+            <td>
+              <div class="pwd_group">
+                <input id="sta_password" class="password" type="password" placeholder="Leave blank if not changing/setting." maxlength="64" size="45" name="sta_password" value="" onchange="validatePassword(this)" />
+                <div id="show-pwd" class="iconfont eye icon-yincang" onclick="pwdShowHide(this)"></div>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
