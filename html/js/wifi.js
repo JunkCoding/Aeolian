@@ -5,15 +5,18 @@ function APconfig ()
 }
 
 var curAP = new APconfig();
+var selAP = new APconfig();
 let xhr = new XMLHttpRequest();
 
-function updateSelSsid (sel)
+function updateSelAP (bssid, ssid)
 {
   //$("#sta_ssid").value = sel.value;
-  document.getElementById("sta_ssid").value = sel.value;
+  document.getElementById("sta_ssid").value = ssid;
+  selAP.bssid = bssid;
+  selAP.ssid = ssid;
 }
 
-function createRowForAp (row, ap)
+function createRowForAp (row, ap, hasFocus)
 {
   row.id = ap.bssid;
 
@@ -26,11 +29,10 @@ function createRowForAp (row, ap)
   input.type = "radio";
   input.name = "ssid";
   input.value = ap.ssid;
-  input.addEventListener('change', function () { updateSelSsid(input); });
+  input.addEventListener('change', function () { updateSelAP(ap.bssid, ap.ssid); });
   /*if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";*/
-  if (curAP.bssid == ap.bssid)
+  if (hasFocus)
   {
-    curAP.ssid = ap.ssid;
     input.checked = "1";
   }
   input.id = "opt-" + ap.ssid;
@@ -168,11 +170,30 @@ var scan = (function ()
         if (evt.data)
         {
           var apList = JSON.parse(evt.data);
-          //console.log(apList);
-          if (apList.BSSID)
+
+          /* Configure our connected AP */
+          if (apList.bssid)
           {
-            curAP.bssid = apList.BSSID;
+            if (curAP.bssid != apList.bssid)
+            {
+              curAP.bssid = apList.bssid;
+              curAP.ssid = apList.ssid
+            }
           }
+          /* This will be null during our first run, so we need to set it */
+          if (selAP.bssid === undefined)
+          {
+            selAP.bssid = curAP.bssid;
+            selAP.ssid = curAP.ssid;
+          }
+          var focusAP = selAP.bssid;
+
+          /* Check for when the SSID text does not match the active/selected connection */
+          if (document.getElementById("sta_ssid").value != selAP.ssid)
+          {
+            focusAP = null;
+          }
+
           if (apList.APs && apList.APs.length > 0)
           {
             let ntbdy = document.createElement('tbody');
@@ -180,7 +201,7 @@ var scan = (function ()
             for (var i = 0; i < l; i++)
             {
               let nr = ntbdy.insertRow();
-              createRowForAp(nr, apList.APs[i]);
+              createRowForAp(nr, apList.APs[i], (apList.APs[i].bssid === focusAP));
             }
             let otbdy = document.querySelector("#apList > tbody");
             otbdy.parentNode.replaceChild(ntbdy, otbdy);
