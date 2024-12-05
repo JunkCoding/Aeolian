@@ -325,8 +325,8 @@ char *ws_scan_results (uint16_t *strLen)
     memset (jsonStr, 0x0, (SIZE_JSONBUF+1));
 
     // Start our JSON response
-    *strLen = snprintf (jsonStr, SIZE_JSONBUF - *strLen, "{\n\"BSSID\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\n\t\"APs\": [",
-                    apinfo.bssid[0], apinfo.bssid[1], apinfo.bssid[2], apinfo.bssid[3], apinfo.bssid[4], apinfo.bssid[5]);
+    *strLen = snprintf (jsonStr, SIZE_JSONBUF - *strLen, "{\n\"bssid\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\n\"ssid\":\"%s\",\n\t\"APs\": [",
+                    apinfo.bssid[0], apinfo.bssid[1], apinfo.bssid[2], apinfo.bssid[3], apinfo.bssid[4], apinfo.bssid[5], apinfo.ssid);
 
     // print the list
     for ( int i = 0; i < cgiWifiAps.apCount; i++ )
