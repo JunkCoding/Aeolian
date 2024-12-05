@@ -75,10 +75,10 @@ espfs_heatshrink_header_t = Struct('<BBH')
 espfs_crc32_footer_t = Struct('<I')
 # crc32
 
-def load_config(root):
+def load_config(root, configFile):
     global config
 
-    defaults_file = os.path.join(script_dir, 'espfs_defaults.yaml')
+    defaults_file = os.path.join(script_dir, configFile)
 
     with open(defaults_file) as f:
         config = list(odyldo.safe_load_all(f))[0]
@@ -249,11 +249,12 @@ def main():
     global config
 
     parser = ArgumentParser()
+    parser.add_argument('CONFIG')
     parser.add_argument('ROOT')
     parser.add_argument('IMAGE')
 
     args = parser.parse_args()
-    load_config(args.ROOT)
+    load_config(args.ROOT, args.CONFIG)
 
     pathlist = make_pathlist(args.ROOT)
     index = 0

@@ -29,6 +29,7 @@
 #define STR_AP_BANDWIDTH        "ap_bandwidth"
 #define STR_AP_MAX_CONN         "ap_connections"
 #define STR_AP_IP_ADDR          "ap_ipaddr"
+#define STR_AP_AUTO_OFF         "ap_autooff"
 
 #define STR_WIFI_MODE           "wifi_mode"
 #define STR_WIFI_POWERSAVE      "wifi_powersave"
@@ -52,7 +53,8 @@ typedef enum
   AP_AUTHMODE,
   AP_CYPHER,
   AP_HIDDEN,
-  AP_BANDWIDTH
+  AP_BANDWIDTH,
+  AP_AUTO_OFF
 } ap_type_t;
 
 typedef enum
@@ -87,6 +89,7 @@ typedef struct
   uint8_t      protocol;                                          // AP Protocol
   uint8_t      bandwidth;                                         // AP Bandwidth (HT20 / HT40)
   uint8_t      max_connection;                                    // Maximum number of clients
+  uint8_t      auto_off;                                          // Auto stop AP when STA connects
 } wifi_ap_cfg_t;
 
 typedef struct
@@ -155,6 +158,8 @@ int        _get_ap_setting (char *buf, int bufsize, int unused);
 // ***********************************************
 int        _set_sta_setting (char *buf, int bufsize, char *param, char *value, int zone);
 int        _get_sta_setting (char *buf, int bufsize, int unused);
+// ***********************************************
+int        _test_sta_setting (char *buf, int bufsize, char *param, char *value, int setting);
 // ***********************************************
 int        _set_wifi_setting (char *buf, int bufsize, char *param, char *value, int zone);
 int        _get_wifi_setting (char *buf, int bufsize, int unused);

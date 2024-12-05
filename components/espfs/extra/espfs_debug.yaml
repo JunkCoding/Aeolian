@@ -1,0 +1,40 @@
+preprocessors:
+    babel-convert:
+        npm:
+            - 'babel-core'
+            - 'babel-cli'
+            - 'babel-preset-env'
+        npx_command: babel-cli --no-babelrc --presets babel-preset-env
+
+    babel-minify:
+        npm: babel-preset-minify
+        npx_command: babel-cli --no-babelrc --presets minify
+
+    html-minifier:
+        npm: html-minifier
+        npx_command: html-minifier
+
+    uglifycss:
+        npm: uglifycss
+        npx_command: uglifycss
+
+    uglifyjs:
+        npm: uglifyjs
+        npx_command: uglifyjs
+
+compressors:
+    gzip:
+        level: 9
+
+    heatshrink:
+        window_sz2: 11
+        lookahead_sz2: 4
+
+filters:
+    'espfs.paths': discard
+    'espfs.yaml': discard
+    '*.css': heatshrink
+    '*.html': heatshrink
+    '*.js': heatshrink
+    '*': [cache, heatshrink]
+
