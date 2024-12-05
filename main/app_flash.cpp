@@ -133,9 +133,9 @@ void print_app_info (void)
   cpu_mhz = get_cpu_mhz();
 
   _print_divider();
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
   F_LOGI(true, true, LC_GREY, "%22s = true", "Local build");
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
   F_LOGI(true, true, LC_GREY, "%22s = %d (last ota @ %d)", "Boot count", boot_count, ota_update);
   F_LOGI(true, true, LC_GREY, "%22s = 0: %s, 1: %s", "Reset reasons", verbose_print_reset_reason(rtc_get_reset_reason(0)), verbose_print_reset_reason(rtc_get_reset_reason(1)));
   F_LOGI(true, true, LC_GREY, "%22s = %s", "Project name", app_info.project_name);
@@ -174,7 +174,7 @@ void print_app_info (void)
  // _print_divider ();
 }
 
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
 void show_nvs_usage (void)
 {
   _print_divider ();
@@ -201,7 +201,7 @@ void show_nvs_usage (void)
     res = nvs_entry_next(&it);
   }
   nvs_release_iterator(it);
-#endif
+#endif /* ESP_IDF_VERSION_MAJOR */
 
   _print_divider ();
   nvs_stats_t nvs_stats;
@@ -249,7 +249,7 @@ void printHeapInfo (void)
   F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Largest 32-bit capable", free32);
   F_LOGI(true, true, LC_GREY, "%22s = %d bytes", "Task stack", uxTaskGetStackHighWaterMark (NULL));
 }
-#endif // AEOLIAN_DEBUG_DEV
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
 
 // **********************************************************************
 // * Calculate all entries in a namespace.
@@ -339,9 +339,9 @@ void *get_nvs_events (const char *ns, uint16_t eventLen, uint16_t *items)
   void *eventList = NULL;
 
   // Namespace info...
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
   _show_namespace_used_entries (ns);
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
 
   // Count the number of events (if any)
 #if ( ESP_IDF_VERSION_MAJOR < 5 )

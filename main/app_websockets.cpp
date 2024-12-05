@@ -325,7 +325,7 @@ char *ws_scan_results (uint16_t *strLen)
     memset (jsonStr, 0x0, (SIZE_JSONBUF+1));
 
     // Start our JSON response
-    *strLen = snprintf (jsonStr, SIZE_JSONBUF - *strLen, "{\n\"curAP\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\n\t\"APs\": [",
+    *strLen = snprintf (jsonStr, SIZE_JSONBUF - *strLen, "{\n\"BSSID\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\n\t\"APs\": [",
                     apinfo.bssid[0], apinfo.bssid[1], apinfo.bssid[2], apinfo.bssid[3], apinfo.bssid[4], apinfo.bssid[5]);
 
     // print the list

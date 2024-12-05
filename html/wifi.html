@@ -21,6 +21,7 @@
       set_dd('ap_hidden', %ap_hidden%);
       set_dd('ap_bandwidth', %ap_bandwidth%);
       set_dd('ap_primary', %ap_primary%);
+      document.getElementById("ap_autooff").checked = %ap_autooff%;
     });
   </script>
 </head>
@@ -190,9 +191,9 @@
       <div class="container">
         <div class="preference">
           <label for="master">AP Auto Off:</label>
-          <input type="checkbox" name="apAutoOff" id="apAutoOff" onclick="onClickHandler(this.id)" />
+          <input type="checkbox" name="apAutoOff" id="ap_autooff" onclick="onClickHandler(this.id)" />
         </div>
-        <label class="pref_label">Disable AP when device connects to a wireless router.</label>
+        <label class="pref_label">Disable AP when the device is connected to a network.</label>
       </div>
       <!--<div class="submit"><input type="submit" name="configure" value="Configure!" class="wifi" id="config" onclick="onClickHandler(this.id)" /></div>-->
       <!--</form>-->
@@ -216,7 +217,7 @@
       <!--</form>-->
       <div class="btn_group">
         <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan(this.id)" /></div>
-        <div class="submit"><input type="submit" name="sta_test" class="wifi" id="sta_test" value="Test" onclick="onClickHandler(this.id)" /></div>
+        <div class="submit"><input type="submit" name="sta_test" class="wifi" id="sta_test" value="Test" onclick="testSTAconfig(this.id)" /></div>
       </div>
     </div>
     <div>

@@ -287,6 +287,7 @@ body {
   background-color: #303030;
   background: url("/img/bg.jpg");
   background-repeat: repeat;
+  line-height: 1.40;
 }
 
 .main {
@@ -550,12 +551,12 @@ input.wifi:hover {
   background-color: #21ca2f;
 }
 input.scan_start {
-  background-color: #b8b917;
+  background-color: #c26f04;
   border: 2px solid black;
   margin: 8px 0px 0px 8px;
 }
 input.scan_start:hover {
-  background-color: #d6d721;
+  background-color: #ff9101;
 }
 input.scan_stop {
   background-color: #880f0f;
@@ -726,9 +727,10 @@ input[type=text]:focus {
   border-color:#e63e3e;
 }
 input[type=submit] {
-  border-radius: 14px;
+  border-radius: 20px;
   min-width: 110px;
-  height: 25px;
+  height: 24px;
+  font-size: 14px;
   /*
   background-color: #008000;
   border: 2px solid #000000;
@@ -755,7 +757,7 @@ input#reboot:hover {
   font-size: 14px;
 }
 div#fw-selector {
-  padding:3px 8px;
+  padding:1px 8px;
   background:#104dab;
   border:2px solid #ffffff;
   margin: 0px 14px 8px 8px;
@@ -767,7 +769,7 @@ div#fw-selector {
   float:inline-start;
   cursor:pointer;
   width:110px;
-  height: 25px;
+  height: 24px;
 }
 div#fw-selector:hover {
   background:#0c75ee;

@@ -175,10 +175,10 @@ extern "C" void app_main(void)
   // Display some useful info on boot
   // -----------------------------------------------------------
   print_app_info();
-#if defined(AEOLIAN_DEV_DEBUG)
+#if defined(CONFIG_AEOLIAN_DEBUG_DEV)
   show_nvs_usage();
   printHeapInfo();
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
 
   // -----------------------------------------------------------
   // Share this between WiFi & HTTP

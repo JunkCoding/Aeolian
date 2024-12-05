@@ -1,4 +1,10 @@
-var curAP = "";
+function APconfig ()
+{
+  ssid = "";
+  bssid = "";
+}
+
+var curAP = new APconfig();
 let xhr = new XMLHttpRequest();
 
 function updateSelSsid (sel)
@@ -22,7 +28,11 @@ function createRowForAp (row, ap)
   input.value = ap.ssid;
   input.addEventListener('change', function () { updateSelSsid(input); });
   /*if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";*/
-  if (curAP == ap.bssid) input.checked = "1";
+  if (curAP.bssid == ap.bssid)
+  {
+    curAP.ssid = ap.ssid;
+    input.checked = "1";
+  }
   input.id = "opt-" + ap.ssid;
   radio.appendChild(input);
   row.appendChild(radio);
@@ -159,9 +169,9 @@ var scan = (function ()
         {
           var apList = JSON.parse(evt.data);
           //console.log(apList);
-          if (apList.curAP)
+          if (apList.BSSID)
           {
-            curAP = apList.curAP;
+            curAP.bssid = apList.BSSID;
           }
           if (apList.APs && apList.APs.length > 0)
           {
@@ -220,6 +230,13 @@ function toggleScan (id)
     scan.start();
     document.getElementById(id).className = "scan_stop";
     document.getElementById(id).value = "Scan Stop";
+  }
+}
+function testSTAconfig (id)
+{
+  if (_("sta_ssid").value != curAP.ssid)
+  {
+    
   }
 }
 function page_onload ()

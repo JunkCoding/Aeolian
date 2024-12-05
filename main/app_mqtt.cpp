@@ -158,10 +158,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         mqttSubscribe(dev_Pattern);
         mqttSubscribe(dev_hikAlarm);
         // These are for internal use
-#if defined (CONFIG_AEOLIAN_DEV_OLIMEX) || defined (CONFIG_AEOLIAN_DEV_TTGO) || defined (CONFIG_AEOLIAN_DEV_SEGGER) || defined (CONFIG_AEOLIAN_DEV_DEBUG) || defined (CONFIG_AEOLIAN_DEV_S3_MATRIX)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
         mqttSubscribe(dev_Network);
         mqttSubscribe(dev_Radar);
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
         mqttSubscribe (dev_Lux);
         break;
       }
@@ -345,9 +345,9 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
   {
     snprintf(token, 63, "%.*s", t[i].end - t[i].start, event->data + t[i].start);
 
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_BRIGHT_YELLOW, "i: %d, type: %d, start: %d, len = %d, token: %s", i, t[i].type, t[i].start, t[i].end - t[i].start, token);
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
 
     // Are we dealing with a string?
     switch (t[i++].type)
@@ -356,9 +356,9 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
       {
         if ( !shrt_cmp(JSON_STR_CMD, token) )
         {
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
           F_LOGV(true, true, LC_YELLOW, "type: %d, JSMN_STRING: %.*s", t[i].type, t[i].end - t[i].start, event->data + t[i].start);
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
           // Ensure this is an object
           if ( t[i].type == JSMN_OBJECT )
           {
@@ -396,9 +396,9 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
         }
         else if ( !shrt_cmp(JSON_STR_SYNC, token) )
         {
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
           F_LOGV(true, true, LC_GREY, "type: %d, JSMN_STRING: %.*s", t[i].type, t[i].end - t[i].start, event->data + t[i].start);
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
           // Save some CPU cycles by Only processing these packets when we are a slave.
           if ( MQTT_Client_Cfg.Slave == true )
           {
@@ -478,9 +478,9 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
                     break;
                 }
               }
-  #if defined (AEOLIAN_DEBUG_DEV)
+  #if defined (CONFIG_AEOLIAN_DEBUG_DEV)
               F_LOGV(true, true, LC_WHITE, "paused: %d (cvars paused: %d), pauseReason: %d", paused, BTST(control_vars.bitflags, DISP_BF_PAUSED), pauseReason);
-  #endif
+  #endif /* CONFIG_AEOLIAN_DEBUG_DEV */
               // Does our state match the master's requested state?
               if ( paused != BTST(control_vars.bitflags, DISP_BF_PAUSED) )
               {
@@ -729,9 +729,9 @@ void proc_ev_dev_hikAlarm (esp_mqtt_event_handle_t event)
         // Check if we have a match and we light up zones accordingly
         if ( (hik_alert[i].eventType == eventType) && (hik_alert[i].ivmsChannel == ivmsChannel) && (hik_alert[i].ruleID == ruleID) && hik_alert[i].zone )
         {
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
           F_LOGI(true, true, LC_GREY, "devId: %2d, eventType: %2d, ivmsChannel: %2d, ruleID: %2d, zone: %2d", devId, eventType, ivmsChannel, ruleID, hik_alert[i].zone);
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
           // Set security light?
           if ( hik_alert[i].sec_light && lightcheck.isdark )
           {

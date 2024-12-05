@@ -104,4 +104,6 @@
   "editor.fontFamily": "Consolas",
   "editor.suggestFontSize": 11,
   "editor.detectIndentation": false,
+  "editor.codeLens": true,
+  "diffEditor.codeLens": true,
 }
