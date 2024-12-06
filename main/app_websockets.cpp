@@ -300,7 +300,7 @@ static void send_ping (void *arg)
   free (resp_arg);
 }
 
-#define JSON_SCAN_STR "{\n\t\t\"ssid\": \"%s\",\n\t\t\"bssid\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\n\t\t\"chan\": %d,\n\t\t\"2chan\": %d,\n\t\t\"rssi\": %d,\n\t\t\"enc\": \"%s\"\n\t}"
+#define JSON_SCAN_STR "{\"ssid\": \"%s\",\"bssid\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\"chan\": %d,\"2chan\": %d,\"rssi\": %d,\"enc\": \"%s\"}"
 #define SIZE_JSONBUF   4096
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
 IRAM_ATTR char *ws_scan_results (uint16_t *strLen)
@@ -325,7 +325,7 @@ char *ws_scan_results (uint16_t *strLen)
     memset (jsonStr, 0x0, (SIZE_JSONBUF+1));
 
     // Start our JSON response
-    *strLen = snprintf (jsonStr, SIZE_JSONBUF - *strLen, "{\n\"bssid\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\n\"ssid\":\"%s\",\n\t\"APs\": [",
+    *strLen = snprintf (jsonStr, SIZE_JSONBUF - *strLen, "{\"bssid\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\"ssid\":\"%s\",\"APs\": [",
                     apinfo.bssid[0], apinfo.bssid[1], apinfo.bssid[2], apinfo.bssid[3], apinfo.bssid[4], apinfo.bssid[5], apinfo.ssid);
 
     // print the list
@@ -342,7 +342,7 @@ char *ws_scan_results (uint16_t *strLen)
         cgiWifiAps.apList[i].primary, cgiWifiAps.apList[i].second,
         cgiWifiAps.apList[i].rssi, auth2str (cgiWifiAps.apList[i].authmode));
     }
-    *strLen += snprintf (&jsonStr[*strLen], SIZE_JSONBUF - *strLen, "]\n}");
+    *strLen += snprintf (&jsonStr[*strLen], SIZE_JSONBUF - *strLen, "]}");
   }
 
   // Release memory

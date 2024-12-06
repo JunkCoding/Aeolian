@@ -128,15 +128,15 @@ esp_err_t cgiThemes(httpd_req_t * req)
     {
       if ( brief == true )
       {
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\n{\"id\": %d, \"name\":\"%s\"},", themes[pos].themeIdentifier, themes[pos].name);
+        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"id\": %d, \"name\":\"%s\"},", themes[pos].themeIdentifier, themes[pos].name);
       }
       else
       {
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\n{\"id\": %d, \"name\":\"%s\",\n\"items\":[", x, themes[pos].name);
+        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"id\": %d, \"name\":\"%s\",\"items\":[", x, themes[pos].name);
         for (uint8_t y = 0; y < themes[pos].count; y++)
         {
           CRGBPalette16 pal = themes[pos].list[y];
-          buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\n{\"%d\":[", y);
+          buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"%d\":[", y);
           for (uint8_t z = 0; z < 16; z++)
           {
             cRGB col = (cRGB)pal.entries[z];
@@ -215,11 +215,11 @@ esp_err_t cgiSchedule (httpd_req_t * req)
     // Iterate through all themes
     for (uint8_t x = 0; (pos < control_vars.num_themes) && (x < MAX_ROWS); x++, pos++)
     {
-      buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\n{\"name\":\"%s\",\n\"palettes\":[", themes[pos].name);
+      buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"name\":\"%s\",\"palettes\":[", themes[pos].name);
       for (uint8_t y = 0; y < themes[pos].count; y++)
       {
         CRGBPalette16 pal = themes[pos].list[y];
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\n{\"%d\":[", y);
+        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"%d\":[", y);
         for (uint8_t z = 0; z < 16; z++)
         {
           cRGB col = (cRGB)pal.entries[z];

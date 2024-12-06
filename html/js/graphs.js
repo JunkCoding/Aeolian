@@ -139,11 +139,6 @@ function wsOpen()
       }
     };
     retries = 0;
-    window.onbeforeunload = function()
-    {
-      ws.onclose = function () {};
-      ws.close(222, "Window closing");
-    };
   }
 }
 function page_onload()
