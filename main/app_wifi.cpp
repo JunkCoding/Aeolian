@@ -101,6 +101,9 @@ static bool scan_for_ssid(void);
 // **************************************************************************************************
 //
 // **************************************************************************************************
+
+/* Strength of authmodes */
+/* OPEN < WEP < WPA_PSK < OWE < WPA2_PSK = WPA_WPA2_PSK < WAPI_PSK < WPA3_PSK = WPA2_WPA3_PSK = DPP */
 const char *auth2str (int auth)
 {
   switch ( auth )
@@ -117,6 +120,20 @@ const char *auth2str (int auth)
       return "WPA/WPA2";
     case WIFI_AUTH_WPA2_ENTERPRISE:
       return "WPA2 Enterprise";
+    case WIFI_AUTH_WPA3_PSK:
+      return "WPA3";
+    case WIFI_AUTH_WAPI_PSK:
+      return "WAPI";
+    case WIFI_AUTH_OWE:
+      return "OWE";
+    case WIFI_AUTH_WPA3_ENT_192:
+      return "WPA2 ENT 192";
+    case WIFI_AUTH_WPA3_EXT_PSK:
+      return "WPA3 EXT";
+    case WIFI_AUTH_WPA3_EXT_PSK_MIXED_MODE:
+      return "WPA3 EXT MIXED MODE";
+    case WIFI_AUTH_DPP:
+      return "DPP";
     default:
       return "Unknown";
   }
