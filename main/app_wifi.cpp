@@ -1242,12 +1242,12 @@ esp_err_t cgiWifiSetSta (httpd_req_t *req)
   }
   else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, RECEIVE_BUFFER)) <= 0 )
   {
-    F_LOGE(true, true, LC_YELLOW, "Some kind of error happened, so figure it out");
+    F_LOGE(true, true, LC_YELLOW, "Some kind of error happened, go figure it out");
   }
   else
   {
     char token[64] __attribute__ ((aligned(4))) = {};
-    char tmpbuf[128]  __attribute__ ((aligned (4))) = {};
+    char param[128] __attribute__ ((aligned (4))) = {};
     int i, r, len;
     jsmn_parser p;
     jsmntok_t t[12];
@@ -1257,19 +1257,18 @@ esp_err_t cgiWifiSetSta (httpd_req_t *req)
     for ( i = 1; i < r; i++ )
     {
       snprintf(token, 63, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-
       if ( !shrt_cmp (STR_STA_SSID, token) )
       {
         i++;
         len = t[i].end - t[i].start;
-        sprintf(tmpbuf, "%.*s", len, token);
+        sprintf (param, "%.*s", len, token);
 
-        if ( str_cmp (wifi_sta_cfg.ssid, tmpbuf) != 0 && len < SSID_STRLEN )
+        if (str_cmp (wifi_sta_cfg.ssid, param) != 0 && len < SSID_STRLEN)
         {
-          if ( save_nvs_str (NVS_WIFI_SETTINGS, STR_STA_SSID, tmpbuf) == ESP_OK )
+          if (save_nvs_str (NVS_WIFI_SETTINGS, STR_STA_SSID, param) == ESP_OK)
           {
             wifi_sta_cfg.ssid_len = len;
-            memcpy (wifi_sta_cfg.ssid, tmpbuf, SSID_STRLEN);
+            memcpy (wifi_sta_cfg.ssid, param, SSID_STRLEN);
           }
         }
       }
@@ -1277,14 +1276,14 @@ esp_err_t cgiWifiSetSta (httpd_req_t *req)
       {
         i++;
         len = t[i].end - t[i].start;
-        sprintf(tmpbuf, "%.*s", len, token);
+        sprintf (param, "%.*s", len, token);
 
-        if ( str_cmp (wifi_sta_cfg.password, tmpbuf) != 0 && len < PASSW_STRLEN )
+        if (str_cmp (wifi_sta_cfg.password, param) != 0 && len < PASSW_STRLEN)
         {
-          if ( save_nvs_str (NVS_WIFI_SETTINGS, STR_STA_PASSW, tmpbuf) == ESP_OK )
+          if (save_nvs_str (NVS_WIFI_SETTINGS, STR_STA_PASSW, param) == ESP_OK)
           {
             wifi_sta_cfg.pass_len = len;
-            memcpy (wifi_sta_cfg.password, tmpbuf, PASSW_STRLEN + 1);
+            memcpy (wifi_sta_cfg.password, param, PASSW_STRLEN + 1);
           }
         }
       }
@@ -1297,7 +1296,84 @@ esp_err_t cgiWifiSetSta (httpd_req_t *req)
 
   return err;
 }
+// --------------------------------------------------------------------------
+//
+// --------------------------------------------------------------------------
+#if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
+IRAM_ATTR esp_err_t cgiWifiTestSta (httpd_req_t* req)
+#else
+esp_err_t cgiWifiTestSta (httpd_req_t* req)
+#endif
+{
+  char token[64]   __attribute__ (( aligned (4) )) = {};
+  char param[128]  __attribute__ (( aligned (4) )) = {};
+  char rcvbuf[RECEIVE_BUFFER] = {};
+  //memset (rcvbuf, 0x0, RECEIVE_BUFFER);
+  esp_err_t err = ESP_FAIL;
+  sta_auth_t auth = {};
 
+  uint16_t len;
+  jsmn_parser p;
+  jsmntok_t t[12];
+
+  if ( req->content_len > RECEIVE_BUFFER )
+  {
+    F_LOGE (true, true, LC_YELLOW, "Request larger than our expectations!");
+  }
+  else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, RECEIVE_BUFFER)) <= 0 )
+  {
+    F_LOGE (true, true, LC_YELLOW, "Some kind of error happened, go figure it out");
+  }
+  else
+  {
+    jsmn_init (&p);
+    int r = jsmn_parse (&p, rcvbuf, req->content_len, t, sizeof (t) / sizeof (t[0]));
+    if ( r < 0 )
+    {
+      F_LOGE (true, true, LC_RED, "jsmn_parse error (%d), data: %.*s", r, req->content_len, rcvbuf);
+    }
+    else
+    {
+      uint16_t i = 1;
+      for ( i = 1; i < r; i++ )
+      {
+        snprintf (token, 63, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+        if (!shrt_cmp (STR_STA_SSID, token))
+        {
+          i++;
+          if (t[i].end - t[i].start <= SSID_STRLEN)
+          {
+            sprintf (auth.ssid, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+          }
+        }
+        else if ( !shrt_cmp (STR_STA_BSSID, token) )
+        {
+          i++;
+          if ( t[i].end - t[i].start <= BSSID_STRLEN )
+          {
+            sprintf (auth.bssid, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+          }
+        }
+          else if ( !shrt_cmp (STR_STA_PASSW, token) )
+        {
+          i++;
+          if ( t[i].end - t[i].start <= PASSW_STRLEN )
+          {
+            sprintf (auth.password, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+          }
+        }
+      }
+    }
+  }
+
+  F_LOGI (true, true, LC_MAGENTA, "S: %s, B: %s, P: %s", auth.ssid, auth.bssid, auth.password);
+  
+  httpd_resp_set_hdr (req, "Content-Type", "application/json");
+  httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));
+  httpd_resp_send_chunk (req, NULL, 0);
+
+  return err;
+}
 // --------------------------------------------------------------------------
 //
 // --------------------------------------------------------------------------
@@ -1316,7 +1392,7 @@ esp_err_t cgiWifiSetAp (httpd_req_t *req)
   }
   else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, RECEIVE_BUFFER)) <= 0 )
   {
-    F_LOGE(true, true, LC_YELLOW, "Some kind of error happened, so figure it out");
+    F_LOGE(true, true, LC_YELLOW, "Some kind of error happened, go figure it out");
   }
   else
   {

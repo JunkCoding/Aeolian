@@ -337,9 +337,7 @@ void proc_ev_dev_leds (esp_mqtt_event_handle_t event)
     F_LOGE(true, true, LC_RED, "jsmn_parse error (%d), mqtt data: %.*s", r, event->data_len, event->data);
     return;
   }
-
   //F_LOGW(true, true, LC_YELLOW, "r: %d, mqtt data: %.*s", r, event->data_len, event->data);
-
   uint16_t i = 1;
   while ( i < r )
   {

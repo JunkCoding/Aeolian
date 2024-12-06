@@ -10,9 +10,11 @@
 
 #define NUMARRAY_SIZE           16
 #define SSID_STRLEN             32
+#define BSSID_STRLEN            17
 #define PASSW_STRLEN            64
 #define UNAME_STRLEN            64
 #define STR_STA_SSID            "sta_ssid"
+#define STR_STA_BSSID           "sta_bssid"
 #define STR_STA_UNAME           "sta_username"
 #define STR_STA_PASSW           "sta_password"
 #define STR_STA_IP_ADDR         "sta_ipaddr"
@@ -65,7 +67,16 @@ typedef enum
 
 typedef struct
 {
-  char         ssid[SSID_STRLEN] __attribute__ ((aligned(4)));    // Station SSID
+  char        ssid[SSID_STRLEN];
+  char        bssid[BSSID_STRLEN];
+  char        username[UNAME_STRLEN];
+  char        password[PASSW_STRLEN];
+} sta_auth_t;
+
+typedef struct
+{
+  char         ssid[SSID_STRLEN] __attribute__ ((aligned (4)));   // Station SSID
+  char         bssid[BSSID_STRLEN] __attribute__ ((aligned (4))); // Station BSSID
   char         username[UNAME_STRLEN];                            // Station username
   char         password[PASSW_STRLEN];                            // Station pwassword
   char         ip_addr[64];                                       // Station IP address
@@ -139,13 +150,11 @@ esp_err_t   tplWifi(struct async_resp_arg *resp_arg, char *token);
 esp_err_t   tplWifi(httpd_req_t *req, char *token, void **arg);
 #endif
 esp_err_t   cgiWifiSetSta(httpd_req_t *req);
+esp_err_t   cgiWifiTestSta (httpd_req_t* req);
 esp_err_t   cgiWifiSetAp(httpd_req_t *req);
 esp_err_t   cgiWifiSetMode(httpd_req_t *req);
 
 void        init_wifi(httpd_handle_t *httpServer);
-
-void        wifi_showStatus(void);
-void        wifi_startWps(void);
 
 esp_err_t   wifi_set_mode(wifi_mode_t mode);
 int         wifi_get_IpStr(char *buf, int buflen);

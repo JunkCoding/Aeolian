@@ -545,6 +545,7 @@ static const httpd_uri_t basic_handlers[] = {
 
     {.uri = "/wifi.html",           .method = HTTP_GET,     .handler = async_espfs_handler,   .user_ctx = (void *)tplDeviceConfig,      .is_websocket = false, },
     {.uri = "/wifi/setsta",         .method = HTTP_POST,    .handler = cgiWifiSetSta,         .user_ctx = NULL,                         .is_websocket = false, },
+    {.uri = "/wifi/teststa",        .method = HTTP_POST,    .handler = cgiWifiTestSta,        .user_ctx = NULL,                         .is_websocket = false, },
     {.uri = "/wifi/setap",          .method = HTTP_POST,    .handler = cgiWifiSetAp,          .user_ctx = NULL,                         .is_websocket = false, },
     {.uri = "/wifi/setmode",        .method = HTTP_POST,    .handler = cgiWifiSetMode,        .user_ctx = NULL,                         .is_websocket = false, },
 
@@ -575,6 +576,7 @@ static const httpd_uri_t basic_handlers[] = {
 
     {.uri = "/wifi.html",           .method = HTTP_GET,     .handler = sendEspFs,             .user_ctx = (void *)tplDeviceConfig,      .is_websocket = false, },
     {.uri = "/wifi/setsta",         .method = HTTP_POST,    .handler = cgiWifiSetSta,         .user_ctx = NULL,                         .is_websocket = false, },
+    {.uri = "/wifi/teststa",        .method = HTTP_POST,    .handler = cgiWifiTestSta,        .user_ctx = NULL,                         .is_websocket = false, },
     {.uri = "/wifi/setap",          .method = HTTP_POST,    .handler = cgiWifiSetAp,          .user_ctx = NULL,                         .is_websocket = false, },
     {.uri = "/wifi/setmode",        .method = HTTP_POST,    .handler = cgiWifiSetMode,        .user_ctx = NULL,                         .is_websocket = false, },
 

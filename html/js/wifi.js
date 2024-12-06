@@ -166,7 +166,7 @@ var scan = (function ()
 
           /* This will be null only during our first run, so we need to set it */
           /* I guess this could be also true if there were no available wireless networks */
-          if (selAP.ssid === null && curAP.ssid != null)
+          if (selAP.ssid == null && curAP.ssid != null) /* deliberate equivalence and not identical */
           {
             selAP.bssid = curAP.bssid;
             selAP.ssid = curAP.ssid;
@@ -247,8 +247,8 @@ function staTestConfig ()
 
   const json = {
     sta_ssid: sid_el.value,
-    sta_pass: pwd_el.value,
-    sta_bsid: selAP.bssid
+    sta_bssid: selAP.bssid,
+    sta_password: pwd_el.value
   }
   // request options
   const options = {
@@ -259,7 +259,7 @@ function staTestConfig ()
     }
   };
   // send post request
-  fetch('/teststa', options)
+  fetch('/wifi/teststa', options)
     .then(res => res.json())
     .then(res => console.log(res))
     .catch(err => console.error(err))  
@@ -281,7 +281,7 @@ function pwdShowHide (_this)
     }
   }
 
-  if (pwd_el === null)
+  if (pwd_el == null)
   {
     return;
   }
