@@ -174,7 +174,8 @@
     "recommendations": [
       "lihui.vs-color-picker",
       "eamodio.gitlens",
-      "anseki.vscode-color"
+      "anseki.vscode-color",
+      "ms-vscode.cpptools"
     ]
   }
 }

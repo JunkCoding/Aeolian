@@ -7,7 +7,8 @@
         "lihui.vs-color-picker",
         "eamodio.gitlens",
         "anseki.vscode-color",
-        "espressif.esp-idf-extension"
+        "espressif.esp-idf-extension",
+        "ms-vscode.cpptools"
     ],
     "unwantedRecommendations": [
         "ms-vscode.cpptools-extension-pack"

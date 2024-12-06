@@ -1,7 +1,7 @@
 function APconfig ()
 {
-  ssid = "";
-  bssid = "";
+  ssid = null
+  bssid = null;
 }
 
 var curAP = new APconfig();
@@ -108,24 +108,6 @@ function createRowForAp (row, ap, hasFocus)
 
   return row;
 }
-/*
-window.onload = function(e)
-{
-  const staform = document.getElementById('f_sta');
-  staform.addEventListener('submit', (event) =>
-  {
-    event.preventDefault();
-
-    xhr.open('POST', '/wifi/setsta');
-
-    let data = new FormData(event.target);
-    const formJSON = Object.fromEntries(data.entries());
-
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send(JSON.stringify(formJSON));
-  });
-}
-*/
 var scan = (function ()
 {
   var o = {};
@@ -174,14 +156,17 @@ var scan = (function ()
           /* Configure our connected AP */
           if (apList.bssid)
           {
+            /* Update the details of the AP we are connected to, if necessary */
             if (curAP.bssid != apList.bssid)
             {
               curAP.bssid = apList.bssid;
               curAP.ssid = apList.ssid
             }
           }
-          /* This will be null during our first run, so we need to set it */
-          if (selAP.bssid === undefined)
+
+          /* This will be null only during our first run, so we need to set it */
+          /* I guess this could be also true if there were no available wireless networks */
+          if (selAP.ssid === null && curAP.ssid != null)
           {
             selAP.bssid = curAP.bssid;
             selAP.ssid = curAP.ssid;
@@ -191,7 +176,9 @@ var scan = (function ()
           /* Check for when the SSID text does not match the active/selected connection */
           if (document.getElementById("sta_ssid").value != selAP.ssid)
           {
+            /* We are no longer focused on a specific BSSID/SSID */
             focusAP = null;
+            selAP.bssid = null;
           }
 
           if (apList.APs && apList.APs.length > 0)
@@ -255,7 +242,27 @@ function toggleScan (_this)
 }
 function staTestConfig ()
 {
+  let pwd_el = document.getElementById("sta_password");
+  let sid_el = document.getElementById("sta_ssid");
 
+  const json = {
+    sta_ssid: sid_el.value,
+    sta_pass: pwd_el.value,
+    sta_bsid: selAP.bssid
+  }
+  // request options
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(json),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+  // send post request
+  fetch('/teststa', options)
+    .then(res => res.json())
+    .then(res => console.log(res))
+    .catch(err => console.error(err))  
 }
 function pwdShowHide (_this)
 {
@@ -291,13 +298,6 @@ function pwdShowHide (_this)
     pwd_el.type = 'password';
   }
 }
-function keyDown (e)
-{
-  if (e.keyCode === 13)
-  {
-    login();
-  }
-}
 function staTestEnable()
 {
   let pwd_el = document.getElementById("sta_password");
@@ -327,6 +327,19 @@ function validatePassword (el)
 }
 function validateSSID (el)
 {
+  if (el.value.length > 0)
+  {
+    selAP.ssid = el.value;
+    if (el.value === curAP.ssid)
+    {
+      /* If the ssid matches our current connected AP, we will use its bssid */
+      selAP.bssid = curAP.bssid;
+    }
+    else
+    {
+      selAP.bssid = null; /* we moved away from a selected AP */
+    }
+  }
   staTestEnable();
 }
 function page_onload ()
