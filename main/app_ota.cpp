@@ -577,7 +577,7 @@ IRAM_ATTR esp_err_t cgiSetBoot(httpd_req_t *req)
           // Get the actual boot partition
           actual_bootpart = esp_ota_get_boot_partition();
 
-          bufptr += sprintf(&tmpbuf[bufptr], "\n\t\"boot\": \"%s\",", actual_bootpart->label);
+          bufptr += sprintf(&tmpbuf[bufptr], "\"boot\": \"%s\",", actual_bootpart->label);
 
           // Check if we had an error setting the partition
           if ( err != ESP_OK )
@@ -668,7 +668,7 @@ esp_err_t cgiEraseFlash(httpd_req_t *req)
           // Try and erase it
           if ( ESP_OK == (err = esp_partition_erase_range(wanted_partition, 0, wanted_partition->size)) )
           {
-            bufptr += sprintf(&tmpbuf[bufptr], "\n\t\"erased\": \"%s\",", wanted_partition->label);
+            bufptr += sprintf(&tmpbuf[bufptr], "\"erased\": \"%s\",", wanted_partition->label);
           }
         }
 
@@ -886,8 +886,8 @@ esp_err_t cgiUploadFirmware(httpd_req_t *req)
 
 #define PARTITION_IS_FACTORY(partition) (partition->type == ESP_PARTITION_TYPE_APP) && (partition->subtype == ESP_PARTITION_SUBTYPE_APP_FACTORY))
 #define PARTITION_IS_OTA(partition) ((partition->type == ESP_PARTITION_TYPE_APP) && (partition->subtype >= ESP_PARTITION_SUBTYPE_APP_OTA_MIN) && (partition->subtype <= ESP_PARTITION_SUBTYPE_APP_OTA_MAX))
-#define APP_FMT_STR "{\n\t\t\t\"name\": \"%s\",\n\t\t\t\"size\": %lu,\n\t\t\t\"version\": \"\",\n\t\t\t\"ota\": %s,\n\t\t\t\"running\": %s,\n\t\t\t\"bootset\": %s"
-#define DATA_FMT_STR "{\n\t\t\t\"name\": \"%s\",\n\t\t\t\"size\": %lu,\n\t\t\t\"format\": %d\n\t\t}"
+#define APP_FMT_STR "{\"name\": \"%s\",\"size\": %lu,\"version\": \"\",\"ota\": %s,\"running\": %s,\"bootset\": %s"
+#define DATA_FMT_STR "{\"name\": \"%s\",\"size\": %lu,\"format\": %d}"
 #if defined (CONFIG_HTTPD_USE_ASYNC)
 IRAM_ATTR esp_err_t cgiGetFlashInfo(struct async_resp_arg *req)
 #else
@@ -950,7 +950,7 @@ IRAM_ATTR esp_err_t cgiGetFlashInfo (httpd_req_t* req)
   int  strptr = 0;
 
   // Start our json structure
-  strptr = sprintf(jsonStr, "{\n");
+  strptr = sprintf(jsonStr, "{");
 
   // We showing "application" partitions?
   if ( show_app )
@@ -963,7 +963,7 @@ IRAM_ATTR esp_err_t cgiGetFlashInfo (httpd_req_t* req)
       boot_partition = running_partition;
     }
 
-    strptr += sprintf(&jsonStr[strptr], "\t\"app\": [");
+    strptr += sprintf(&jsonStr[strptr], "\"app\": [");
 
     esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, (partname) ? (part) : (NULL));
     while ( it != NULL )
@@ -987,11 +987,11 @@ IRAM_ATTR esp_err_t cgiGetFlashInfo (httpd_req_t* req)
         // Verify the partition?
         if ( verify )
         {
-          strptr += sprintf(&jsonStr[strptr], ",\n\t\t\t\"valid\": %s", (check_partition_valid_app(it_partition) ? "true" : "false"));
+          strptr += sprintf(&jsonStr[strptr], ",\"valid\": %s", (check_partition_valid_app(it_partition) ? "true" : "false"));
         }
 
         // Finish this JSON object
-        strptr += sprintf(&jsonStr[strptr], "\n\t\t}");
+        strptr += sprintf(&jsonStr[strptr], "}");
 
         it = esp_partition_next(it);
       }
@@ -1007,10 +1007,10 @@ IRAM_ATTR esp_err_t cgiGetFlashInfo (httpd_req_t* req)
     // Comma seperate JSON objects
     if ( (jsonStr[(strptr - 1)]) == ']' )
     {
-      strptr += sprintf(&jsonStr[strptr], ",\n");
+      strptr += sprintf(&jsonStr[strptr], ",");
     }
 
-    strptr += sprintf(&jsonStr[strptr], "\t\"data\": [");
+    strptr += sprintf(&jsonStr[strptr], "\"data\": [");
 
     esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, (partname) ? (part) : (NULL));
     while ( it != NULL )
