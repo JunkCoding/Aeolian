@@ -101,6 +101,9 @@ static bool scan_for_ssid(void);
 // **************************************************************************************************
 //
 // **************************************************************************************************
+
+/* Strength of authmodes */
+/* OPEN < WEP < WPA_PSK < OWE < WPA2_PSK = WPA_WPA2_PSK < WAPI_PSK < WPA3_PSK = WPA2_WPA3_PSK = DPP */
 const char *auth2str (int auth)
 {
   switch ( auth )
@@ -117,6 +120,20 @@ const char *auth2str (int auth)
       return "WPA/WPA2";
     case WIFI_AUTH_WPA2_ENTERPRISE:
       return "WPA2 Enterprise";
+    case WIFI_AUTH_WPA3_PSK:
+      return "WPA3";
+    case WIFI_AUTH_WAPI_PSK:
+      return "WAPI";
+    case WIFI_AUTH_OWE:
+      return "OWE";
+    case WIFI_AUTH_WPA3_ENT_192:
+      return "WPA2 ENT 192";
+    case WIFI_AUTH_WPA3_EXT_PSK:
+      return "WPA3 EXT";
+    case WIFI_AUTH_WPA3_EXT_PSK_MIXED_MODE:
+      return "WPA3 EXT MIXED MODE";
+    case WIFI_AUTH_DPP:
+      return "DPP";
     default:
       return "Unknown";
   }
@@ -959,6 +976,8 @@ void get_nvs_sta_cfg (wifi_sta_cfg_t *wifi_sta_cfg)
   const char *default_sta_pass = WIFI_PASS;
   nvs_handle_t nvs_handle;
 
+// For that time I locked myself out of the device and didn't want to do a reset...
+#if not defined (CONFIG_FORCE_STA_CONFIG)
   esp_err_t err = nvs_open(NVS_WIFI_STA_CFG, NVS_READONLY, &nvs_handle);
   if ( err == ESP_OK )
   {
@@ -986,6 +1005,7 @@ void get_nvs_sta_cfg (wifi_sta_cfg_t *wifi_sta_cfg)
   {
     F_LOGE(true, true, LC_YELLOW, "Couldn't open flash for \"%s\" (func:%s, line: %d)", NVS_WIFI_STA_CFG,  __FILE__, __LINE__);
   }
+#endif /* CONFIG_FORCE_STA_CONFIG */
 
   // Check for zero config
   if ( !wifi_sta_cfg->ssid_len && !wifi_sta_cfg->pass_len )
@@ -1027,6 +1047,7 @@ void get_nvs_ap_cfg (wifi_ap_cfg_t *wifi_ap_cfg)
     nvs_get_u8(nvs_handle, STR_AP_HIDDEN, &wifi_ap_cfg->hidden);
     nvs_get_u8(nvs_handle, STR_AP_BANDWIDTH, &wifi_ap_cfg->bandwidth);
     nvs_get_u8(nvs_handle, STR_AP_MAX_CONN, &wifi_ap_cfg->max_connection);
+    nvs_get_u8(nvs_handle, STR_AP_AUTO_OFF, &wifi_ap_cfg->auto_off);
     nvs_close(nvs_handle);
   }
   else
@@ -1518,6 +1539,13 @@ int _set_ap_setting (char *buf, int bufsize, char *param, char *value, int setti
         wifi_ap_cfg.bandwidth = ns;
       }
       break;
+    case AP_AUTO_OFF:
+      if ( (ns <= 1) && wifi_ap_cfg.auto_off != ns )
+      {
+        saveType = TYPE_U8;
+        wifi_ap_cfg.auto_off = ns;
+      }
+      break;
   }
   esp_err_t err = ESP_FAIL;
   if ( saveType == TYPE_STR )
@@ -1560,6 +1588,9 @@ int _get_ap_setting (char *buf, int bufsize, int setting)
       break;
     case AP_BANDWIDTH:
       len = snprintf (buf, bufsize, "%d", wifi_ap_cfg.bandwidth);
+      break;
+    case AP_AUTO_OFF:
+      len = snprintf (buf, bufsize, "%d", wifi_ap_cfg.auto_off);
       break;
   }
   return len;
@@ -1623,6 +1654,15 @@ int _get_sta_setting (char *buf, int bufsize, int setting)
       break;
   }
   return len;
+}
+// ***********************************************
+int _test_sta_setting (char *buf, int bufsize, char *param, char *value, int setting)
+{
+  bool saveParam = false;
+
+  F_LOGI(true, true, LC_GREY, "param: %s, value: %s", param, value);
+
+  return 0;
 }
 // ***********************************************
 int _set_wifi_setting (char *buf, int bufsize, char *param, char *value, int setting)

@@ -1,14 +1,22 @@
-var retries;
-var curAP = "";
-let xhr = new XMLHttpRequest();
-
-function updateSelSsid(sel)
+function APconfig ()
 {
-  //$("#sta_ssid").value = sel.value;
-  document.getElementById("sta_ssid").value = sel.value;
+  ssid = "";
+  bssid = "";
 }
 
-function createRowForAp(row, ap)
+var curAP = new APconfig();
+var selAP = new APconfig();
+let xhr = new XMLHttpRequest();
+
+function updateSelAP (bssid, ssid)
+{
+  //$("#sta_ssid").value = sel.value;
+  document.getElementById("sta_ssid").value = ssid;
+  selAP.bssid = bssid;
+  selAP.ssid = ssid;
+}
+
+function createRowForAp (row, ap, hasFocus)
 {
   row.id = ap.bssid;
 
@@ -16,14 +24,17 @@ function createRowForAp(row, ap)
   radio.className = "radio_tick";
   radio.style.width = '22px';
   /*radio.id = "radio_tick";*/
-  var input = document.createElement("input")
+  var input = document.createElement("input");
   input.style.width = '22px';
   input.type = "radio";
   input.name = "ssid";
   input.value = ap.ssid;
-  input.addEventListener('change', function() {updateSelSsid(input)});
+  input.addEventListener('change', function () { updateSelAP(ap.bssid, ap.ssid); });
   /*if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";*/
-  if(curAP == ap.bssid) input.checked = "1";
+  if (hasFocus)
+  {
+    input.checked = "1";
+  }
   input.id = "opt-" + ap.ssid;
   radio.appendChild(input);
   row.appendChild(radio);
@@ -33,13 +44,13 @@ function createRowForAp(row, ap)
   rssi.style.width = '32px';
 
   var rssi_img = document.createElement('div');
-  if(ap.rssi > -30)
+  if (ap.rssi > -30)
     rssi_img.className = "signal-bars sizing-box good five-bars";
-  else if(ap.rssi > -67)
+  else if (ap.rssi > -67)
     rssi_img.className = "signal-bars sizing-box good four-bars";
-  else if(ap.rssi > -70)
+  else if (ap.rssi > -70)
     rssi_img.className = "signal-bars sizing-box ok three-bars";
-  else if(ap.rssi > -80)
+  else if (ap.rssi > -80)
     rssi_img.className = "signal-bars sizing-box bad two-bars";
   else
     rssi_img.className = "signal-bars sizing-box bad one-bar";
@@ -97,10 +108,10 @@ function createRowForAp(row, ap)
 
   return row;
 }
-
+/*
 window.onload = function(e)
 {
-  const staform = document.getElementById('staform');
+  const staform = document.getElementById('f_sta');
   staform.addEventListener('submit', (event) =>
   {
     event.preventDefault();
@@ -114,75 +125,212 @@ window.onload = function(e)
     xhr.send(JSON.stringify(formJSON));
   });
 }
-
-function wsOpen()
+*/
+var scan = (function ()
 {
-  var ws;
+  var o = {};
+  var _ws = undefined;
+  var _retries = 0;
 
-  if ( ws === undefined || ws.readyState != 0 )
+  o.start = function ()
   {
-    if (retries)
+    if ((_ws === undefined) || _ws.readyState != WebSocket.OPEN)
     {
-      setMsg("error", "WebSocket timeout, retrying..");
+      if (_retries)
+      {
+        setMsg("error", "WebSocket timeout, retrying..");
+      }
+      else
+      {
+        setMsg("info", "Opening WebSocket..");
+      }
+
+      let uri = "/websocket/apscan";
+      _ws = new WebSocket("ws://" + location.host + uri);
+      _ws.binaryType = 'arraybuffer';
+      _ws.onopen = function (evt)
+      {
+        _retries = 0;
+        setMsg("done", "WebSocket opened.");
+      };
+      _ws.onerror = function (evt)
+      {
+        if (_ws.readyState == WebSocket.OPEN)
+        {
+          setMsg("error", "WebSocket error!");
+        }
+      };
+      _ws.onclose = function (evt)
+      {
+        console.log("websocket closed.");
+        setMsg("done", "WebSocket closed.");
+      };
+      _ws.onmessage = function (evt)
+      {
+        if (evt.data)
+        {
+          var apList = JSON.parse(evt.data);
+
+          /* Configure our connected AP */
+          if (apList.bssid)
+          {
+            if (curAP.bssid != apList.bssid)
+            {
+              curAP.bssid = apList.bssid;
+              curAP.ssid = apList.ssid
+            }
+          }
+          /* This will be null during our first run, so we need to set it */
+          if (selAP.bssid === undefined)
+          {
+            selAP.bssid = curAP.bssid;
+            selAP.ssid = curAP.ssid;
+          }
+          var focusAP = selAP.bssid;
+
+          /* Check for when the SSID text does not match the active/selected connection */
+          if (document.getElementById("sta_ssid").value != selAP.ssid)
+          {
+            focusAP = null;
+          }
+
+          if (apList.APs && apList.APs.length > 0)
+          {
+            let ntbdy = document.createElement('tbody');
+            let l = apList.APs.length;
+            for (var i = 0; i < l; i++)
+            {
+              let nr = ntbdy.insertRow();
+              createRowForAp(nr, apList.APs[i], (apList.APs[i].bssid === focusAP));
+            }
+            let otbdy = document.querySelector("#apList > tbody");
+            otbdy.parentNode.replaceChild(ntbdy, otbdy);
+          }
+        }
+      };
+      _retries = 0;
+      return true;
     }
     else
     {
-      setMsg("info", "Opening WebSocket..");
+      return false;
     }
-    var uri = "/websocket/apscan";
-    ws = new WebSocket("ws://" + location.host + uri);
-    ws.binaryType = 'arraybuffer';
-    ws.onopen = function(evt)
+  };
+  o.running = function ()
+  {
+    if ((_ws === undefined) || _ws.readyState != WebSocket.OPEN)
     {
-      retries = 0;
-      setMsg("done", "WebSocket opened.");
-    };
-    ws.onerror = function(evt)
+      return false;
+    }
+    else
     {
-      if ( ws.readyState == WebSocket.OPEN )
-      {
-        setMsg("error", "WebSocket error!");
-      }
-    };
-    ws.close = function(evt)
+      return true;
+    }
+  };
+  o.stop = function ()
+  {
+    if ((_ws === undefined) || _ws.readyState != WebSocket.OPEN)
     {
-      setMsg("done", "WebSocket closed.");
-    };
-    ws.onmessage = function(evt)
-    {
-      if ( evt.data )
-      {
-        var apList = JSON.parse(evt.data);
-        if(apList.curAP)
-        {
-          curAP = apList.curAP;
-        }
-        if(apList.APs && apList.APs.length > 0)
-        {
-          let ntbdy = document.createElement('tbody');
-          let l = apList.APs.length;
-          for(var i = 0; i < l; i++)
-          {
-            let nr = ntbdy.insertRow();
-            createRowForAp(nr, apList.APs[i]);
-          }
-          let otbdy = document.querySelector("#apList > tbody");
-          otbdy.parentNode.replaceChild(ntbdy, otbdy);
-        }
-      }
-    };
-    retries = 0;
-    window.onbeforeunload = function()
-    {
-      ws.onclose = function () {};
-      ws.close(222, "Window closing");
-    };
+      return false;
+    }
+    _ws.close();
+    return true;
+  };
+  return o;
+})();
+function toggleScan (_this)
+{
+  if (scan.running() === true)
+  {
+    scan.stop();
+    _this.className = "scan_start";
+    _this.value = "Scan Start";
+  }
+  else
+  {
+    scan.start();
+    _this.className = "scan_stop";
+    _this.value = "Scan Stop";
   }
 }
-
-function page_onload()
+function staTestConfig ()
 {
-  wsOpen();
+
+}
+function pwdShowHide (_this)
+{
+  let parent = _this.parentNode;
+  var pwd_el = null;
+  for (var i = 0; i < parent.childNodes.length; i++)
+  {
+    let tmp_el = parent.childNodes[i];
+    if ((tmp_el.tagName != undefined) && tmp_el.tagName.toLowerCase() === 'input')
+    {
+      if (tmp_el.classList.contains('password'))
+      {
+        pwd_el = tmp_el;
+        break;
+      }
+    }
+  }
+
+  if (pwd_el === null)
+  {
+    return;
+  }
+
+  if (_this.classList.contains('icon-yincang'))
+  {
+    _this.classList.remove('icon-yincang');
+    _this.classList.add('icon-xianshimima');
+    pwd_el.type = 'text';
+  } else
+  {
+    _this.classList.add('icon-yincang');
+    _this.classList.remove('icon-xianshimima');
+    pwd_el.type = 'password';
+  }
+}
+function keyDown (e)
+{
+  if (e.keyCode === 13)
+  {
+    login();
+  }
+}
+function staTestEnable()
+{
+  let pwd_el = document.getElementById("sta_password");
+  let sid_el = document.getElementById("sta_ssid");
+  let con_el = document.getElementById("sta_test");
+
+  if (sid_el.value.length > 0 && (pwd_el.value.length === 0 || pwd_el.value.length >= 8))
+  {
+    con_el.disabled = false;
+    return true;
+  }
+  con_el.disabled = true;
+  return false;
+}
+function validatePassword (el)
+{
+  // Fuck WPS, but not open?
+  if (el.value.length === 0 || el.value.length >= 8)
+  {
+    el.classList.remove('error');
+  }
+  else
+  {
+    el.classList.add('error');
+  }
+  staTestEnable();
+}
+function validateSSID (el)
+{
+  staTestEnable();
+}
+function page_onload ()
+{
   init_all_dropboxex();
-  //scanAPs();
+  staTestEnable();
 }

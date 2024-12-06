@@ -42,12 +42,12 @@
 
 // Force current test pattern if we are debugging
 // (avoid accidentally forcing patterns on other devices)
-#if defined(AEOLIAN_DEBUG_DEV)
+#if defined(CONFIG_AEOLIAN_DEBUG_DEV)
 //#define FORCE_PATTERN       "Police Lights"
 //#define FORCE_PATTERN       "Two Sin"
 //#define FORCE_PATTERN       "Pride"
 //#define FORCE_PATTERN       "Old School 2"
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
 
 extern uint16_t led_debug_cnt;
 extern uint32_t led_write_count;

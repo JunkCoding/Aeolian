@@ -20,7 +20,8 @@ list(APPEND SOURCES
   "third-party/heatshrink/heatshrink_decoder.c")
 # ---------------------------------------------------------
 
-# FIXME: Make this dynamic
+# https://stackoverflow.com/questions/1027247/is-it-better-to-specify-source-files-with-glob-or-each-file-individually-in-cmak
+# (Keeping these as individually listed)
 # ---------------------------------------------------------
 list(APPEND webpages
   "${PROJECT_DIR}/html/404.html"
@@ -69,6 +70,13 @@ if(AEOLIAN_DEV_ROCKET)
 endif()
 # ---------------------------------------------------------
 
+if (CONFIG_AEOLIAN_DEBUG_DEV)
+  message(AUTHOR_WARNING "** Using debug espfs configuration **")
+  set(ESPFS_CONFIG "espfs_debug.yaml")
+else()
+  set(ESPFS_CONFIG "espfs_production.yaml")
+endif()
+
 # A list of things we require to work
 # ---------------------------------------------------------
 set(REQ_COMPONENTS spi_flash spiffs vfs)
@@ -85,7 +93,7 @@ idf_component_register(SRCS               ${SOURCES}
 # Generate: "build/esp-idf/espfs/webpages.espfs"
 # ---------------------------------------------------------
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/webpages.espfs"
-                    COMMAND ${python} ${COMPONENT_DIR}/extra/mkespfsimage.py ${PROJECT_DIR}/html ${CMAKE_CURRENT_BINARY_DIR}/webpages.espfs
+                    COMMAND ${python} ${COMPONENT_DIR}/extra/mkespfsimage.py ${ESPFS_CONFIG} ${PROJECT_DIR}/html ${CMAKE_CURRENT_BINARY_DIR}/webpages.espfs
                     DEPENDS "${COMPONENT_DIR}/extra/mkespfsimage.py" ${webpages}
                     VERBATIM)
 # Get the above custom command to run...

@@ -35,20 +35,23 @@
  * More: https://gist.github.com/964762
  */
 
-var t = function(
+var t = function (
   a, // the string source from which the template is compiled
   b  // the default `with` context of the template (optional)
-){
-  return function(
+)
+{
+  return function (
     c, // the object called as `this` in the template
     d  // the `with` context of this template call (optional)
-  ){
+  )
+  {
     return a.replace(
       /#{([^}]*)}/g, // a regexp that finds the interpolated code: "#{<code>}"
-      function(
+      function (
         a, // not used, only positional
         e  // the code matched by the interpolation
-      ){
+      )
+      {
         return Function(
           "x",
           "with(x)return " + e // the result of the interpolated code
@@ -57,10 +60,10 @@ var t = function(
           d     // the most
           || b  // specific
           || {} // context.
-        )
+        );
       }
-    )
-  }
+    );
+  };
 };
 
 /*
@@ -71,33 +74,36 @@ var t = function(
  *
  */
 
-var s = function(
+var s = function (
   a, // placeholder for storage object
   b  // placeholder for JSON
-){
+)
+{
   return b
     ? {                 // if JSON is supported
-      get: function(    // provide a getter function
+      get: function (    // provide a getter function
         c               // that takes a key
-      ){
+      )
+      {
         return a[c] &&  // and if the key exists
-          b.parse(a[c]) // parses and returns it,
+          b.parse(a[c]); // parses and returns it,
       },
 
-      set: function(     // and a setter function
+      set: function (     // and a setter function
         c,               // that takes a key
         d                // and a value
-      ){
+      )
+      {
         a[c] =           // and sets
-          b.stringify(d) // its serialization.
+          b.stringify(d); // its serialization.
       }
     }
-    : {}                 // if JSON isn't supported, provide a shim.
+    : {};                 // if JSON isn't supported, provide a shim.
 }(
   this.localStorage // use native localStorage if available
   || {},            // or an object otherwise
   JSON              // use native JSON (required)
-)
+);
 
 /*
  * Bind/Unbind events
@@ -113,27 +119,29 @@ var s = function(
  *
  */
 
-var p = function(
+var p = function (
   a, // a DOM element
   b, // an event name such as "click"
   c, // (placeholder)
   d  // (placeholder)
-){
+)
+{
   c = c || document; // use the document by default
   d = c[             // save the current onevent　handler
     b = "on" + b     // prepent the event name with "on"
   ];
   a = c[b] =                 // cache and replace the current handler
-    function(e) {            // with a function that
+    function (e)
+    {            // with a function that
       d = d && d(            // executes/caches the previous handler
         e = e || c.event     // with a cross-browser object,
       );
 
       return (a = a && b(e)) // and calls the passed function,
         ? b                  // returning the current handler if it rebinds
-        : d                  // and the previous handler otherwise.
+        : d;                  // and the previous handler otherwise.
     };
-  c = this // cache the window to fetch IE events
+  c = this; // cache the window to fetch IE events
 };
 
 /*
@@ -152,11 +160,12 @@ var p = function(
  *
  */
 
-var m = function(
+var m = function (
   a, // an HTML string
   b, // placeholder
   c  // placeholder
-){
+)
+{
   b = document;                   // get the document,
   c = b.createElement("p");       // create a container element,
   c.innerHTML = a;                // write the HTML to it, and
@@ -166,8 +175,8 @@ var m = function(
     b = c.firstChild              // the container element has a first child
   ) a.appendChild(b);             // append the child to the fragment,
 
-  return a                        // and then return the fragment.
-}
+  return a;                        // and then return the fragment.
+};
 
 /*
  * DOM selector
@@ -183,12 +192,13 @@ var m = function(
  *
  */
 
-var $ = function(
+var $ = function (
   a,                         // take a simple selector like "name", "#name", or ".name", and
   b                          // an optional context, and
-){
+)
+{
   a = a.match(/^(\W)?(.*)/); // split the selector into name and symbol.
-  return(                    // return an element or list, from within the scope of
+  return (                    // return an element or list, from within the scope of
     b                        // the passed context
     || document              // or document,
   )[
@@ -201,8 +211,8 @@ var $ = function(
     )
   ](
     a[2]                     // called with the name.
-  )
-}
+  );
+};
 
 
 /*
@@ -217,27 +227,29 @@ var $ = function(
  *
  */
 
-var j = function(
+var j = function (
   a // cursor placeholder
-){
-  for(                     // for all a
-    a=0;                   // from 0
-    a<4;                   // to 4,
+)
+{
+  for (                     // for all a
+    a = 0;                   // from 0
+    a < 4;                   // to 4,
     a++                    // incrementing
-  ) try {                  // try
+  ) try
+  {                  // try
     return a               // returning
       ? new ActiveXObject( // a new ActiveXObject
-          [                // reflecting
-            ,              // (elided)
-            "Msxml2",      // the various
-            "Msxml3",      // working
-            "Microsoft"    // options
-          ][a] +           // for Microsoft implementations, and
-          ".XMLHTTP"       // the appropriate suffix,
-        )                  // but make sure to
-      : new XMLHttpRequest // try the w3c standard first, and
+        [                // reflecting
+          ,              // (elided)
+          "Msxml2",      // the various
+          "Msxml3",      // working
+          "Microsoft"    // options
+        ][a] +           // for Microsoft implementations, and
+        ".XMLHTTP"       // the appropriate suffix,
+      )                  // but make sure to
+      : new XMLHttpRequest; // try the w3c standard first, and
   }
 
-  catch(e){}               // ignore when it fails.
+    catch (e) {}               // ignore when it fails.
 }
 

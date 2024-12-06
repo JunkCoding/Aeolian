@@ -453,22 +453,22 @@ static bool check_weekly_event (struct tm tm)
     // Iterate through weekly events, if necessary
     for ( ;eval_pos < num_weekly_events; eval_pos++ )
     {
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_GREY, "Evaluating: %s, %02d:%02d to %02d:%02d, theme: %s (%s)",
       dayNames[weekly_events[eval_pos].day],
       weekly_events[eval_pos].start.hour, weekly_events[eval_pos].start.minute,
       weekly_events[eval_pos].end.hour, weekly_events[eval_pos].end.minute,
       get_theme_name(weekly_events[eval_pos].theme), flags2str(tmpStr, (schedulerFlags_t)weekly_events[eval_pos].flags));
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
       // Is pending event for today?
       if ( weekly_events[eval_pos].day == tm.tm_wday && !BTST(weekly_events[eval_pos].flags, EVENT_INACTIVE) )
       {
         uint16_t sst = (weekly_events[eval_pos].start.hour * 60) + weekly_events[eval_pos].start.minute;
         uint16_t est = (weekly_events[eval_pos].end.hour * 60) + weekly_events[eval_pos].end.minute;
 
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
         F_LOGD(true, true, LC_BRIGHT_YELLOW, "tod = %d, sst = %d, est = %d (cur_weekly_event: %d, num_weekly_events: %d)", tod, sst, est, cur_weekly_event, num_weekly_events);
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
         // Current time less than end time?
         if ( tod < est )
         {
@@ -481,13 +481,13 @@ static bool check_weekly_event (struct tm tm)
             // Save this as the last known valid match
             valid_pos = eval_pos;
 
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
             F_LOGW(true, true, LC_GREEN, "Match: %s, %02d:%02d to %02d:%02d, theme: %s (%s)",
               dayNames[weekly_events[eval_pos].day],
               weekly_events[eval_pos].start.hour, weekly_events[eval_pos].start.minute,
               weekly_events[eval_pos].end.hour, weekly_events[eval_pos].end.minute,
               get_theme_name(weekly_events[eval_pos].theme), flags2str(tmpStr, (schedulerFlags_t)weekly_events[eval_pos].flags));
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
           }
           else
           {
@@ -517,13 +517,13 @@ static bool check_weekly_event (struct tm tm)
       cur_weekly_event = eval_pos;
     }
 
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_WHITE, "Next event: %s, %02d:%02d to %02d:%02d, theme: %s (%s)",
       dayNames[weekly_events[eval_pos].day],
       weekly_events[eval_pos].start.hour, weekly_events[eval_pos].start.minute,
       weekly_events[eval_pos].end.hour, weekly_events[eval_pos].end.minute,
       get_theme_name(weekly_events[eval_pos].theme), flags2str(tmpStr, (schedulerFlags_t)weekly_events[eval_pos].flags));
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
 
     if ( match == true )
     {
@@ -576,7 +576,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
     // Iterate through events, if necessary
     for ( ;eval_pos < num_annual_events; eval_pos++ )
     {
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
       F_LOGV(true, true, LC_GREY, "Evaluating: %s %2d%2s to %2d%2s, %02d:%02d to %02d:%02d, theme: %s (%s)",
           monNames[annual_events[eval_pos].month],
           annual_events[eval_pos].dayStart, nth (annual_events[eval_pos].dayStart),
@@ -584,7 +584,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
           annual_events[eval_pos].start.hour, annual_events[eval_pos].start.minute,
           annual_events[eval_pos].end.hour, annual_events[eval_pos].end.minute,
           get_theme_name (annual_events[eval_pos].theme), flags2str(tmpStr, (schedulerFlags_t)annual_events[eval_pos].flags));
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
       // Does this event match the current month and enabled?
       if ( (annual_events[eval_pos].month == tm.tm_mon) && !BTST(annual_events[eval_pos].flags, EVENT_INACTIVE) )
       {
@@ -599,7 +599,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
 
             // Save this as the last known valid match
             valid_pos = eval_pos;
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
             F_LOGW(true, true, LC_GREEN, "Match: %s %2d%2s to %2d%2s, %02d:%02d to %02d:%02d, theme: %s (%s)",
                 monNames[annual_events[eval_pos].month],
                 annual_events[eval_pos].dayStart, nth (annual_events[eval_pos].dayStart),
@@ -607,7 +607,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
                 annual_events[eval_pos].start.hour, annual_events[eval_pos].start.minute,
                 annual_events[eval_pos].end.hour, annual_events[eval_pos].end.minute,
                 get_theme_name (annual_events[eval_pos].theme), flags2str(tmpStr, (schedulerFlags_t)annual_events[eval_pos].flags));
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
             // Should this be set as the default event?
             if ( BTST (annual_events[eval_pos].flags, EVENT_DEFAULT) )
             {
@@ -638,7 +638,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
     }
 
     // Log our current comparison
-#if defined (AEOLIAN_DEBUG_DEV)
+#if defined (CONFIG_AEOLIAN_DEBUG_DEV)
     F_LOGV(true, true, LC_WHITE, "Next event: %s %2d%2s to %2d%2s, %02d:%02d to %02d:%02d, theme: %s (%s)",
       monNames[annual_events[eval_pos].month],
       annual_events[eval_pos].dayStart, nth (annual_events[eval_pos].dayStart),
@@ -646,7 +646,7 @@ static bool check_annual_event(struct tm tm, bool ignore_master=false)
       annual_events[eval_pos].start.hour, annual_events[eval_pos].start.minute,
       annual_events[eval_pos].end.hour, annual_events[eval_pos].end.minute,
       get_theme_name (annual_events[eval_pos].theme), flags2str(tmpStr, (schedulerFlags_t)annual_events[eval_pos].flags));
-#endif
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
   }
 
   F_LOGV(true, true, LC_BRIGHT_GREEN, "match = %d", match);
@@ -929,7 +929,7 @@ void scheduler_task(void *arg)
     // Check whether it is currently dark(ish) outside
     // -----------------------------------------------------------
     bool isDark = true;
-    if ( lightcheck.lux_level >= 440 || (now >= lightcheck.ts_sunrise && now <= lightcheck.ts_sunset) )
+    if ( lightcheck.lux_level >= 500 || (now >= lightcheck.ts_sunrise && now <= lightcheck.ts_sunset) )
     {
       isDark = false;
     }

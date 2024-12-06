@@ -138,6 +138,12 @@ menu "Aeolian Configuration"
       default ""
       help
         Password of the wireless AP we should connect to
+
+    config FORCE_STA_CONFIG
+      bool "Force Config"
+      default false
+      help
+        Ignore NVS settings and force these settings (useful, for example, if you forget your AP password and don't want to reset the device)
   endmenu
 
   menu "WS2812 Configuration"

@@ -121,14 +121,14 @@ function doEraseFlash(partition, callback)
 }
 function doUpgrade(partition, callback)
 {
-  var firmware =  document.querySelector('#firmware').files;
-  if ( firmware.length == 0 )
+  let firmware = document.getElementById("sel-fw");
+  if ( firmware.files.length == 0 )
   {
     _("status").innerHTML="<strong style=\"color: red;\">No file selected!</strong>";
     return;
   }
   // Only using the first file
-  firmware = firmware[0];
+  firmware = firmware.files[0];
   if ( firmware.size == 0 )
   {
     _("status").innerHTML="<strong style=\"color: red;\">File is empty!</strong>";
@@ -138,6 +138,7 @@ function doUpgrade(partition, callback)
 
   _("progressBar").value = 0;
   _("progbar").style.display = 'block';
+  _("main").style.pointerEvents = "none";
 
   // Override the global xhr
   let xhr = new XMLHttpRequest();
@@ -169,6 +170,7 @@ function loadHandler(event)
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong>Success: Reboot to run new firmware</strong>";
     _("progbar").style.display = 'none';
+    _("main").style.pointerEvents = "";
   });
 }
 function errorHandler(event)
@@ -178,6 +180,7 @@ function errorHandler(event)
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong style=\"color: red;\">Error: An unknown error ocurred during upload</strong>";
     _("progbar").style.display = 'none';
+    _("main").style.pointerEvents = "";
   });
 }
 function abortHandler(event)
@@ -187,6 +190,7 @@ function abortHandler(event)
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong style=\"color: amber;\">Aborted: Firmware upload aborted</strong>";
     _("progbar").style.display = 'none';
+    _("main").style.pointerEvents = "";
   });
 }
 function timeoutHandler(event)
@@ -196,6 +200,7 @@ function timeoutHandler(event)
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="Upload timed out";
     _("progbar").style.display = 'none';
+    _("main").style.pointerEvents = "";
   });
 }
 function humanFileSize(B,i)
@@ -224,10 +229,10 @@ function doInfo(callback)
                 + "<td>" + flinfo.app[i].name + "</td>"
                 + "<td>" + humanFileSize(flinfo.app[i].size,0) + "</td>"
                 + "<td>" + flinfo.app[i].version + "</td>"
-                + "<td>" + ((valid_apps[flinfo.app[i].name])?("&#10004;"):(('<input type="submit" value="Verify ' + flinfo.app[i].name + '!" onclick="doVerify( \'' + flinfo.app[i].name + '\')" />'))) + "</td>"
+                + "<td>" + ((valid_apps[flinfo.app[i].name])?("&#10004;"):(('<input type="submit" class="verify" value="Verify ' + flinfo.app[i].name + '!" onclick="doVerify( \'' + flinfo.app[i].name + '\')" />'))) + "</td>"
                 + "<td>" + ((flinfo.app[i].running)?("&#10004;"):("")) + "</td>"
-                + '<td>' + ((flinfo.app[i].bootset)?("&#10004;"):('<input type="submit" value="Set Boot ' + flinfo.app[i].name + '!" onclick="doSetBoot( \'' + flinfo.app[i].name + '\')" />')) + '</td>'
-                + '<td>' + (((flinfo.app[i].ota) && !(flinfo.app[i].running))?('<input type="submit" value="Upload to ' + flinfo.app[i].name + '!" onclick="doUpgrade( \'' + flinfo.app[i].name + '\')" />'):('')) + '</td>'
+                + '<td>' + ((flinfo.app[i].bootset)?("&#10004;"):('<input type="submit" class="setboot" value="Set Boot ' + flinfo.app[i].name + '!" onclick="doSetBoot( \'' + flinfo.app[i].name + '\')" />')) + '</td>'
+                + '<td>' + (((flinfo.app[i].ota) && !(flinfo.app[i].running))?('<input type="submit" class="upload" value="Upload to ' + flinfo.app[i].name + '!" onclick="doUpgrade(\'' + flinfo.app[i].name + '\')" disabled />'):('')) + '</td>'
                 + "</tr>";
       var nr = ntbdy.insertRow();
       nr.innerHTML = tr;
@@ -240,10 +245,10 @@ function doInfo(callback)
     for(var i=0;i<l;i++)
     {
       var tr = "<tr>"
-                + "<td>" + flinfo.data[i].name + "</td>"
-                + "<td>" + humanFileSize(flinfo.data[i].size,0) + "</td>"
-                + "<td>" + dataformats[flinfo.data[i].format] + "</td>"
-                + '<td>' + ('<input type="submit" value="Erase ' + flinfo.data[i].name + '!" onclick="doEraseFlash( \'' + flinfo.data[i].name + '\')" />') + '</td>'
+                + `<td>${flinfo.data[i].name}</td>`
+                + `<td>${humanFileSize(flinfo.data[i].size,0)}</td>`
+                + `<td>${dataformats[flinfo.data[i].format]}</td>`
+                + `<td><input type="submit" class="erase" value="Erase ${flinfo.data[i].name}!" onclick="doEraseFlash('${flinfo.data[i].name}')" /></td>`
                 + "</tr>";
       var nr = ntbdy.insertRow();
       nr.innerHTML = tr;
@@ -254,6 +259,14 @@ function doInfo(callback)
   xhr.send();
   return false;
 }
+function enable_fw_upload(set_enabled)
+{
+  let el = document.getElementsByClassName("upload");
+  for(var i=0;i < el.length;i ++)
+  {
+    el[i].disabled = !set_enabled;
+  }
+}
 function page_onload()
 {
   openAjaxSpinner();
@@ -261,5 +274,40 @@ function page_onload()
   {
     closeAjaxSpinner();
     _("status").innerHTML="Ready.";
+  });
+
+  let sel_fw = document.getElementById("sel-fw");
+  let dis_fw = document.getElementById("fw-details");
+
+  sel_fw.addEventListener("change", () => {
+    if ( sel_fw.files.length > 0 )
+    {
+      let firmware = sel_fw.files[0];
+      if ( firmware.type != "application/octet-stream" )
+      {
+        enable_fw_upload(false);
+        _("status").innerHTML="<strong style=\"color: red;\">Invalid file</strong>";
+        dis_fw.innerHTML = "No firmware selected";
+        sel_fw.value = null;
+      }
+      else
+      {
+        let fileSize = (firmware.size / 1024).toFixed(1);
+        let suffix = "KB";
+        if ( fileSize >= 1024 )
+        {
+          fileSize = (fileSize / 1024).toFixed(1);
+          suffix = "MB";
+        } 
+        enable_fw_upload(true);
+        dis_fw.innerHTML = `<p>${firmware.name}</p>&nbsp;<p>(${fileSize}${suffix})</p>`;
+        _("status").innerHTML="Ready.";
+      }
+    }
+    else
+    {
+      enable_fw_upload(false);
+      dis_fw.innerHTML = "No firmware selected";
+    }
   });
 }

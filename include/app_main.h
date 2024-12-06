@@ -109,16 +109,16 @@ typedef enum
 #define JSON_SWITCHOFF_STR          "{\"" JSON_STR_CMD "\": {\"" JSON_STR_ID "\": %d, \"" JSON_STR_ARG "\": \"%s\", \"reason\": %d}}"
 #define JSON_SWITCHON_STR           "{\"" JSON_STR_CMD "\": {\"" JSON_STR_ID "\": %d, \"" JSON_STR_ARG "\": \"%s\", \"reason\": %d}, \"delay\": %d, \"theme\": %d, \"pattern\": %d}"
 
-#define JSON_SUCCESS_STR            "\n\t\"success\": true\n}"
-#define JSON_FAILURE_STR            "\n\t\"success\": false\n}"
-#define JSON_REBOOT_STR             "{\n\t\"message\": \"Rebooting...\",\n\t\"success\": true\n}"
+#define JSON_SUCCESS_STR            "\"success\": true}"
+#define JSON_FAILURE_STR            "\"success\": false}"
+#define JSON_REBOOT_STR             "{\"message\": \"Rebooting...\",\"success\": true}"
 
-#if not defined AEOLIAN_DEBUG_DEV
+#if not defined CONFIG_AEOLIAN_DEBUG_DEV
 #if defined (CONFIG_ESP_GDBSTUB_ENABLED)
 #pragma once
 #warning GDBSTUB enabled
 #endif /* CONFIG_ESP_GDBSTUB_ENABLED */
-#endif /* AEOLIAN_DEBUG_DEV */
+#endif /* CONFIG_AEOLIAN_DEBUG_DEV */
 
 /*
  * Macro to check the outputs of TWDT functions and trigger an abort if an

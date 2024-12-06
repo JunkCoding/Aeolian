@@ -30,7 +30,7 @@
     <a href="/console.html">Console</a>
     <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
-  <div class="main">
+  <div class="main" id="main">
     <h1>MQTT Network Configuration</h1>
     <table class="status_table">
       <tbody>
@@ -40,33 +40,27 @@
         </tr>
         <tr>
           <th>MQTT Client Id:</th>
-          <td> <input id="mqtt_client_id" type="text" maxlength="32" size="45" name="mqtt_client_id"
-              value="%mqtt_client_id%" onchange="updateControl(this.id, this.value)"> </td>
+          <td> <input id="mqtt_client_id" type="text" maxlength="32" size="45" name="mqtt_client_id" value="%mqtt_client_id%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>MQTT URI:</th>
-          <td> <input id="mqtt_uri" type="text" maxlength="32" size="45" name="mqtt_uri" value="%mqtt_uri%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td> <input id="mqtt_uri" type="text" maxlength="32" size="45" name="mqtt_uri" value="%mqtt_uri%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>MQTT Port:</th>
-          <td> <input id="mqtt_port" type="text" maxlength="8" size="45" name="mqtt_port" value="%mqtt_port%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td> <input id="mqtt_port" type="text" maxlength="8" size="45" name="mqtt_port" value="%mqtt_port%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>MQTT User:</th>
-          <td> <input id="mqtt_user" type="text" maxlength="32" size="45" name="mqtt_user" value="%mqtt_user%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td> <input id="mqtt_user" type="text" maxlength="32" size="45" name="mqtt_user" value="%mqtt_user%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>MQTT Password:</th>
-          <td> <input id="mqtt_password" type="password" maxlength="64" size="45" name="mqtt_password"
-              value="%mqtt_password%" onchange="updateControl(this.id, this.value)"> </td>
+          <td> <input id="mqtt_password" type="password" maxlength="64" size="45" name="mqtt_password" value="%mqtt_password%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>MQTT Keep Alive:</th>
-          <td> <input id="mqtt_keep_alive" type="text" maxlength="8" size="45" name="mqtt_keep_alive"
-              value="%mqtt_keep_alive%" onchange="updateControl(this.id, this.value)"> </td>
+          <td> <input id="mqtt_keep_alive" type="text" maxlength="8" size="45" name="mqtt_keep_alive" value="%mqtt_keep_alive%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
       </tbody>
     </table>
@@ -81,45 +75,33 @@
         </tr>
         <tr>
           <th>Security Light:</td>
-          <td class="nopadding"> <input id="cLight" type="text" name="cLight" value="%cLight%"
-              onchange="updateControl(this.id, this.value)"> </td>
-          <td class="nopadding"> <input id="sLight" type="text" name="sLight" value="%sLight%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td class="nopadding"> <input id="cLight" type="text" name="cLight" value="%cLight%" onchange="updateControl(this.id, this.value)" /> </td>
+          <td class="nopadding"> <input id="sLight" type="text" name="sLight" value="%sLight%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>Hikvision Alerts/Control:</td>
-          <td class="nopadding"> <input id="cHikAlarm" type="text" name="cHikAlarm" value="%cHikAlarm%"
-              onchange="updateControl(this.id, this.value)"> </td>
-          <td class="nopadding"> <input id="sHikAlarm" type="text" name="sHikAlarm" value="%sHikAlarm%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td class="nopadding"> <input id="cHikAlarm" type="text" name="cHikAlarm" value="%cHikAlarm%" onchange="updateControl(this.id, this.value)" /> </td>
+          <td class="nopadding"> <input id="sHikAlarm" type="text" name="sHikAlarm" value="%sHikAlarm%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>LEDs:</td>
-          <td class="nopadding"> <input id="cLEDs" type="text" name="cLEDs" value="%cLEDs%"
-              onchange="updateControl(this.id, this.value)"> </td>
-          <td class="nopadding"> <input id="sLEDs" type="text" name="sLEDs" value="%sLEDs%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td class="nopadding"> <input id="cLEDs" type="text" name="cLEDs" value="%cLEDs%" onchange="updateControl(this.id, this.value)" /> </td>
+          <td class="nopadding"> <input id="sLEDs" type="text" name="sLEDs" value="%sLEDs%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>Patterns:</td>
-          <td class="nopadding"> <input id="cPattern" type="text" name="cPattern" value="%cPattern%"
-              onchange="updateControl(this.id, this.value)"> </td>
-          <td class="nopadding"> <input id="sPattern" type="text" name="sPattern" value="%sPattern%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td class="nopadding"> <input id="cPattern" type="text" name="cPattern" value="%cPattern%" onchange="updateControl(this.id, this.value)" /> </td>
+          <td class="nopadding"> <input id="sPattern" type="text" name="sPattern" value="%sPattern%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>Connect:</td>
-          <td class="nopadding"> <input id="cConnect" type="text" name="cConnect" value="%cConnect%"
-              onchange="updateControl(this.id, this.value)"> </td>
-          <td class="nopadding"> <input id="sConnect" type="text" name="sConnect" value="%sConnect%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td class="nopadding"> <input id="cConnect" type="text" name="cConnect" value="%cConnect%" onchange="updateControl(this.id, this.value)" /> </td>
+          <td class="nopadding"> <input id="sConnect" type="text" name="sConnect" value="%sConnect%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
         <tr>
           <th>Disconnect (LWT):</td>
-          <td class="nopadding"> <input id="cDiscon" type="text" name="cDiscon" value="%cDiscon%"
-              onchange="updateControl(this.id, this.value)"> </td>
-          <td class="nopadding"> <input id="sDiscon" type="text" name="sDiscon" value="%sDiscon%"
-              onchange="updateControl(this.id, this.value)"> </td>
+          <td class="nopadding"> <input id="cDiscon" type="text" name="cDiscon" value="%cDiscon%" onchange="updateControl(this.id, this.value)" /> </td>
+          <td class="nopadding"> <input id="sDiscon" type="text" name="sDiscon" value="%sDiscon%" onchange="updateControl(this.id, this.value)" /> </td>
         </tr>
       </tbody>
     </table>
@@ -127,14 +109,14 @@
       <div class="container">
         <div class="preference">
           <label for="master">MQTT Master:</label>
-          <input type="checkbox" name="mqtt_master" id="mqtt_master" onclick="onClickHandler(this.id)">
+          <input type="checkbox" name="mqtt_master" id="mqtt_master" onclick="onClickHandler(this.id)" />
         </div>
         <label class="pref_label">Send commands to other MQTT clients</label>
       </div>
       <div class="container">
         <div class="preference">
           <label for="slave">MQTT Slave:</label>
-          <input type="checkbox" name="mqtt_slave" id="mqtt_slave" onclick="onClickHandler(this.id)">
+          <input type="checkbox" name="mqtt_slave" id="mqtt_slave" onclick="onClickHandler(this.id)" />
         </div>
         <label class="pref_label">Receive commands via MQTT</label>
       </div>

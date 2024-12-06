@@ -25,10 +25,18 @@
     <a href="/console.html">Console</a>
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
-  <div class="main">
+  <div class="main" id="main">
     <h1>App Partitions</h1>
-    <p><b>&nbsp;Binary firmware&nbsp;</b><input type="file" id="firmware" /></p>
-    <br />
+    <div class="fw-group">
+      <div id="fw-selector">
+        <input type="file" id="sel-fw" />
+        <label for="sel-fw" class="inp_select">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+          Firmware File
+        </label>
+      </div>
+      <div class="fw-details"><span id="fw-details">No File Selected</span></div>
+    </div>
     <table id="tblApp" class="hdr_table">
       <thead>
         <tr>
@@ -57,7 +65,7 @@
       <tbody></tbody>
     </table>
     <br />
-    <div class="credentials"><input type="submit" value="Reboot!" onclick="doReboot()" /></div>
+    <div><input type="submit" value="Reboot!" id="reboot" onclick="doReboot()" /></div>
     <div id="status" class="alert remark">Loading...</div>
     <div id="spinner"></div>
     <div id="progbar" class="html5-progress-bar">

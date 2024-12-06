@@ -32,7 +32,7 @@ function wsOpen()
         setMsg("error", "WebSocket error!");
       }
     };
-    ws.close = function(evt)
+    ws.onclose = function(evt)
     {
       setMsg("done", "WebSocket closed.");
     };
@@ -60,11 +60,6 @@ function wsOpen()
       }
     };
     retries = 0;
-    window.onbeforeunload = function()
-    {
-      ws.onclose = function () {};
-      ws.close(222, "Window closing");
-    };
   }
 }
 function page_onload()
