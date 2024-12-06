@@ -211,7 +211,7 @@
         <tbody>
           <tr>
             <th>SSID:</th>
-            <td> <input id="sta_ssid" type="text" maxlength="32" size="45" name="sta_ssid" value="%sta_ssid%" onchange="updateControl(this.id, this.value)" /> </td>
+            <td> <input id="sta_ssid" type="text" maxlength="32" size="45" name="sta_ssid" value="%sta_ssid%" onchange="validateSSID(this)" /> </td>
           </tr>
           <tr>
             <th>Password:</th>
@@ -226,8 +226,8 @@
       </table>
       <!--</form>-->
       <div class="btn_group">
-        <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan(this.id)" /></div>
-        <div class="submit"><input type="submit" name="sta_test" class="wifi" id="sta_test" value="Test" onclick="testSTAconfig(this.id)" /></div>
+        <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan(this)" /></div>
+        <div class="submit"><input type="submit" name="sta_test" class="wifi" id="sta_test" value="Test/Set" onclick="staTestConfig(this)" disabled/></div>
       </div>
     </div>
     <div>
