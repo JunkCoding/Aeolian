@@ -34,6 +34,7 @@
 }
 .eye {
   cursor: pointer;
+  margin-left: 10px;
 }
 .icon-xianshimima:before {
   content: "\e611";

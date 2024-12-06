@@ -253,12 +253,9 @@ function toggleScan (_this)
     _this.value = "Scan Stop";
   }
 }
-function staTestConfig (_this)
+function staTestConfig ()
 {
-  if (__this.value != curAP.ssid)
-  {
-    
-  }
+
 }
 function pwdShowHide (_this)
 {
@@ -301,28 +298,39 @@ function keyDown (e)
     login();
   }
 }
+function staTestEnable()
+{
+  let pwd_el = document.getElementById("sta_password");
+  let sid_el = document.getElementById("sta_ssid");
+  let con_el = document.getElementById("sta_test");
+
+  if (sid_el.value.length > 0 && (pwd_el.value.length === 0 || pwd_el.value.length >= 8))
+  {
+    con_el.disabled = false;
+    return true;
+  }
+  con_el.disabled = true;
+  return false;
+}
 function validatePassword (el)
 {
+  // Fuck WPS, but not open?
   if (el.value.length === 0 || el.value.length >= 8)
   {
     el.classList.remove('error');
-    return;
   }
   else
   {
     el.classList.add('error');
   }
-  //updateControl(el.id, el.value);
+  staTestEnable();
 }
 function validateSSID (el)
 {
-  if (el.value.length === 0 || el.value.length < 8)
-  {
-    return;
-  }
-  //updateControl(el.id, el.value);
+  staTestEnable();
 }
 function page_onload ()
 {
   init_all_dropboxex();
+  staTestEnable();
 }
