@@ -238,24 +238,24 @@ var scan = (function ()
   };
   return o;
 })();
-function toggleScan (id)
+function toggleScan (_this)
 {
   if (scan.running() === true)
   {
     scan.stop();
-    document.getElementById(id).className = "scan_start";
-    document.getElementById(id).value = "Scan Start";
+    _this.className = "scan_start";
+    _this.value = "Scan Start";
   }
   else
   {
     scan.start();
-    document.getElementById(id).className = "scan_stop";
-    document.getElementById(id).value = "Scan Stop";
+    _this.className = "scan_stop";
+    _this.value = "Scan Stop";
   }
 }
-function testSTAconfig (id)
+function staTestConfig (_this)
 {
-  if (_("sta_ssid").value != curAP.ssid)
+  if (__this.value != curAP.ssid)
   {
     
   }
@@ -266,10 +266,14 @@ function pwdShowHide (_this)
   var pwd_el = null;
   for (var i = 0; i < parent.childNodes.length; i++)
   {
-    if (parent.childNodes[i].className == "password")
+    let tmp_el = parent.childNodes[i];
+    if ((tmp_el.tagName != undefined) && tmp_el.tagName.toLowerCase() === 'input')
     {
-      pwd_el = parent.childNodes[i];
-      break;
+      if (tmp_el.classList.contains('password'))
+      {
+        pwd_el = tmp_el;
+        break;
+      }
     }
   }
 
@@ -299,11 +303,24 @@ function keyDown (e)
 }
 function validatePassword (el)
 {
-  if (el.value.length < 8)
+  if (el.value.length === 0 || el.value.length >= 8)
+  {
+    el.classList.remove('error');
+    return;
+  }
+  else
+  {
+    el.classList.add('error');
+  }
+  //updateControl(el.id, el.value);
+}
+function validateSSID (el)
+{
+  if (el.value.length === 0 || el.value.length < 8)
   {
     return;
   }
-  updateControl(el.id, el.value);
+  //updateControl(el.id, el.value);
 }
 function page_onload ()
 {

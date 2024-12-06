@@ -640,11 +640,12 @@ input.setboot {
 input.setboot:hover {
   background-color: #ca21b4;
 }
+/*
 input.upload:disabled {
   background-color: grey;
   border: 2px solid black;
   pointer-events: none;
-}
+}*/
 .status_table {
   border-collapse: separate;
   /*border: #24ff50 1px solid;*/
@@ -761,6 +762,14 @@ input[type=radio]:checked:after {
 */
 
 /* ------ */
+input:disabled {
+  background: grey;
+  border: 2px solid black;
+  pointer-events: none;
+}
+input.error {
+  color: #dd0606;
+}
 input {
   color: #ffffff;
   /*padding: 1px 4px 1px 4px;
