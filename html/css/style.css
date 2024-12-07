@@ -595,8 +595,24 @@ input[class="off"]:checked + svg,
 input[class="off"]:focus + svg {
   fill: rgb(235, 32, 0);
 }
-
-/* ------ */
+/* ---------------------------------------------------------- */
+input[type="checkbox"] {
+  /* Add if not using autoprefixer */
+  -webkit-appearance: none;
+  appearance: none;
+  /* For iOS < 15 to remove gradient background */
+  background-color: #fff;
+  /* Not removed via appearance */
+  /*margin: 0;*/
+  font: inherit;
+  color: currentColor;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid currentColor;
+  border-radius: 0.15em;
+  transform: translateY(0.075em);
+  place-content: center;
+}
 .onoffswitch-checkbox {
   display: none;
 }
@@ -695,9 +711,205 @@ input[class="off"]:focus + svg {
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
   right: 0px;
 }
+.onoffswitch {
+  position: relative;
+  width: 60px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+  display: none;
+}
+.onoffswitch-label {
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #999;
+  border-radius: 16px;
+}
+.onoffswitch-inner {
+  display: block;
+  width: 200%;
+  margin-left: -100%;
+  transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before,
+.onoffswitch-inner:after {
+  display: block;
+  float: left;
+  width: 50%;
+  height: 18px;
+  padding: 0;
+  line-height: 18px;
+  font-size: 12px;
+  color: white;
+  font-family: Trebuchet, Arial, sans-serif;
+  font-weight: bold;
+  box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+  content: "ON";
+  padding-left: 10px;
+  background-color: #34A7C1;
+  color: #FFF;
+}
+.onoffswitch-inner:after {
+  content: "OFF";
+  padding-right: 7px;
+  background-color: #C13434;
+  color: #fff;
+  text-align: right;
+}
+.onoffswitch-switch {
+  display: block;
+  width: 22px;
+  margin: 0px;
+  background-color: #fff;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 39px;
+  border: 2px solid #999;
+  border-radius: 16px;
+  transition: all 0.3s ease-in 0s;
+}
+.onoffswitch-checkbox:checked+.onoffswitch-label .onoffswitch-inner {
+  margin-left: 0;
+}
+.onoffswitch-checkbox:checked+.onoffswitch-label .onoffswitch-switch {
+  right: 0px;
+}
+/* ---------------------------------------------------------- */
+.tickbox {
+  --gray: #636e72;
+  --very-light-gray: #eee;
+  --light-gray: #9098A9;
+  --x-light-gray: #dfe6e9;
+  --gradient: linear-gradient(180deg, #E02020 0%, #FA6400 17%, #F7B500 33%, #6DD400 50%, #0091FF 67%, #6236FF 83%, #B620E0 100%);
+}
 
-/* ------ */
+.tickbox label {
+  font-size: 1.35em;
+}
 
+/* CORE STYLES */
+.tickbox input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 1em;
+  height: 1em;
+  font: inherit;
+  border: 0.1em solid var(--light-gray);
+  margin-bottom: -0.125em;
+}
+
+.tickbox input[type=checkbox] {
+  border-radius: 0.25em;
+}
+
+.tickbox input:checked {
+  border-color: transparent;
+  background: var(--gradient) border-box;
+  box-shadow: 0 0 0 0.1em inset #fff;
+}
+
+.tickbox input:not(:checked):hover {
+  border-color: transparent;
+  background: linear-gradient(#fff, #fff) padding-box, var(--gradient) border-box;
+}
+/* ---------------------------------------------------------- */
+.tickbox2 {
+  --borderColor: rgb(25, 28, 31);
+  --tick-color: #902020;
+  --borderWidth: .135em;
+  font-size: 12px;
+}
+.tickbox2 label {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
+}
+.tickbox2 input[type=checkbox] {
+  -webkit-appearance: none;
+  appearance: none;
+  vertical-align: middle;
+  background: #fff;
+  font-size: 1.4em;
+  border-radius: 0.125em;
+  display: inline-block;
+  border: var(--borderWidth) solid var(--borderColor);
+  width: 1em;
+  height: 1em;
+  position: relative;
+}
+.tickbox2 input[type=checkbox]:before,
+.tickbox2 input[type=checkbox]:after {
+  content: "";
+  position: absolute;
+  background: var(--tick-color);
+  width: calc(var(--borderWidth) * 3);
+  height: calc(var(--borderWidth) * 1.5);
+  top: 36%;
+  left: 8%;
+  transform-origin: left center;
+}
+.tickbox2 input[type=checkbox]:before {
+  transform: rotate(45deg) translate(calc(var(--borderWidth) / -3), calc(var(--borderWidth) / -3)) scaleX(0);
+  transition: transform 100ms ease-in 100ms;
+}
+
+.tickbox2 input[type=checkbox]:after {
+  width: calc(var(--borderWidth) * 9);
+  transform: rotate(-45deg) translateY(calc(var(--borderWidth) * 3)) scaleX(0);
+  transform-origin: left center;
+  transition: transform 100ms ease-in;
+}
+
+.tickbox2 input[type=checkbox]:checked:before {
+  transform: rotate(45deg) translate(calc(var(--borderWidth) / -3), calc(var(--borderWidth) / -3)) scaleX(1);
+  transition: transform 100ms ease-in;
+}
+
+.tickbox2 input[type=checkbox]:checked:after {
+  width: calc(var(--borderWidth) * 9);
+  transform: rotate(-45deg) translateY(calc(var(--borderWidth) * 3)) scaleX(1);
+  transition: transform 100ms ease-out 100ms;
+}
+
+.tickbox2 input[type=checkbox]:focus {
+  outline: calc(var(--borderWidth) / 2) dotted rgba(0, 0, 0, 0.25);
+}
+/*
+.tickbox2 input[type=checkbox]:before {
+  transform: rotate(45deg) translate(calc(var(--borderWidth) / -2), calc(var(--borderWidth) / -2)) scaleX(0);
+  transition: transform 100ms ease-in 100ms;
+}
+
+.tickbox2 input[type=checkbox]:after {
+  width: calc(var(--borderWidth) * 8);
+  transform: rotate(-45deg) translateY(calc(var(--borderWidth) * 2)) scaleX(0);
+  transform-origin: left center;
+  transition: transform 100ms ease-in;
+}
+
+.tickbox2 input[type=checkbox]:checked:before {
+  transform: rotate(45deg) translate(calc(var(--borderWidth) / -2), calc(var(--borderWidth) / -2)) scaleX(1);
+  transition: transform 100ms ease-in;
+}
+
+.tickbox2 input[type=checkbox]:checked:after {
+  width: calc(var(--borderWidth) * 8);
+  transform: rotate(-45deg) translateY(calc(var(--borderWidth) * 2)) scaleX(1);
+  transition: transform 100ms ease-out 100ms;
+}
+
+.tickbox2 input[type=checkbox]:focus {
+  outline: calc(var(--borderWidth) / 2) dotted rgba(0, 0, 0, 0.25);
+}
+*/
+/* ---------------------------------------------------------- */
 .main {
   background-color: #f0f7e045;
   -moz-border-radius: 12px;
@@ -793,75 +1005,6 @@ progress::-moz-progress-bar {
   display: inline-block;
 }
 
-/* ------ */
-.onoffswitch {
-    position: relative;
-    width: 60px;
-    -webkit-user-select:none;
-    -moz-user-select:none;
-    -ms-user-select: none;
-}
-.onoffswitch-checkbox {
-    display: none;
-}
-.onoffswitch-label {
-    display: block;
-    overflow: hidden;
-    cursor: pointer;
-    border: 2px solid #999;
-    border-radius: 16px;
-}
-.onoffswitch-inner {
-    display: block;
-    width: 200%;
-    margin-left: -100%;
-    transition: margin 0.3s ease-in 0s;
-}
-.onoffswitch-inner:before, .onoffswitch-inner:after {
-    display: block;
-    float: left;
-    width: 50%;
-    height: 18px;
-    padding: 0;
-    line-height: 18px;
-    font-size: 12px;
-    color: white;
-    font-family: Trebuchet, Arial, sans-serif;
-    font-weight: bold;
-    box-sizing: border-box;
-}
-.onoffswitch-inner:before {
-    content: "ON";
-    padding-left: 10px;
-    background-color: #34A7C1;
-    color: #FFF;
-}
-.onoffswitch-inner:after {
-    content: "OFF";
-    padding-right: 7px;
-    background-color: #C13434;
-    color: #fff;
-    text-align: right;
-}
-.onoffswitch-switch {
-    display: block;
-    width: 22px;
-    margin: 0px;
-    background-color: #fff;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 39px;
-    border: 2px solid #999;
-    border-radius: 16px;
-    transition: all 0.3s ease-in 0s;
-}
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
-    margin-left: 0;
-}
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
-    right: 0px;
-}
 /* ------ */
 /*
 #tblApp input:hover,

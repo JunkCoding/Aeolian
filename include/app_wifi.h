@@ -71,6 +71,7 @@ typedef struct
   char        bssid[BSSID_STRLEN];
   char        username[UNAME_STRLEN];
   char        password[PASSW_STRLEN];
+  bool        lockAP;
 } sta_auth_t;
 
 typedef struct

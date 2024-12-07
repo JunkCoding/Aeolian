@@ -195,7 +195,9 @@
       <div class="container">
         <div class="preference">
           <label for="master">AP Auto Off:</label>
-          <input type="checkbox" name="apAutoOff" id="ap_autooff" onclick="onClickHandler(this.id)" />
+          <div class="tickbox2">
+            <input type="checkbox" name="apAutoOff" id="ap_autooff" onclick="onClickHandler(this.id)" />
+          </div>
         </div>
         <label class="pref_label">Disable AP when the device is connected to a network.</label>
       </div>
@@ -227,6 +229,15 @@
       <div class="btn_group">
         <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan(this)" /></div>
         <div class="submit"><input type="submit" name="sta_test" class="wifi" id="sta_test" value="Test/Set" onclick="staTestConfig()" disabled/></div>
+        <div class="container">
+          <div class="preference">
+            <label for="master">Lock to AP:</label>
+            <div class="tickbox2">
+              <input type="checkbox" name="apAutoOff" id="ap_autooff" onclick="onClickHandler(this.id)" />
+            </div>
+          </div>
+          <label class="pref_label">Lock to the specific AP using the BSSID</label>
+        </div>
       </div>
     </div>
     <div>

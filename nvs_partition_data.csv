@@ -31,8 +31,8 @@ zone_03,data,hex2bin,0900030000003F3F3F00
 wifi_settings,namespace,,
 mode,data,u8,01
 powersave,data,u8,01
-sta_ssid,data,string,WaveLan
-sta_password,data,string,Fl0r3nce
+sta_ssid,data,string,<wifi_ssid>
+sta_password,data,string,<wifi_pass>
 # --------------------
 # Weekly schedule
 # --------------------
