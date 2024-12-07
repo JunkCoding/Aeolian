@@ -1645,8 +1645,10 @@ span#fw-details {
   justify-content: flex-start;
   align-items: center;
 }
-.pref_label {
+.pref_label { /* fixme: hack to center label attached to tickbox */
   margin-left: 15px;
+  line-height: 0.9;
+  height: 11px;
 }
 .preference {
   display: flex;

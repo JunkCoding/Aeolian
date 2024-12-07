@@ -604,7 +604,7 @@ IRAM_ATTR esp_err_t cgiSetBoot(httpd_req_t *req)
   }
 
   // Update our status
-  bufptr += sprintf(&tmpbuf[bufptr], ((ESP_OK == err) ? JSON_SUCCESS_STR : JSON_FAILURE_STR));
+  bufptr += sprintf(&tmpbuf[bufptr], ((ESP_OK == err) ? JSON_APPEND_SUCCESS_STR : JSON_APPEND_FAILURE_STR));
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
   send_async_header_using_ext(req, "/config.json");
@@ -678,7 +678,7 @@ esp_err_t cgiEraseFlash(httpd_req_t *req)
   }
 
   // Update our status
-  bufptr += sprintf(&tmpbuf[bufptr], ((ESP_OK == err) ? JSON_SUCCESS_STR : JSON_FAILURE_STR));
+  bufptr += sprintf(&tmpbuf[bufptr], ((ESP_OK == err) ? JSON_APPEND_SUCCESS_STR : JSON_APPEND_FAILURE_STR));
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
   send_async_header_using_ext(req, "/config.json");
@@ -875,7 +875,7 @@ esp_err_t cgiUploadFirmware(httpd_req_t *req)
   lightsUnpause(PAUSE_UPLOADING, true);
 
   char msgbuf[256];
-  bufptr += sprintf(&msgbuf[bufptr], "{%s", ((ESP_OK == err) ? JSON_SUCCESS_STR : JSON_FAILURE_STR));
+  bufptr += sprintf(&msgbuf[bufptr], "{%s", ((ESP_OK == err) ? JSON_APPEND_SUCCESS_STR : JSON_APPEND_FAILURE_STR));
   httpd_resp_send_chunk(req, msgbuf, bufptr);
   httpd_resp_send_chunk(req, NULL, 0);
 
@@ -1038,7 +1038,7 @@ IRAM_ATTR esp_err_t cgiGetFlashInfo (httpd_req_t* req)
   }
 
   // The stupidest of *all* stupid validity checks
-  strptr += sprintf(&jsonStr[strptr], ",%s", ((jsonStr[(strptr - 1)] != '{') ? JSON_SUCCESS_STR : JSON_FAILURE_STR));
+  strptr += sprintf(&jsonStr[strptr], ",%s", ((jsonStr[(strptr - 1)] != '{') ? JSON_APPEND_SUCCESS_STR : JSON_APPEND_FAILURE_STR));
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
   send_async_header_using_ext(req, "/config.json");

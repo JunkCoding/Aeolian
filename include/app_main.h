@@ -109,6 +109,10 @@ typedef enum
 #define JSON_SWITCHOFF_STR          "{\"" JSON_STR_CMD "\": {\"" JSON_STR_ID "\": %d, \"" JSON_STR_ARG "\": \"%s\", \"reason\": %d}}"
 #define JSON_SWITCHON_STR           "{\"" JSON_STR_CMD "\": {\"" JSON_STR_ID "\": %d, \"" JSON_STR_ARG "\": \"%s\", \"reason\": %d}, \"delay\": %d, \"theme\": %d, \"pattern\": %d}"
 
+/* These are meant for appending to an opening brace!! */
+#define JSON_APPEND_SUCCESS_STR     "\"success\": true}"
+#define JSON_APPEND_FAILURE_STR     "\"success\": false}"
+/* Normal versions */
 #define JSON_SUCCESS_STR            "{\"success\": true}"
 #define JSON_FAILURE_STR            "{\"success\": false}"
 #define JSON_REBOOT_STR             "{\"message\": \"Rebooting...\",\"success\": true}"
