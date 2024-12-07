@@ -39,7 +39,6 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/wsa.html"
   "${PROJECT_DIR}/html/css/schedule.css"
   "${PROJECT_DIR}/html/css/signalbars.css"
-  "${PROJECT_DIR}/html/css/siimple.min.css"
   "${PROJECT_DIR}/html/css/style.css"
   "${PROJECT_DIR}/html/css/themes.css"
   "${PROJECT_DIR}/html/js/140medley.js"
