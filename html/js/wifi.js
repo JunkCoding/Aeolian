@@ -6,14 +6,23 @@ function APconfig ()
 
 var curAP = new APconfig();
 var selAP = new APconfig();
+var fixedAP = false;
 let xhr = new XMLHttpRequest();
 
 function updateSelAP (bssid, ssid)
 {
-  //$("#sta_ssid").value = sel.value;
   document.getElementById("sta_ssid").value = ssid;
   selAP.bssid = bssid;
   selAP.ssid = ssid;
+  let f_ap = document.getElementById("ap_fixed");
+  if (selAP.ssid === curAP.ssid && selAP.bssid !== curAP.bssid)
+  {
+    f_ap.checked = true;
+  }
+  else
+  {
+    f_ap.checked = false;
+  }
 }
 
 function createRowForAp (row, ap, hasFocus)
@@ -247,7 +256,7 @@ function staTestConfig ()
 
   const json = {
     sta_ssid: sid_el.value,
-    sta_bssid: selAP.bssid,
+    sta_bssid: (fixedAP ? selAP.bssid : ""),
     sta_password: pwd_el.value
   }
   // request options
@@ -341,6 +350,10 @@ function validateSSID (el)
     }
   }
   staTestEnable();
+}
+function toggleFixedAP (el)
+{
+  fixedAP = el.checked;
 }
 function page_onload ()
 {

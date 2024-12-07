@@ -781,57 +781,21 @@ input[type="checkbox"] {
   right: 0px;
 }
 /* ---------------------------------------------------------- */
+input#ap_fixed {
+  margin-left: 20px;
+}
 .tickbox {
-  --gray: #636e72;
-  --very-light-gray: #eee;
-  --light-gray: #9098A9;
-  --x-light-gray: #dfe6e9;
-  --gradient: linear-gradient(180deg, #E02020 0%, #FA6400 17%, #F7B500 33%, #6DD400 50%, #0091FF 67%, #6236FF 83%, #B620E0 100%);
-}
-
-.tickbox label {
-  font-size: 1.35em;
-}
-
-/* CORE STYLES */
-.tickbox input {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 1em;
-  height: 1em;
-  font: inherit;
-  border: 0.1em solid var(--light-gray);
-  margin-bottom: -0.125em;
-}
-
-.tickbox input[type=checkbox] {
-  border-radius: 0.25em;
-}
-
-.tickbox input:checked {
-  border-color: transparent;
-  background: var(--gradient) border-box;
-  box-shadow: 0 0 0 0.1em inset #fff;
-}
-
-.tickbox input:not(:checked):hover {
-  border-color: transparent;
-  background: linear-gradient(#fff, #fff) padding-box, var(--gradient) border-box;
-}
-/* ---------------------------------------------------------- */
-.tickbox2 {
   --borderColor: rgb(25, 28, 31);
   --tick-color: #902020;
   --borderWidth: .135em;
   font-size: 12px;
 }
-.tickbox2 label {
+.tickbox label {
   display: block;
   max-width: 100%;
   margin: 0 auto;
 }
-.tickbox2 input[type=checkbox] {
+.tickbox input[type=checkbox] {
   -webkit-appearance: none;
   appearance: none;
   vertical-align: middle;
@@ -844,8 +808,8 @@ input[type="checkbox"] {
   height: 1em;
   position: relative;
 }
-.tickbox2 input[type=checkbox]:before,
-.tickbox2 input[type=checkbox]:after {
+.tickbox input[type=checkbox]:before,
+.tickbox input[type=checkbox]:after {
   content: "";
   position: absolute;
   background: var(--tick-color);
@@ -855,60 +819,32 @@ input[type="checkbox"] {
   left: 8%;
   transform-origin: left center;
 }
-.tickbox2 input[type=checkbox]:before {
+.tickbox input[type=checkbox]:before {
   transform: rotate(45deg) translate(calc(var(--borderWidth) / -3), calc(var(--borderWidth) / -3)) scaleX(0);
   transition: transform 100ms ease-in 100ms;
 }
 
-.tickbox2 input[type=checkbox]:after {
+.tickbox input[type=checkbox]:after {
   width: calc(var(--borderWidth) * 9);
   transform: rotate(-45deg) translateY(calc(var(--borderWidth) * 3)) scaleX(0);
   transform-origin: left center;
   transition: transform 100ms ease-in;
 }
 
-.tickbox2 input[type=checkbox]:checked:before {
+.tickbox input[type=checkbox]:checked:before {
   transform: rotate(45deg) translate(calc(var(--borderWidth) / -3), calc(var(--borderWidth) / -3)) scaleX(1);
   transition: transform 100ms ease-in;
 }
 
-.tickbox2 input[type=checkbox]:checked:after {
+.tickbox input[type=checkbox]:checked:after {
   width: calc(var(--borderWidth) * 9);
   transform: rotate(-45deg) translateY(calc(var(--borderWidth) * 3)) scaleX(1);
   transition: transform 100ms ease-out 100ms;
 }
 
-.tickbox2 input[type=checkbox]:focus {
+.tickbox input[type=checkbox]:focus {
   outline: calc(var(--borderWidth) / 2) dotted rgba(0, 0, 0, 0.25);
 }
-/*
-.tickbox2 input[type=checkbox]:before {
-  transform: rotate(45deg) translate(calc(var(--borderWidth) / -2), calc(var(--borderWidth) / -2)) scaleX(0);
-  transition: transform 100ms ease-in 100ms;
-}
-
-.tickbox2 input[type=checkbox]:after {
-  width: calc(var(--borderWidth) * 8);
-  transform: rotate(-45deg) translateY(calc(var(--borderWidth) * 2)) scaleX(0);
-  transform-origin: left center;
-  transition: transform 100ms ease-in;
-}
-
-.tickbox2 input[type=checkbox]:checked:before {
-  transform: rotate(45deg) translate(calc(var(--borderWidth) / -2), calc(var(--borderWidth) / -2)) scaleX(1);
-  transition: transform 100ms ease-in;
-}
-
-.tickbox2 input[type=checkbox]:checked:after {
-  width: calc(var(--borderWidth) * 8);
-  transform: rotate(-45deg) translateY(calc(var(--borderWidth) * 2)) scaleX(1);
-  transition: transform 100ms ease-out 100ms;
-}
-
-.tickbox2 input[type=checkbox]:focus {
-  outline: calc(var(--borderWidth) / 2) dotted rgba(0, 0, 0, 0.25);
-}
-*/
 /* ---------------------------------------------------------- */
 .main {
   background-color: #f0f7e045;
