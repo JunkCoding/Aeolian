@@ -1754,6 +1754,7 @@ input[type="range"] {
   width: 14em;
   background: transparent;
   position: relative;
+  z-index: 0;
 }
 input[type="range"]:focus {
   /* To remove default (mostly blue) outline appplied by browsers on :focus */
@@ -1831,5 +1832,5 @@ input[type="range"]::before {
   padding: 0.38em;
   /* Makes the letters look embossed adding to the skeumorphic theme of the design */
   text-shadow: .5px .5px 0.9px rgba(0, 0, 0, .4);
-  z-index: 0; /* Fixme: return to -1 */
+  z-index: -1; 
 }
