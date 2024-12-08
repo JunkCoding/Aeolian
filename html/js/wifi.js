@@ -23,6 +23,7 @@ function updateSelAP (bssid, ssid)
   {
     f_ap.checked = false;
   }
+  toggleFixedAP(f_ap);
 }
 
 function createRowForAp (row, ap, hasFocus)

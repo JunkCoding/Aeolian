@@ -10,9 +10,10 @@
 
 #define NUMARRAY_SIZE           16
 #define SSID_STRLEN             32
-#define BSSID_STRLEN            17
 #define PASSW_STRLEN            64
 #define UNAME_STRLEN            64
+#define BSSID_BYTELEN           6
+#define BSSID_STRLEN            17
 #define STR_STA_SSID            "sta_ssid"
 #define STR_STA_BSSID           "sta_bssid"
 #define STR_STA_UNAME           "sta_username"
@@ -67,47 +68,39 @@ typedef enum
 
 typedef struct
 {
-  char        ssid[SSID_STRLEN];
-  char        bssid[BSSID_STRLEN];
-  char        username[UNAME_STRLEN];
-  char        password[PASSW_STRLEN];
-  bool        lockAP;
-} sta_auth_t;
-
-typedef struct
-{
-  char         ssid[SSID_STRLEN] __attribute__ ((aligned (4)));   // Station SSID
-  char         bssid[BSSID_STRLEN] __attribute__ ((aligned (4))); // Station BSSID
-  char         username[UNAME_STRLEN];                            // Station username
-  char         password[PASSW_STRLEN];                            // Station pwassword
-  char         ip_addr[64];                                       // Station IP address
-  size_t       ssid_len;                                          // Store len
-  size_t       uname_len;                                         // Store len
-  size_t       pass_len;                                          // Store len
+  char         ssid[SSID_STRLEN] __attribute__ ((aligned (4)));     // Station SSID
+  uint8_t      bssid[BSSID_BYTELEN] __attribute__ ((aligned (4)));  // Station BSSID
+  char         username[UNAME_STRLEN];                              // Station username
+  char         password[PASSW_STRLEN];                              // Station pwassword
+  char         ip_addr[64];                                         // Station IP address
+  size_t       ssid_len;                                            // Store len
+  size_t       uname_len;                                           // Store len
+  size_t       pass_len;                                            // Store len
+  bool         bssid_set;                                           // Fixed AP?
 } wifi_sta_cfg_t;
 
 typedef struct
 {
-  char         ssid[SSID_STRLEN] __attribute__ ((aligned(4)));    // AP SSID
-  char         password[PASSW_STRLEN];                            // AP Password
-  size_t       ssid_len;                                          // Store len
-  size_t       pass_len;                                          // Store len
+  char         ssid[SSID_STRLEN] __attribute__ ((aligned(4)));      // AP SSID
+  char         password[PASSW_STRLEN];                              // AP Password
+  size_t       ssid_len;                                            // Store len
+  size_t       pass_len;                                            // Store len
   //uint8_t      enabled;                                           // Enabled by default?
-  uint8_t      primary;                                           // AP Primary Channel
-  uint8_t      secondary;                                         // AP's Second Channel
-  uint8_t      authmode;                                          // AP Authmode
-  uint8_t      cypher;                                            // AP Cyphe
-  uint8_t      hidden;                                            // Hidden AP?
-  uint8_t      protocol;                                          // AP Protocol
-  uint8_t      bandwidth;                                         // AP Bandwidth (HT20 / HT40)
-  uint8_t      max_connection;                                    // Maximum number of clients
-  uint8_t      auto_off;                                          // Auto stop AP when STA connects
+  uint8_t      primary;                                             // AP Primary Channel
+  uint8_t      secondary;                                           // AP's Second Channel
+  uint8_t      authmode;                                            // AP Authmode
+  uint8_t      cypher;                                              // AP Cyphe
+  uint8_t      hidden;                                              // Hidden AP?
+  uint8_t      protocol;                                            // AP Protocol
+  uint8_t      bandwidth;                                           // AP Bandwidth (HT20 / HT40)
+  uint8_t      max_connection;                                      // Maximum number of clients
+  uint8_t      auto_off;                                            // Auto stop AP when STA connects
 } wifi_ap_cfg_t;
 
 typedef struct
 {
-  wifi_mode_t  mode __attribute__ ((packed));                     // 0xA1 - WIFI_MODE (small as possible)
-  uint8_t      powersave;                                         // 0xA2 - WIFI_POWERSAVE
+  wifi_mode_t  mode __attribute__ ((packed));                       // 0xA1 - WIFI_MODE (small as possible)
+  uint8_t      powersave;                                           // 0xA2 - WIFI_POWERSAVE
 } wifi_cfg_t;
 
 

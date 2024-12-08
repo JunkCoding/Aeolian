@@ -96,7 +96,7 @@ static QueueHandle_t xApScanQueue = NULL;
 static void start_ap(void);
 static void stop_ap (bool forceStop=false);
 static void periodic_sta_callback(void *arg);
-static bool scan_for_ssid(void);
+static bool sta_connect (wifi_sta_cfg_t *sta_cfg);
 
 // **************************************************************************************************
 //
@@ -201,24 +201,19 @@ const char *SecondChanStr (wifi_second_chan_t second)
       return "Unknown";
   }
 }
-char* mac2str(unsigned char *mac_bin)
+const char *mac2str (unsigned char *mac_bin)
 {
-    static char mac_str_buf[18];
-  snprintf(
-    mac_str_buf,
-    sizeof(mac_str_buf),
-    "%02X:%02X:%02X:%02X:%02X:%02X",
-    mac_bin[0],
-    mac_bin[1],
-    mac_bin[2],
-    mac_bin[3],
-    mac_bin[4],
-    mac_bin[5]);
-
-    return mac_str_buf;
+  static char mac_str_buf[18];
+  snprintf (mac_str_buf, sizeof (mac_str_buf), "%02X:%02X:%02X:%02X:%02X:%02X", mac_bin[0], mac_bin[1], mac_bin[2], mac_bin[3], mac_bin[4], mac_bin[5]);
+  return (const char *)mac_str_buf;
+}
+bool str2mac (const char *mac, uint8_t *values)
+{
+  sscanf (mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &values[0], &values[1], &values[2], &values[3], &values[4], &values[5]);
+  return strlen (mac) == 17;
 }
 
-void set_hostname(const char *hostname)
+void set_hostname (const char* hostname)
 {
   if ( netif_ap )
   {
@@ -811,9 +806,8 @@ static void start_ap (void)
 void log_ap(const wifi_ap_record_t ap, const log_colour_t logCol)
 {
   F_LOGI(true, true, logCol, "Found AP: %s (%02X:%02X:%02X:%02X:%02X:%02X), channel: %d, rssi: %d, auth: %s",
-        ap.ssid,
-        ap.bssid[0], ap.bssid[1], ap.bssid[2], ap.bssid[3], ap.bssid[4], ap.bssid[5],
-        ap.primary,  ap.rssi, auth2str(ap.authmode));
+        ap.ssid, ap.bssid[0], ap.bssid[1], ap.bssid[2], ap.bssid[3], ap.bssid[4], ap.bssid[5],
+        ap.primary, ap.rssi, auth2str(ap.authmode));
 }
 
 // --------------------------------------------------------------------------
@@ -909,9 +903,9 @@ bool findBestAP(uint8_t *bssid, const uint8_t *ssid, uint8_t len)
 }
 
 // **************************************************************************************************
-// Start STA mode
+// Search for AP and start STA connection
 // **************************************************************************************************
-static bool scan_for_ssid(void)
+static bool sta_connect (wifi_sta_cfg_t *sta_cfg)
 {
   bool scan_found = false;
   uint8_t bssid[6] = {};
@@ -927,25 +921,29 @@ static bool scan_for_ssid(void)
   wifi_config.sta.threshold.rssi     = -90;
   wifi_config.sta.pmf_cfg.capable    = true;
   //wifi_config.sta.pmf_cfg.required   = false;
-  //wifi_config.sta.bssid_set          = 0;
+  if ( sta_cfg->bssid_set )
+  {
+    wifi_config.sta.bssid_set = true;
+    memcpy((char*)wifi_config.sta.bssid, sta_cfg->bssid, 6);
+  }
   //wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
   //wifi_config.sta.rm_enabled         = true;
 
   // Set the SSID/Password
-  if ( wifi_sta_cfg.ssid_len > 0 && wifi_sta_cfg.pass_len > 0 )
+  if ( sta_cfg->ssid_len > 0 && sta_cfg->pass_len > 0 )
   {
     // Copy the stored SSID to our configuration
-    memcpy ((char *)wifi_config.sta.ssid, wifi_sta_cfg.ssid, wifi_sta_cfg.ssid_len);
-    wifi_config.sta.ssid[wifi_sta_cfg.ssid_len] = 0x0;
+    memcpy ((char *)wifi_config.sta.ssid, sta_cfg->ssid, sta_cfg->ssid_len);
+    wifi_config.sta.ssid[sta_cfg->ssid_len] = 0x0;
 
     // Copy the stored password to our configuration
-    memcpy ((char *)wifi_config.sta.password, wifi_sta_cfg.password, wifi_sta_cfg.pass_len);
-    wifi_config.sta.password[wifi_sta_cfg.pass_len] = 0x0;
+    memcpy ((char *)wifi_config.sta.password, sta_cfg->password, sta_cfg->pass_len);
+    wifi_config.sta.password[sta_cfg->pass_len] = 0x0;
 
     // Check results for an SSID matching our saved SSID/password combination
-    //scan_found = findBestAP(bssid, wifi_config.sta.ssid, wifi_sta_cfg.ssid_len);
+    //scan_found = findBestAP(bssid, wifi_config.sta.ssid, sta_cfg->ssid_len);
     //if ( scan_found == true )
-    if ( (scan_found = findBestAP(bssid, wifi_config.sta.ssid, wifi_sta_cfg.ssid_len)) == true )
+    if ( (scan_found = findBestAP(bssid, wifi_config.sta.ssid, sta_cfg->ssid_len)) == true )
     {
       // Whether to set the MAC address of target AP or not.
       // Generally, station_config.bssid_set needs to be 0; and it needs to be 1 only when users need to check the MAC address of the AP
@@ -957,7 +955,7 @@ static bool scan_for_ssid(void)
 
       // Attempt a connection to the found SSID
       //F_LOGI(true, true, LC_YELLOW, "Attenpting connection to: '%s', password: '%s'", wifi_config.sta.ssid, wifi_config.sta.password);
-      F_LOGI(true, true, LC_YELLOW, "Attenpting connection to: '%s', password: '********'", wifi_config.sta.ssid);
+      F_LOGI(true, true, LC_YELLOW, "Attenpting connection to: '%s', password: '%s'", wifi_config.sta.ssid, "*");
       ESP_ERROR_CHECK (esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
       esp_wifi_connect();
     }
@@ -1119,7 +1117,7 @@ void wifi_start (void)
     }
     else
     {
-      ssid_found = scan_for_ssid();
+      ssid_found = sta_connect(&wifi_sta_cfg);
     }
   }
 
@@ -1310,7 +1308,7 @@ esp_err_t cgiWifiTestSta (httpd_req_t* req)
   char rcvbuf[RECEIVE_BUFFER] = {};
   //memset (rcvbuf, 0x0, RECEIVE_BUFFER);
   esp_err_t err = ESP_FAIL;
-  sta_auth_t auth = {};
+  wifi_sta_cfg_t testSta = {};
 
   uint16_t len;
   jsmn_parser p;
@@ -1343,15 +1341,17 @@ esp_err_t cgiWifiTestSta (httpd_req_t* req)
           i++;
           if (t[i].end - t[i].start <= SSID_STRLEN)
           {
-            sprintf (auth.ssid, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+            testSta.ssid_len = t[i].end - t[i].start;
+            sprintf (testSta.ssid, "%.*s", testSta.ssid_len, rcvbuf + t[i].start);
           }
         }
         else if ( !shrt_cmp (STR_STA_BSSID, token) )
         {
           i++;
-          if ( t[i].end - t[i].start <= BSSID_STRLEN )
+          if ( t[i].end - t[i].start == BSSID_STRLEN )
           {
-            sprintf (auth.bssid, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+            sprintf (param, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+            testSta.bssid_set = str2mac (param, testSta.bssid);
           }
         }
           else if ( !shrt_cmp (STR_STA_PASSW, token) )
@@ -1359,14 +1359,15 @@ esp_err_t cgiWifiTestSta (httpd_req_t* req)
           i++;
           if ( t[i].end - t[i].start <= PASSW_STRLEN )
           {
-            sprintf (auth.password, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+            testSta.pass_len = t[i].end - t[i].start;
+            sprintf (testSta.password, "%.*s", testSta.pass_len, rcvbuf + t[i].start);
           }
         }
       }
     }
   }
 
-  F_LOGI (true, true, LC_MAGENTA, "S: %s, B: %s, P: %s", auth.ssid, auth.bssid, auth.password);
+  F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", testSta.ssid, testSta.ssid_len, mac2str (testSta.bssid), testSta.bssid_set, testSta.password, testSta.pass_len);
   
   httpd_resp_set_hdr (req, "Content-Type", "application/json");
   httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));
