@@ -162,8 +162,6 @@ int        _get_ap_setting (char *buf, int bufsize, int unused);
 int        _set_sta_setting (char *buf, int bufsize, char *param, char *value, int zone);
 int        _get_sta_setting (char *buf, int bufsize, int unused);
 // ***********************************************
-int        _test_sta_setting (char *buf, int bufsize, char *param, char *value, int setting);
-// ***********************************************
 int        _set_wifi_setting (char *buf, int bufsize, char *param, char *value, int zone);
 int        _get_wifi_setting (char *buf, int bufsize, int unused);
 

@@ -48,10 +48,6 @@
 #define MAC_STR           "%02x%02x%02x%02x%02x%02x"
 #define UNIQ_NAME_LEN     (sizeof(UNIQ_NAME_PREFIX) + (6 * 2)) /* 6 bytes for mac address as 2 hex chars */
 
-#define MAX_AP_NUM        15
-#define WIFI_EVT_BUFSIZE  128
-
-#define MAX_NUM_APS       32
 #define SCAN_TIMEOUT      (60 * 1000 / portTICK_PERIOD_MS)
 #define CFG_TIMEOUT       (60 * 1000 / portTICK_PERIOD_MS)
 #define CFG_TICKS         (1000 / portTICK_PERIOD_MS)
@@ -70,7 +66,6 @@ char hostname[64] __attribute__ ((aligned (4))) = {};
 static httpd_handle_t *hHttpServer  = NULL;
 static esp_netif_t *netif_sta       = NULL;
 static esp_netif_t *netif_ap        = NULL;
-static bool ssid_found              = false;
 esp_timer_handle_t xHandleCheckSTA  = NULL;
 static char ipAddr[16];
 
@@ -83,6 +78,7 @@ const int WIFI_STA_STARTED          = BIT4;
 const int WIFI_AP_STARTED           = BIT5;  // Set automatically once the SoftAP is started
 const int WIFI_SCAN_INPROGRESS      = BIT6;  // Set when scan called, cleared when complete
 const int WIFI_SCAN_DONE            = BIT7;  // Cleared when called, set when done
+const int WIFI_TEST_STA_CFG         = BIT8;  // Testing STA configuration
 
 
 // **************************************************************************************************
@@ -359,13 +355,16 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
         F_LOGW(true, true, LC_RED, "WIFI_EVENT_STA_DISCONNECTED");
 
         EventBits_t uxBits = xEventGroupGetBits (wifi_event_group);
-        if ( BTST(uxBits, WIFI_STA_CONNECTED) )
+        if ( BTST (uxBits, WIFI_STA_CONNECTED) )
         {
           disconnects = 0;
-          xEventGroupClearBits(wifi_event_group, WIFI_STA_CONNECTED);
+          xEventGroupClearBits (wifi_event_group, WIFI_STA_CONNECTED);
+        }
 
-          // We were connected, so AP may have rebooted. Try reconnects at random intervals
-          periodic_sta_callback(NULL);
+        /* Are we testing an STA config? */
+        if ( BTST (uxBits, WIFI_TEST_STA_CFG) )
+        {
+          break;
         }
         // If we have more than 5 disconnects, start an AP to allow configuration
         else if ( ++disconnects >= 5 )
@@ -746,7 +745,7 @@ static void stop_ap (bool forceStop)
 // **************************************************************************************************
 static void start_ap (void)
 {
-  F_LOGI(true, true, LC_GREY, "Setting up AP...");
+  F_LOGI(true, true, LC_GREY, "Configuring AP...");
 
   /*
   // Recommended by Espressif not to use
@@ -813,7 +812,7 @@ void log_ap(const wifi_ap_record_t ap, const log_colour_t logCol)
 // --------------------------------------------------------------------------
 // Scan local access points for an AP matching our configuration
 // --------------------------------------------------------------------------
-bool findBestAP(uint8_t *bssid, const uint8_t *ssid, uint8_t len)
+bool findBestAP (wifi_sta_cfg_t *searchConfig)
 {
   // Prepare everything for our search
   int x = 10;             // Max loops
@@ -839,16 +838,21 @@ bool findBestAP(uint8_t *bssid, const uint8_t *ssid, uint8_t len)
         for ( int i = 0; i < cgiWifiAps.apCount; i++ )
         {
           // Compare this AP with the SSID we are looking for
-          if ( strncmp(wifi_sta_cfg.ssid, (const char *)cgiWifiAps.apList[i].ssid, wifi_sta_cfg.ssid_len) == 0 )
+          if ( strncmp (searchConfig->ssid, ( const char * )cgiWifiAps.apList[i].ssid, searchConfig->ssid_len) == 0 )
           {
+            if ( searchConfig->bssid_set )
+            {
+              if ( !memcmp (searchConfig->bssid, cgiWifiAps.apList[i].bssid, BSSID_BYTELEN) )
+              {
+                log_ap (cgiWifiAps.apList[i], LC_GREEN);
+                foundAP = true;
+              }
+            }
             // If the signal strength is lower than our current saved, make this our chosen AP
-            if ( cgiWifiAps.apList[i].rssi > rssi )
+            else if ( cgiWifiAps.apList[i].rssi > rssi )
             {
               // Let anyone watching know what we are doing
               log_ap(cgiWifiAps.apList[i], LC_GREEN);
-
-              // Store the bssid to ensure we connec to the right AP
-              memcpy(bssid, cgiWifiAps.apList[i].bssid, 6);
 
               // Flag we found something
               foundAP = true;
@@ -893,7 +897,7 @@ bool findBestAP(uint8_t *bssid, const uint8_t *ssid, uint8_t len)
 
   if ( x == 0 && !foundAP )
   {
-    F_LOGE(true, true, LC_RED, "Could not find AP matching \"%s\"", ssid);
+    F_LOGE (true, true, LC_RED, "Could not find AP matching \"%.*s\"", searchConfig->ssid_len, searchConfig->ssid);
   }
 
   ESP_ERROR_CHECK(esp_task_wdt_delete(NULL));
@@ -908,9 +912,8 @@ bool findBestAP(uint8_t *bssid, const uint8_t *ssid, uint8_t len)
 static bool sta_connect (wifi_sta_cfg_t *sta_cfg)
 {
   bool scan_found = false;
-  uint8_t bssid[6] = {};
 
-  F_LOGI(true, true, LC_GREY, "Setting up STA...");
+  F_LOGI (true, true, LC_GREY, "Configuring STA...");
 
   wifi_config_t wifi_config = {};
   esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
@@ -921,10 +924,15 @@ static bool sta_connect (wifi_sta_cfg_t *sta_cfg)
   wifi_config.sta.threshold.rssi     = -90;
   wifi_config.sta.pmf_cfg.capable    = true;
   //wifi_config.sta.pmf_cfg.required   = false;
+
+  // Whether to set the MAC address of target AP or not.
+  // Generally, station_config.bssid_set needs to be 0; and it needs to be 1 only when users need to check the MAC address of the AP
+  // (From testing, the ESP32 automatically chooses the AP with the best signal. I would tend to only enable this feature for
+  // security reasons, otherwise this might hinder roaming)
   if ( sta_cfg->bssid_set )
   {
     wifi_config.sta.bssid_set = true;
-    memcpy((char*)wifi_config.sta.bssid, sta_cfg->bssid, 6);
+    memcpy((char*)wifi_config.sta.bssid, sta_cfg->bssid, BSSID_BYTELEN);
   }
   //wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
   //wifi_config.sta.rm_enabled         = true;
@@ -941,18 +949,8 @@ static bool sta_connect (wifi_sta_cfg_t *sta_cfg)
     wifi_config.sta.password[sta_cfg->pass_len] = 0x0;
 
     // Check results for an SSID matching our saved SSID/password combination
-    //scan_found = findBestAP(bssid, wifi_config.sta.ssid, sta_cfg->ssid_len);
-    //if ( scan_found == true )
-    if ( (scan_found = findBestAP(bssid, wifi_config.sta.ssid, sta_cfg->ssid_len)) == true )
+    if ( ( scan_found = findBestAP (sta_cfg) ) == true )
     {
-      // Whether to set the MAC address of target AP or not.
-      // Generally, station_config.bssid_set needs to be 0; and it needs to be 1 only when users need to check the MAC address of the AP
-      // (From testing, the ESP32 automatically chooses the AP with the best signal. I would tend to only enable this feature for
-      // security reasons, otherwise this might hinder roaming)
-      //wifi_config.sta.bssid_set = true;
-      // Set the bssid to ensure we connect to the right AP
-      //memcpy(wifi_config.sta.bssid, bssid, 6);
-
       // Attempt a connection to the found SSID
       //F_LOGI(true, true, LC_YELLOW, "Attenpting connection to: '%s', password: '%s'", wifi_config.sta.ssid, wifi_config.sta.password);
       F_LOGI(true, true, LC_YELLOW, "Attenpting connection to: '%s', password: '%s'", wifi_config.sta.ssid, "*");
@@ -1117,7 +1115,7 @@ void wifi_start (void)
     }
     else
     {
-      ssid_found = sta_connect(&wifi_sta_cfg);
+      sta_connect(&wifi_sta_cfg);
     }
   }
 
@@ -1298,17 +1296,17 @@ esp_err_t cgiWifiSetSta (httpd_req_t *req)
 //
 // --------------------------------------------------------------------------
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR esp_err_t cgiWifiTestSta (httpd_req_t* req)
+IRAM_ATTR esp_err_t cgiWifiTestSta (httpd_req_t *req)
 #else
-esp_err_t cgiWifiTestSta (httpd_req_t* req)
+esp_err_t cgiWifiTestSta (httpd_req_t *req)
 #endif
 {
-  char token[64]   __attribute__ (( aligned (4) )) = {};
-  char param[128]  __attribute__ (( aligned (4) )) = {};
+  char token[64]   __attribute__ ((aligned (4))) = {};
+  char param[128]  __attribute__ ((aligned (4))) = {};
   char rcvbuf[RECEIVE_BUFFER] = {};
   //memset (rcvbuf, 0x0, RECEIVE_BUFFER);
   esp_err_t err = ESP_FAIL;
-  wifi_sta_cfg_t testSta = {};
+  wifi_sta_cfg_t sta_test = {};
 
   uint16_t len;
   jsmn_parser p;
@@ -1336,13 +1334,13 @@ esp_err_t cgiWifiTestSta (httpd_req_t* req)
       for ( i = 1; i < r; i++ )
       {
         snprintf (token, 63, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-        if (!shrt_cmp (STR_STA_SSID, token))
+        if ( !shrt_cmp (STR_STA_SSID, token) )
         {
           i++;
-          if (t[i].end - t[i].start <= SSID_STRLEN)
+          if ( t[i].end - t[i].start <= SSID_STRLEN )
           {
-            testSta.ssid_len = t[i].end - t[i].start;
-            sprintf (testSta.ssid, "%.*s", testSta.ssid_len, rcvbuf + t[i].start);
+            sta_test.ssid_len = t[i].end - t[i].start;
+            sprintf (sta_test.ssid, "%.*s", sta_test.ssid_len, rcvbuf + t[i].start);
           }
         }
         else if ( !shrt_cmp (STR_STA_BSSID, token) )
@@ -1351,7 +1349,7 @@ esp_err_t cgiWifiTestSta (httpd_req_t* req)
           if ( t[i].end - t[i].start == BSSID_STRLEN )
           {
             sprintf (param, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-            testSta.bssid_set = str2mac (param, testSta.bssid);
+            sta_test.bssid_set = str2mac (param, sta_test.bssid);
           }
         }
           else if ( !shrt_cmp (STR_STA_PASSW, token) )
@@ -1359,16 +1357,28 @@ esp_err_t cgiWifiTestSta (httpd_req_t* req)
           i++;
           if ( t[i].end - t[i].start <= PASSW_STRLEN )
           {
-            testSta.pass_len = t[i].end - t[i].start;
-            sprintf (testSta.password, "%.*s", testSta.pass_len, rcvbuf + t[i].start);
+            sta_test.pass_len = t[i].end - t[i].start;
+            sprintf (sta_test.password, "%.*s", sta_test.pass_len, rcvbuf + t[i].start);
           }
         }
       }
     }
   }
 
-  F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", testSta.ssid, testSta.ssid_len, mac2str (testSta.bssid), testSta.bssid_set, testSta.password, testSta.pass_len);
-  
+  F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", sta_test.ssid, sta_test.ssid_len, mac2str (sta_test.bssid), sta_test.bssid_set, sta_test.password, sta_test.pass_len);
+
+  /* Make sure we are disconnected before testing */
+  err = esp_wifi_disconnect ();
+  if ( err == 0 )
+  {
+    xEventGroupSetBits (wifi_event_group, WIFI_TEST_STA_CFG);
+    if ( sta_connect (&sta_test) )
+    {
+      // Do something useful
+    }
+    xEventGroupClearBits (wifi_event_group, WIFI_TEST_STA_CFG);
+  }
+
   httpd_resp_set_hdr (req, "Content-Type", "application/json");
   httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));
   httpd_resp_send_chunk (req, NULL, 0);
@@ -1731,15 +1741,6 @@ int _get_sta_setting (char *buf, int bufsize, int setting)
       break;
   }
   return len;
-}
-// ***********************************************
-int _test_sta_setting (char *buf, int bufsize, char *param, char *value, int setting)
-{
-  bool saveParam = false;
-
-  F_LOGI(true, true, LC_GREY, "param: %s, value: %s", param, value);
-
-  return 0;
 }
 // ***********************************************
 int _set_wifi_setting (char *buf, int bufsize, char *param, char *value, int setting)

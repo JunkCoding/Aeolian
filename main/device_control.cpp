@@ -951,7 +951,6 @@ WORD_ALIGNED_ATTR DRAM_ATTR static status_command_t status_command[] = {
   {STR_STA_PASSW,               _get_sta_setting,      _set_sta_setting,       STA_PASSWORD},
   {STR_STA_UNAME,               _get_sta_setting,      _set_sta_setting,       STA_USERNAME},
   {STR_STA_SSID,                _get_sta_setting,      _set_sta_setting,       STA_SSID},
-  {"sta_test",                  NULL,                  _test_sta_setting,      0},
   {"sunrise",                   _get_sunrise,          NULL,                   0},
   {"sunset",                    _get_sunset,           NULL,                   0},
   {"sys_led",                   NULL,                  NULL,                   0},
