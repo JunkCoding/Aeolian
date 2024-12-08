@@ -364,6 +364,7 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
         /* Are we testing an STA config? */
         if ( BTST (uxBits, WIFI_TEST_STA_CFG) )
         {
+          F_LOGW (true, true, LC_GREY, "Ignoring disconnect whilst testing STA config");
           break;
         }
         // If we have more than 5 disconnects, start an AP to allow configuration
@@ -1371,13 +1372,28 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
   err = esp_wifi_disconnect ();
   if ( err == 0 )
   {
+    err = ESP_FAIL;
     xEventGroupSetBits (wifi_event_group, WIFI_TEST_STA_CFG);
     if ( sta_connect (&sta_test) )
     {
-      // Do something useful
+      // Wait for connection or other
+      int t = 5;
+      while ( t-- > 0 )
+      {
+        EventBits_t uxBits = xEventGroupWaitBits (wifi_event_group, WIFI_STA_CONNECTED, false, false, 10000);
+        F_LOGI (true, true, LC_YELLOW, "tick");
+        if ( BTST (uxBits, WIFI_STA_CONNECTED) )
+        {
+          F_LOGI (true, true, LC_MAGENTA, "connected");
+          err = ESP_OK;
+          break;
+        }
+      }
     }
     xEventGroupClearBits (wifi_event_group, WIFI_TEST_STA_CFG);
   }
+
+  F_LOGW (true, true, LC_MAGENTA, "err = %d", err);
 
   httpd_resp_set_hdr (req, "Content-Type", "application/json");
   httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));

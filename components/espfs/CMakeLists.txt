@@ -73,7 +73,7 @@ if (CONFIG_AEOLIAN_DEBUG_DEV)
   message(AUTHOR_WARNING "** Using debug espfs configuration **")
   set(ESPFS_CONFIG "espfs_debug.yaml")
 else()
-  set(ESPFS_CONFIG "espfs_production.yaml")
+  set(ESPFS_CONFIG "espfs_defaults.yaml")
 endif()
 
 # A list of things we require to work
