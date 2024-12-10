@@ -66,6 +66,14 @@ typedef enum
   WIFI_POWERSAVE
 } wifi_type_t;
 
+typedef enum
+{
+  STA_TEST_NONE,
+  STA_TEST_OK,
+  STA_TEST_FAIL,
+  STA_TEST_RUNNING
+} sta_test_t;
+
 typedef struct
 {
   char         ssid[SSID_STRLEN] __attribute__ ((aligned (4)));     // Station SSID

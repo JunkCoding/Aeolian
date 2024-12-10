@@ -71,7 +71,10 @@ static char ipAddr[16];
 
 static EventGroupHandle_t wifi_event_group = NULL;
 
-const int WIFI_INITIALIZED          = BIT0;
+// Sore the status of testing an STA configuration
+sta_test_t sta_test_result = STA_TEST_NONE;
+
+const int WIFI_INITIALIZED = BIT0;
 const int WIFI_STA_CONNECTED        = BIT1;  // ESP32 is currently connected
 const int WIFI_AP_STACONNECTED      = BIT2;
 const int WIFI_STA_STARTED          = BIT4;
@@ -79,7 +82,7 @@ const int WIFI_AP_STARTED           = BIT5;  // Set automatically once the SoftA
 const int WIFI_SCAN_INPROGRESS      = BIT6;  // Set when scan called, cleared when complete
 const int WIFI_SCAN_DONE            = BIT7;  // Cleared when called, set when done
 const int WIFI_TEST_STA_CFG         = BIT8;  // Testing STA configuration
-
+const int WIFI_STA_GOT_IP           = BIT9;  // We have an IP
 
 // **************************************************************************************************
 // Scan result
@@ -92,7 +95,7 @@ static QueueHandle_t xApScanQueue = NULL;
 static void start_ap(void);
 static void stop_ap (bool forceStop=false);
 static void periodic_sta_callback(void *arg);
-static bool sta_connect (wifi_sta_cfg_t *sta_cfg);
+static bool sta_connect (const wifi_sta_cfg_t *sta_cfg);
 
 // **************************************************************************************************
 //
@@ -278,7 +281,7 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
       }
     case WIFI_EVENT_SCAN_DONE:
       {
-        F_LOGV(true, true, LC_GREY, "WIFI_EVENT_SCAN_DONE");
+        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_SCAN_DONE");
 
         // We can set this one here, at the beginning
         xEventGroupSetBits (wifi_event_group, WIFI_SCAN_DONE);
@@ -358,7 +361,7 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
         if ( BTST (uxBits, WIFI_STA_CONNECTED) )
         {
           disconnects = 0;
-          xEventGroupClearBits (wifi_event_group, WIFI_STA_CONNECTED);
+          xEventGroupClearBits (wifi_event_group, WIFI_STA_CONNECTED | WIFI_STA_GOT_IP);
         }
 
         /* Are we testing an STA config? */
@@ -504,7 +507,7 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
 IRAM_ATTR void ip_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 #else
 void ip_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
-#endif
+#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   switch ( event_id )
   {
@@ -516,7 +519,7 @@ void ip_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id, 
         sprintf(ipAddr, IPSTR, IP2STR (&event->ip_info.ip));
         F_LOGI(true, true, LC_YELLOW, "Allocated DHCP address: %s", ipAddr);
 
-        xEventGroupSetBits(wifi_event_group, WIFI_STA_CONNECTED);
+        xEventGroupSetBits (wifi_event_group, WIFI_STA_GOT_IP);
 
         obtain_time();
 
@@ -526,7 +529,7 @@ void ip_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id, 
     case IP_EVENT_STA_LOST_IP:
       {
         F_LOGW(true, true, LC_RED, "WIFI_EVENT_STA_LOST_IP");
-        xEventGroupClearBits (wifi_event_group, WIFI_STA_CONNECTED);
+        xEventGroupClearBits (wifi_event_group, WIFI_STA_GOT_IP);
 
         // Fin
         break;
@@ -578,8 +581,8 @@ void ip_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id, 
 IRAM_ATTR void wifi_startScan (void)
 #else
 void wifi_startScan (void)
-#endif
-{
+#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
+{ 
   EventBits_t uxBits = xEventGroupGetBits (wifi_event_group);
   if ( BTST(uxBits, WIFI_SCAN_INPROGRESS) )
   { 
@@ -638,7 +641,7 @@ void wifi_startScan (void)
       // Non blocking scan
       esp_wifi_scan_start(&scan_config, false);
 
-      F_LOGV(true, true, LC_BRIGHT_YELLOW, "WiFi scan started");
+      F_LOGI(true, true, LC_BRIGHT_YELLOW, "WiFi scan started");
     }
     else
     {
@@ -654,7 +657,7 @@ void wifi_startScan (void)
 IRAM_ATTR esp_err_t wifi_getApScanResult (scan_result_t *cgiWifiAps)
 #else
 esp_err_t wifi_getApScanResult (scan_result_t *cgiWifiAps)
-#endif
+#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   esp_err_t err = ESP_FAIL;
 
@@ -813,7 +816,7 @@ void log_ap(const wifi_ap_record_t ap, const log_colour_t logCol)
 // --------------------------------------------------------------------------
 // Scan local access points for an AP matching our configuration
 // --------------------------------------------------------------------------
-bool findBestAP (wifi_sta_cfg_t *searchConfig)
+bool findBestAP (const wifi_sta_cfg_t *sta_cfg)
 {
   // Prepare everything for our search
   int x = 10;             // Max loops
@@ -823,7 +826,12 @@ bool findBestAP (wifi_sta_cfg_t *searchConfig)
   ESP_ERROR_CHECK(esp_task_wdt_add(NULL));
   ESP_ERROR_CHECK(esp_task_wdt_status(NULL));
 
-  // Loop until we time out or find a match
+  F_LOGI (true, true, LC_BRIGHT_MAGENTA, "ssid: '%.*s', password: '%.*s'", sta_cfg->ssid_len, sta_cfg->ssid, sta_cfg->pass_len, sta_cfg->password);
+
+  /* Initialise a scan to get the ball rolling, so to speak */
+  wifi_startScan ();
+
+  /* Loop until we find a match (or timeout) */
   do
   {
     esp_task_wdt_reset();
@@ -839,11 +847,11 @@ bool findBestAP (wifi_sta_cfg_t *searchConfig)
         for ( int i = 0; i < cgiWifiAps.apCount; i++ )
         {
           // Compare this AP with the SSID we are looking for
-          if ( strncmp (searchConfig->ssid, ( const char * )cgiWifiAps.apList[i].ssid, searchConfig->ssid_len) == 0 )
+          if ( strncmp (sta_cfg->ssid, ( const char * )cgiWifiAps.apList[i].ssid, sta_cfg->ssid_len) == 0 )
           {
-            if ( searchConfig->bssid_set )
+            if ( sta_cfg->bssid_set )
             {
-              if ( !memcmp (searchConfig->bssid, cgiWifiAps.apList[i].bssid, BSSID_BYTELEN) )
+              if ( !memcmp (sta_cfg->bssid, cgiWifiAps.apList[i].bssid, BSSID_BYTELEN) )
               {
                 log_ap (cgiWifiAps.apList[i], LC_GREEN);
                 foundAP = true;
@@ -892,13 +900,18 @@ bool findBestAP (wifi_sta_cfg_t *searchConfig)
       // have a break
       delay_ms(2000);
     }
+
+    // Reset the WDT
+    CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
+
     // Decrement out timeout
     x--;
-  } while ( x > 0 && !foundAP );
+  }
+  while ( x > 0 && !foundAP );
 
   if ( x == 0 && !foundAP )
   {
-    F_LOGE (true, true, LC_RED, "Could not find AP matching \"%.*s\"", searchConfig->ssid_len, searchConfig->ssid);
+    F_LOGE (true, true, LC_RED, "Could not find AP matching \"%.*s\"", sta_cfg->ssid_len, sta_cfg->ssid);
   }
 
   ESP_ERROR_CHECK(esp_task_wdt_delete(NULL));
@@ -910,7 +923,7 @@ bool findBestAP (wifi_sta_cfg_t *searchConfig)
 // **************************************************************************************************
 // Search for AP and start STA connection
 // **************************************************************************************************
-static bool sta_connect (wifi_sta_cfg_t *sta_cfg)
+static bool sta_connect (const wifi_sta_cfg_t *sta_cfg)
 {
   bool scan_found = false;
 
@@ -943,11 +956,11 @@ static bool sta_connect (wifi_sta_cfg_t *sta_cfg)
   {
     // Copy the stored SSID to our configuration
     memcpy ((char *)wifi_config.sta.ssid, sta_cfg->ssid, sta_cfg->ssid_len);
-    wifi_config.sta.ssid[sta_cfg->ssid_len] = 0x0;
+    //wifi_config.sta.ssid[sta_cfg->ssid_len] = 0x0;
 
     // Copy the stored password to our configuration
     memcpy ((char *)wifi_config.sta.password, sta_cfg->password, sta_cfg->pass_len);
-    wifi_config.sta.password[sta_cfg->pass_len] = 0x0;
+    //wifi_config.sta.password[sta_cfg->pass_len] = 0x0;
 
     // Check results for an SSID matching our saved SSID/password combination
     if ( ( scan_found = findBestAP (sta_cfg) ) == true )
@@ -1228,7 +1241,7 @@ void init_wifi (httpd_handle_t *httpServer)
 IRAM_ATTR esp_err_t cgiWifiSetSta (httpd_req_t *req)
 #else
 esp_err_t cgiWifiSetSta (httpd_req_t *req)
-#endif
+#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   esp_err_t err = ESP_FAIL;
   char rcvbuf[RECEIVE_BUFFER] = {};
@@ -1296,107 +1309,208 @@ esp_err_t cgiWifiSetSta (httpd_req_t *req)
 // --------------------------------------------------------------------------
 //
 // --------------------------------------------------------------------------
+// Can't imagine two could try and run at the same time, but you never know...
+static TaskHandle_t xTaskStaTestHandle = NULL;
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR esp_err_t cgiWifiTestSta (httpd_req_t *req)
+IRAM_ATTR void test_sta_cfg (void *data)
 #else
-esp_err_t cgiWifiTestSta (httpd_req_t *req)
-#endif
+void test_sta_cfg (void *data)
+#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
-  char token[64]   __attribute__ ((aligned (4))) = {};
-  char param[128]  __attribute__ ((aligned (4))) = {};
-  char rcvbuf[RECEIVE_BUFFER] = {};
-  //memset (rcvbuf, 0x0, RECEIVE_BUFFER);
-  esp_err_t err = ESP_FAIL;
-  wifi_sta_cfg_t sta_test = {};
+  esp_err_t err = ESP_OK;
+  wifi_sta_cfg_t *sta_test = (wifi_sta_cfg_t *)data;
 
-  uint16_t len;
-  jsmn_parser p;
-  jsmntok_t t[12];
+  //printf ("%08X -> %08X\n", (unsigned int)&sta_test, (unsigned int)sta_test);
+  //F_LOGD (true, true, LC_MAGENTA, "e: %d) S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", err, sta_test->ssid, sta_test->ssid_len, mac2str (sta_test->bssid), sta_test->bssid_set, sta_test->password, sta_test->pass_len);
 
-  if ( req->content_len > RECEIVE_BUFFER )
+  ESP_ERROR_CHECK (esp_task_wdt_add (NULL));
+  ESP_ERROR_CHECK (esp_task_wdt_status (NULL));
+
+  // Allow sender to receive acknowledgements */
+  delay_ms (2000);
+
+  /* Check if we are connected to a wireless network before we begin */
+  bool wifi_connection = networkIsConnected ();
+
+    /* Make sure we are disconnected before testing */
+  if ( wifi_connection )
   {
-    F_LOGE (true, true, LC_YELLOW, "Request larger than our expectations!");
-  }
-  else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, RECEIVE_BUFFER)) <= 0 )
-  {
-    F_LOGE (true, true, LC_YELLOW, "Some kind of error happened, go figure it out");
-  }
-  else
-  {
-    jsmn_init (&p);
-    int r = jsmn_parse (&p, rcvbuf, req->content_len, t, sizeof (t) / sizeof (t[0]));
-    if ( r < 0 )
-    {
-      F_LOGE (true, true, LC_RED, "jsmn_parse error (%d), data: %.*s", r, req->content_len, rcvbuf);
-    }
-    else
-    {
-      uint16_t i = 1;
-      for ( i = 1; i < r; i++ )
-      {
-        snprintf (token, 63, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-        if ( !shrt_cmp (STR_STA_SSID, token) )
-        {
-          i++;
-          if ( t[i].end - t[i].start <= SSID_STRLEN )
-          {
-            sta_test.ssid_len = t[i].end - t[i].start;
-            sprintf (sta_test.ssid, "%.*s", sta_test.ssid_len, rcvbuf + t[i].start);
-          }
-        }
-        else if ( !shrt_cmp (STR_STA_BSSID, token) )
-        {
-          i++;
-          if ( t[i].end - t[i].start == BSSID_STRLEN )
-          {
-            sprintf (param, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-            sta_test.bssid_set = str2mac (param, sta_test.bssid);
-          }
-        }
-          else if ( !shrt_cmp (STR_STA_PASSW, token) )
-        {
-          i++;
-          if ( t[i].end - t[i].start <= PASSW_STRLEN )
-          {
-            sta_test.pass_len = t[i].end - t[i].start;
-            sprintf (sta_test.password, "%.*s", sta_test.pass_len, rcvbuf + t[i].start);
-          }
-        }
-      }
-    }
+    F_LOGI (true, true, LC_YELLOW, "Disconnecting STA to test wifi config");
+    xEventGroupSetBits (wifi_event_group, WIFI_TEST_STA_CFG);
+    err = esp_wifi_disconnect ();
   }
 
-  F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", sta_test.ssid, sta_test.ssid_len, mac2str (sta_test.bssid), sta_test.bssid_set, sta_test.password, sta_test.pass_len);
-
-  /* Make sure we are disconnected before testing */
-  err = esp_wifi_disconnect ();
   if ( err == 0 )
   {
     err = ESP_FAIL;
-    xEventGroupSetBits (wifi_event_group, WIFI_TEST_STA_CFG);
-    if ( sta_connect (&sta_test) )
+    F_LOGI (true, true, LC_GREY, "Testing STA settings");
+
+    if ( sta_connect (sta_test) )
     {
       // Wait for connection or other
       int t = 5;
       while ( t-- > 0 )
       {
-        EventBits_t uxBits = xEventGroupWaitBits (wifi_event_group, WIFI_STA_CONNECTED, false, false, 10000);
-        F_LOGI (true, true, LC_YELLOW, "tick");
+        // Feed the watchdog
+        CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
+        EventBits_t uxBits = xEventGroupWaitBits (wifi_event_group, WIFI_STA_CONNECTED, false, true, 500 / portTICK_PERIOD_MS);
         if ( BTST (uxBits, WIFI_STA_CONNECTED) )
         {
-          F_LOGI (true, true, LC_MAGENTA, "connected");
+          F_LOGI (true, true, LC_BRIGHT_GREEN, "connected, STA settings are good");
           err = ESP_OK;
           break;
         }
       }
     }
-    xEventGroupClearBits (wifi_event_group, WIFI_TEST_STA_CFG);
+    else
+    {
+      F_LOGI (true, true, LC_RED, "STA settings did not work");
+    }
   }
 
-  F_LOGW (true, true, LC_MAGENTA, "err = %d", err);
+  if ( ESP_OK == err )
+  {
+    sta_test_result = STA_TEST_OK;
+  }
+  else
+  {
+    sta_test_result = STA_TEST_FAIL;
+  
+  }
 
+  if ( wifi_connection )
+  {
+    // Just in case
+    esp_wifi_disconnect ();
+
+    // Restore our previous settings
+    sta_connect (&wifi_sta_cfg);
+
+    xEventGroupClearBits (wifi_event_group, WIFI_TEST_STA_CFG);
+    F_LOGW (true, true, LC_YELLOW, "Waiting for original WiFi connection to be restored");
+    EventBits_t uxBits = xEventGroupWaitBits (wifi_event_group, WIFI_STA_GOT_IP, false, true, 7000 / portTICK_PERIOD_MS);
+
+    // Wait a while and let things happen
+    F_LOGI (true, true, LC_GREEN, "We have our original network back");
+  }
+
+  /* Clean up after ourselves */
+  vPortFree (sta_test);
+  sta_test = NULL;
+
+  ESP_ERROR_CHECK (esp_task_wdt_delete (NULL));
+
+  //TaskHandle_t myself = xTaskGetCurrentTaskHandle ();
+  //vTaskDelete (myself);
+
+  xTaskStaTestHandle = NULL;
+  vTaskDelete (NULL);
+}
+// --------------------------------------------------------------------------
+#if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
+IRAM_ATTR esp_err_t cgiWifiTestSta (httpd_req_t *req)
+#else
+esp_err_t cgiWifiTestSta (httpd_req_t *req)
+#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
+{
+  char token[64]   __attribute__ ((aligned (4))) = {};
+  char param[128]  __attribute__ ((aligned (4))) = {};
+  char rcvbuf[RECEIVE_BUFFER] = {};
+  //memset (rcvbuf, 0x0, RECEIVE_BUFFER);
+
+  esp_err_t err = ESP_FAIL; /* Things can only get better from here */
+
+  wifi_sta_cfg_t *sta_test = (wifi_sta_cfg_t *)pvPortMalloc (sizeof (wifi_sta_cfg_t));
+  if ( sta_test == NULL )
+  {
+    F_LOGE (true, true, LC_RED, "pvPortMalloc failed allocating 'sta_test' (%d bytes)", sizeof (wifi_sta_cfg_t));
+    err = ESP_ERR_NO_MEM;
+  }
+  else
+  {
+    uint16_t len;
+    jsmn_parser p;
+    jsmntok_t t[12];
+
+    /* Zerp our storage */
+    memset (sta_test, 0x0, sizeof (wifi_sta_cfg_t));
+
+    if ( req->content_len > RECEIVE_BUFFER )
+    {
+      F_LOGE (true, true, LC_YELLOW, "Request larger than our expectations!");
+    }
+    else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, RECEIVE_BUFFER)) <= 0 )
+    {
+      F_LOGE (true, true, LC_YELLOW, "Some kind of error happened, go figure it out");
+    }
+    else
+    {
+      jsmn_init (&p);
+      int r = jsmn_parse (&p, rcvbuf, req->content_len, t, sizeof (t) / sizeof (t[0]));
+      if ( r < 0 )
+      {
+        F_LOGE (true, true, LC_RED, "jsmn_parse error (%d), data: %.*s", r, req->content_len, rcvbuf);
+      }
+      else
+      {
+        uint16_t i = 1;
+        for ( i = 1; i < r; i++ )
+        {
+          snprintf (token, 63, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+          if ( !shrt_cmp (STR_STA_SSID, token) )
+          {
+            i++;
+            if ( t[i].end - t[i].start <= SSID_STRLEN )
+            {
+              sta_test->ssid_len = t[i].end - t[i].start;
+              sprintf (sta_test->ssid, "%.*s", sta_test->ssid_len, rcvbuf + t[i].start);
+            }
+          }
+          else if ( !shrt_cmp (STR_STA_BSSID, token) )
+          {
+            i++;
+            if ( t[i].end - t[i].start == BSSID_STRLEN )
+            {
+              sprintf (param, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+              sta_test->bssid_set = str2mac (param, sta_test->bssid);
+            }
+          }
+          else if ( !shrt_cmp (STR_STA_PASSW, token) )
+          {
+            i++;
+            if ( t[i].end - t[i].start <= PASSW_STRLEN )
+            {
+              sta_test->pass_len = t[i].end - t[i].start;
+              sprintf (sta_test->password, "%.*s", sta_test->pass_len, rcvbuf + t[i].start);
+            }
+          }
+        }
+      }
+    }
+
+    F_LOGD (true, true, LC_MAGENTA, "e: %d) S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", err, sta_test->ssid, sta_test->ssid_len, mac2str (sta_test->bssid), sta_test->bssid_set, sta_test->password, sta_test->pass_len);
+
+  // Create task to handle testing STA config
+  // *****************************************
+    if ( xTaskStaTestHandle == NULL )
+    {
+      //printf ("%08X -> %08X\n", (unsigned int)&sta_test, (unsigned int)sta_test);
+      sta_test_result = STA_TEST_RUNNING;
+      xTaskCreate (&test_sta_cfg, TASK_NAME_TEST_STA, STACKSIZE_TEST_STA, sta_test, TASK_PRIORITY_LOW, &xTaskStaTestHandle);
+      err = (xTaskStaTestHandle == NULL);
+    }
+  }
+
+  // Return our success or failure fulfilling our designated task.
   httpd_resp_set_hdr (req, "Content-Type", "application/json");
-  httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));
+  if ( ESP_OK == err )
+  {
+    httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));
+  }
+  else
+  {
+    httpd_resp_send_chunk (req, JSON_FAILURE_STR, strlen (JSON_FAILURE_STR));
+  }
   httpd_resp_send_chunk (req, NULL, 0);
 
   return err;
@@ -1408,7 +1522,7 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
 IRAM_ATTR esp_err_t cgiWifiSetAp (httpd_req_t *req)
 #else
 esp_err_t cgiWifiSetAp (httpd_req_t *req)
-#endif
+#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   esp_err_t err = ESP_FAIL;
   char rcvbuf[RECEIVE_BUFFER] = {};
@@ -1462,7 +1576,7 @@ esp_err_t cgiWifiSetAp (httpd_req_t *req)
 IRAM_ATTR esp_err_t  cgiWifiSetMode (httpd_req_t *req)
 #else
 esp_err_t  cgiWifiSetMode (httpd_req_t *req)
-#endif
+#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   esp_err_t err = ESP_FAIL;
 

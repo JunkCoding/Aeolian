@@ -16,6 +16,7 @@
 #define     STACKSIZE_SNTP            4096
 #define     STACKSIZE_STATS           3072
 #define     STACKSIZE_WSS             4096
+#define     STACKSIZE_TEST_STA        3072
 
 // Task names
 // ----------------------------------------
@@ -29,6 +30,7 @@
 #define     TASK_NAME_STATS           "task_list"
 #define     TASK_NAME_WEB             "web_server"
 #define     TASK_NAME_WSS             "ws_transport"
+#define     TASK_NAME_TEST_STA        "test_sta"
 
 // Task priorities
 // ----------------------------------------
@@ -42,6 +44,7 @@
 #define     TASK_PRIORITY_STATS       (tskIDLE_PRIORITY + 1)
 #define     TASK_PRIORITY_WEB         (configMAX_PRIORITIES - 4)
 #define     TASK_PRIORITY_WSS         (tskIDLE_PRIORITY + 1)
+#define     TASK_PRIORITY_LOW         (tskIDLE_PRIORITY + 1)
 
 extern TaskHandle_t xBTHandle;
 extern TaskHandle_t xCCTVHandle;
