@@ -72,7 +72,12 @@ static char ipAddr[16];
 static EventGroupHandle_t wifi_event_group = NULL;
 
 // Sore the status of testing an STA configuration
-sta_test_t sta_test_result = STA_TEST_NONE;
+typedef struct
+{
+  sta_test_status_t status;
+  wifi_sta_cfg_t    config;
+} sta_test_t;
+static QueueHandle_t sta_test_queue = NULL;  // A queue of one
 
 const int WIFI_INITIALIZED = BIT0;
 const int WIFI_STA_CONNECTED        = BIT1;  // ESP32 is currently connected
@@ -823,10 +828,10 @@ bool findBestAP (const wifi_sta_cfg_t *sta_cfg)
   int rssi = -2000;       // Impossibly high(low?) value
   bool foundAP = false;   // Did we find a match?
 
-  ESP_ERROR_CHECK(esp_task_wdt_add(NULL));
-  ESP_ERROR_CHECK(esp_task_wdt_status(NULL));
+  ///ESP_ERROR_CHECK(esp_task_wdt_add(NULL));
+  ///ESP_ERROR_CHECK(esp_task_wdt_status(NULL));
 
-  F_LOGI (true, true, LC_BRIGHT_MAGENTA, "ssid: '%.*s', password: '%.*s'", sta_cfg->ssid_len, sta_cfg->ssid, sta_cfg->pass_len, sta_cfg->password);
+  //F_LOGD (true, true, LC_BRIGHT_MAGENTA, "ssid: '%.*s', password: '%.*s'", sta_cfg->ssid_len, sta_cfg->ssid, sta_cfg->pass_len, sta_cfg->password);
 
   /* Initialise a scan to get the ball rolling, so to speak */
   wifi_startScan ();
@@ -834,7 +839,7 @@ bool findBestAP (const wifi_sta_cfg_t *sta_cfg)
   /* Loop until we find a match (or timeout) */
   do
   {
-    esp_task_wdt_reset();
+    //*/esp_task_wdt_reset();
     EventBits_t uxBits = xEventGroupGetBits(wifi_event_group);
     if ( !BTST(uxBits, WIFI_SCAN_INPROGRESS) )
     {
@@ -902,7 +907,7 @@ bool findBestAP (const wifi_sta_cfg_t *sta_cfg)
     }
 
     // Reset the WDT
-    CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
+    //CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
 
     // Decrement out timeout
     x--;
@@ -914,7 +919,7 @@ bool findBestAP (const wifi_sta_cfg_t *sta_cfg)
     F_LOGE (true, true, LC_RED, "Could not find AP matching \"%.*s\"", sta_cfg->ssid_len, sta_cfg->ssid);
   }
 
-  ESP_ERROR_CHECK(esp_task_wdt_delete(NULL));
+  ///ESP_ERROR_CHECK(esp_task_wdt_delete(NULL));
 
   F_LOGD(true, true, LC_RED, "x = %d, foundAP = %d", x, foundAP);
   return foundAP;
@@ -1318,13 +1323,13 @@ void test_sta_cfg (void *data)
 #endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   esp_err_t err = ESP_OK;
-  wifi_sta_cfg_t *sta_test = (wifi_sta_cfg_t *)data;
+  sta_test_t *sta_test = (sta_test_t *)data;
 
   //printf ("%08X -> %08X\n", (unsigned int)&sta_test, (unsigned int)sta_test);
-  //F_LOGD (true, true, LC_MAGENTA, "e: %d) S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", err, sta_test->ssid, sta_test->ssid_len, mac2str (sta_test->bssid), sta_test->bssid_set, sta_test->password, sta_test->pass_len);
+  F_LOGD (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", sta_test->config.ssid, sta_test->config.ssid_len, mac2str (sta_test->config.bssid), sta_test->config.bssid_set, sta_test->config.password, sta_test->config.pass_len);
 
-  ESP_ERROR_CHECK (esp_task_wdt_add (NULL));
-  ESP_ERROR_CHECK (esp_task_wdt_status (NULL));
+  ///ESP_ERROR_CHECK (esp_task_wdt_add (NULL));
+  ///ESP_ERROR_CHECK (esp_task_wdt_status (NULL));
 
   // Allow sender to receive acknowledgements */
   delay_ms (2000);
@@ -1345,37 +1350,45 @@ void test_sta_cfg (void *data)
     err = ESP_FAIL;
     F_LOGI (true, true, LC_GREY, "Testing STA settings");
 
-    if ( sta_connect (sta_test) )
+    //*/CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
+    if ( sta_connect (&sta_test->config) )
     {
       // Wait for connection or other
       int t = 5;
       while ( t-- > 0 )
       {
         // Feed the watchdog
-        CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
+        //*/CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
         EventBits_t uxBits = xEventGroupWaitBits (wifi_event_group, WIFI_STA_CONNECTED, false, true, 500 / portTICK_PERIOD_MS);
         if ( BTST (uxBits, WIFI_STA_CONNECTED) )
         {
-          F_LOGI (true, true, LC_BRIGHT_GREEN, "connected, STA settings are good");
           err = ESP_OK;
           break;
         }
       }
     }
-    else
-    {
-      F_LOGI (true, true, LC_RED, "STA settings did not work");
-    }
   }
 
   if ( ESP_OK == err )
   {
-    sta_test_result = STA_TEST_OK;
+    F_LOGI (true, true, LC_BRIGHT_GREEN, "connected, STA settings are good");
+    sta_test->status = STA_TEST_OK;
   }
   else
   {
-    sta_test_result = STA_TEST_FAIL;
-  
+    F_LOGI (true, true, LC_RED, "STA settings did not work");
+    sta_test->status = STA_TEST_FAIL;
+
+  }
+
+  if ( xQueueSendToBack (sta_test_queue, (void *)sta_test, (TickType_t)0) == errQUEUE_FULL )
+  {
+    /*  xQueueOverwrite(xQueue, pvItemToQueue).
+        Only for use with queues that have a length of one - so the queue is either empty or full.
+        xQueueOverwrite() is a macro that calls xQueueGenericSend(), and therefore has the same return values as xQueueSendToFront().
+        However, pdPASS is the only value that can be returned because xQueueOverwrite() will write to the queue even when the queue is already full.
+        e.g. don't bother checking for an error message */
+    xQueueOverwrite (sta_test_queue, (void *)sta_test);
   }
 
   if ( wifi_connection )
@@ -1384,6 +1397,7 @@ void test_sta_cfg (void *data)
     esp_wifi_disconnect ();
 
     // Restore our previous settings
+    //*/CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
     sta_connect (&wifi_sta_cfg);
 
     xEventGroupClearBits (wifi_event_group, WIFI_TEST_STA_CFG);
@@ -1398,7 +1412,7 @@ void test_sta_cfg (void *data)
   vPortFree (sta_test);
   sta_test = NULL;
 
-  ESP_ERROR_CHECK (esp_task_wdt_delete (NULL));
+  ///ESP_ERROR_CHECK (esp_task_wdt_delete (NULL));
 
   //TaskHandle_t myself = xTaskGetCurrentTaskHandle ();
   //vTaskDelete (myself);
@@ -1420,10 +1434,27 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
 
   esp_err_t err = ESP_FAIL; /* Things can only get better from here */
 
-  wifi_sta_cfg_t *sta_test = (wifi_sta_cfg_t *)pvPortMalloc (sizeof (wifi_sta_cfg_t));
+  if ( sta_test_queue == NULL )
+  {
+    F_LOGI (true, true, LC_GREY, "created 'sta_test_queue'");
+    sta_test_queue = xQueueCreate (1, sizeof(sta_test_t));
+  }
+  /* Affirmation code */
+/*
+  else
+  {
+    sta_test_t item;
+    if ( xQueuePeek (sta_test_queue, &item, 0) )
+    {
+      F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", item.config.ssid, item.config.ssid_len, mac2str (item.config.bssid), item.config.bssid_set, item.config.password, item.config.pass_len);
+    }
+  }
+*/
+
+  sta_test_t *sta_test = (sta_test_t *)pvPortMalloc (sizeof (sta_test_t));
   if ( sta_test == NULL )
   {
-    F_LOGE (true, true, LC_RED, "pvPortMalloc failed allocating 'sta_test' (%d bytes)", sizeof (wifi_sta_cfg_t));
+    F_LOGE (true, true, LC_RED, "pvPortMalloc failed allocating 'sta_test_t' (%d bytes)", sizeof (sta_test_t));
     err = ESP_ERR_NO_MEM;
   }
   else
@@ -1433,7 +1464,7 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
     jsmntok_t t[12];
 
     /* Zerp our storage */
-    memset (sta_test, 0x0, sizeof (wifi_sta_cfg_t));
+    memset (sta_test, 0x0, sizeof (sta_test_t));
 
     if ( req->content_len > RECEIVE_BUFFER )
     {
@@ -1457,46 +1488,59 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
         for ( i = 1; i < r; i++ )
         {
           snprintf (token, 63, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-          if ( !shrt_cmp (STR_STA_SSID, token) )
+
+          /* Are we being asked to provide details of a previous scan? */
+          if ( !shrt_cmp (STR_STA_TEST_RESULT, token) )
+          {
+            i++;
+            /*  Options, options, options...
+                a) I guess we can get the status of the last test and ensure the parameters given for the
+                test match the parameters we have now.
+                b) Just get the result of the last test.
+                c) Either of the above, but choose to keep or remove the test in our history  */
+            
+          }
+          /* Check for SSID being provided */
+          else if ( !shrt_cmp (STR_STA_SSID, token) )
           {
             i++;
             if ( t[i].end - t[i].start <= SSID_STRLEN )
             {
-              sta_test->ssid_len = t[i].end - t[i].start;
-              sprintf (sta_test->ssid, "%.*s", sta_test->ssid_len, rcvbuf + t[i].start);
+              sta_test->config.ssid_len = t[i].end - t[i].start;
+              sprintf (sta_test->config.ssid, "%.*s", sta_test->config.ssid_len, rcvbuf + t[i].start);
             }
           }
+          /* Check for valid BSSID and set lock-to-AP if available */
           else if ( !shrt_cmp (STR_STA_BSSID, token) )
           {
             i++;
             if ( t[i].end - t[i].start == BSSID_STRLEN )
             {
               sprintf (param, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-              sta_test->bssid_set = str2mac (param, sta_test->bssid);
+              sta_test->config.bssid_set = str2mac (param, sta_test->config.bssid);
             }
           }
+          /* Check if we are being provided a password */
           else if ( !shrt_cmp (STR_STA_PASSW, token) )
           {
             i++;
             if ( t[i].end - t[i].start <= PASSW_STRLEN )
             {
-              sta_test->pass_len = t[i].end - t[i].start;
-              sprintf (sta_test->password, "%.*s", sta_test->pass_len, rcvbuf + t[i].start);
+              sta_test->config.pass_len = t[i].end - t[i].start;
+              sprintf (sta_test->config.password, "%.*s", sta_test->config.pass_len, rcvbuf + t[i].start);
             }
           }
         }
       }
     }
 
-    F_LOGD (true, true, LC_MAGENTA, "e: %d) S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", err, sta_test->ssid, sta_test->ssid_len, mac2str (sta_test->bssid), sta_test->bssid_set, sta_test->password, sta_test->pass_len);
-
   // Create task to handle testing STA config
   // *****************************************
     if ( xTaskStaTestHandle == NULL )
     {
       //printf ("%08X -> %08X\n", (unsigned int)&sta_test, (unsigned int)sta_test);
-      sta_test_result = STA_TEST_RUNNING;
-      xTaskCreate (&test_sta_cfg, TASK_NAME_TEST_STA, STACKSIZE_TEST_STA, sta_test, TASK_PRIORITY_LOW, &xTaskStaTestHandle);
+      sta_test->status = STA_TEST_RUNNING;
+      xTaskCreate (test_sta_cfg, TASK_NAME_TEST_STA, STACKSIZE_TEST_STA, sta_test, TASK_PRIORITY_LOW, &xTaskStaTestHandle);
       err = (xTaskStaTestHandle == NULL);
     }
   }

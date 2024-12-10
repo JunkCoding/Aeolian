@@ -21,6 +21,8 @@
 #define STR_STA_IP_ADDR         "sta_ipaddr"
 #define STR_STA_NTP_ADDR        "sta_ntp_addr"
 
+#define STR_STA_TEST_RESULT     "test_result"
+
 #define STR_AP_SSID             "ap_ssid"
 #define STR_AP_PASSW            "ap_password"
 #define STR_AP_PRIMARY          "ap_primary"
@@ -71,8 +73,9 @@ typedef enum
   STA_TEST_NONE,
   STA_TEST_OK,
   STA_TEST_FAIL,
-  STA_TEST_RUNNING
-} sta_test_t;
+  STA_TEST_RUNNING,
+  STA_TEST_NOT_FOUND
+} sta_test_status_t;
 
 typedef struct
 {
