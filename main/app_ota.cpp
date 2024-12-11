@@ -874,10 +874,17 @@ esp_err_t cgiUploadFirmware(httpd_req_t *req)
   // Remove our block on the light show
   lightsUnpause(PAUSE_UPLOADING, true);
 
-  char msgbuf[256];
-  bufptr += sprintf(&msgbuf[bufptr], "{%s", ((ESP_OK == err) ? JSON_APPEND_SUCCESS_STR : JSON_APPEND_FAILURE_STR));
-  httpd_resp_send_chunk(req, msgbuf, bufptr);
-  httpd_resp_send_chunk(req, NULL, 0);
+      // Return our success or failure fulfilling our designated task.
+  httpd_resp_set_hdr (req, "Content-Type", "application/json");
+  if ( ESP_OK == err )
+  {
+    httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));
+  }
+  else
+  {
+    httpd_resp_send_chunk (req, JSON_FAILURE_STR, strlen (JSON_FAILURE_STR));
+  }
+  httpd_resp_send_chunk (req, NULL, 0);
 
   // We handled the request, regardless of errors, so we should return ESP_OK
   return ESP_OK;

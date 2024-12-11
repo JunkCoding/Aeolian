@@ -250,16 +250,27 @@ function toggleScan (_this)
     _this.value = "Scan Stop";
   }
 }
-function staTestConfig ()
+var handleError = function (err)
+{
+  console.warn(err);
+  return new Response(JSON.stringify({
+    code: 400,
+    message: 'Stupid network Error'
+  }));
+};
+async function staAwaitResults (el)
 {
   let pwd_el = document.getElementById("sta_password");
   let sid_el = document.getElementById("sta_ssid");
 
+  openBusyBox("Testing...");
+
   const json = {
+    test_result: "matching",
     sta_ssid: sid_el.value,
     sta_bssid: (fixedAP ? selAP.bssid : ""),
     sta_password: pwd_el.value
-  }
+  };
   // request options
   const options = {
     method: 'POST',
@@ -268,11 +279,70 @@ function staTestConfig ()
       'Content-Type': 'application/json'
     }
   };
-  // send post request
-  fetch('/wifi/teststa', options)
-    .then(res => res.json())
-    .then(res => console.log(res))
-    .catch(err => console.error(err))  
+  const url = '/wifi/teststa';
+  const response = await fetch(url, options).catch(handleError);
+  const data = await response.json();
+  if (data.noerr === true)
+  {
+    if (data.tip === 0)
+    {
+      closeBusyBox();      
+      return data;
+    }
+  }
+  // If not timeout, keep trying
+  await sleep(500);
+  await staAwaitResults(el);
+}
+async function staTestConfig (el)
+{
+  let pwd_el = document.getElementById("sta_password");
+  let sid_el = document.getElementById("sta_ssid");
+
+  openBusyBox("Testing...");
+
+  const json = {
+    sta_ssid: sid_el.value,
+    sta_bssid: (fixedAP ? selAP.bssid : ""),
+    sta_password: pwd_el.value
+  };
+  // request options
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(json),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+  const url = '/wifi/teststa';
+  const response = await fetch(url, options).catch(handleError);
+  const data = await response.json();
+  if (data.noerr === true)
+  {
+    await sleep(1500);
+    await staAwaitResults(el);
+    console.log("here");
+  }
+  else
+  {
+    closeBusyBox();
+  }
+}
+async  function staSaveConfig ()
+{
+  try
+  {
+    const response = await fetch('<https://example.com/api/data>');
+    if (!response.ok)
+    {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    console.log(data);
+  } catch (error)
+  {
+    console.error(error);
+  }
 }
 function pwdShowHide (_this)
 {

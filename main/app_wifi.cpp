@@ -1326,7 +1326,7 @@ void test_sta_cfg (void *data)
   sta_test_t *sta_test = (sta_test_t *)data;
 
   //printf ("%08X -> %08X\n", (unsigned int)&sta_test, (unsigned int)sta_test);
-  F_LOGD (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", sta_test->config.ssid, sta_test->config.ssid_len, mac2str (sta_test->config.bssid), sta_test->config.bssid_set, sta_test->config.password, sta_test->config.pass_len);
+  F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", sta_test->config.ssid, sta_test->config.ssid_len, mac2str (sta_test->config.bssid), sta_test->config.bssid_set, sta_test->config.password, sta_test->config.pass_len);
 
   ///ESP_ERROR_CHECK (esp_task_wdt_add (NULL));
   ///ESP_ERROR_CHECK (esp_task_wdt_status (NULL));
@@ -1428,9 +1428,13 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
 #endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   char token[64]   __attribute__ ((aligned (4))) = {};
-  char param[128]  __attribute__ ((aligned (4))) = {};
+  char tmpbuf[1024] __attribute__ ((aligned (4))) = {};
+  int  bufptr = 0;
   char rcvbuf[RECEIVE_BUFFER] = {};
   //memset (rcvbuf, 0x0, RECEIVE_BUFFER);
+
+  /* Check results of previous run */
+  sta_res_status_t statusCheck = STA_RES_GET;
 
   esp_err_t err = ESP_FAIL; /* Things can only get better from here */
 
@@ -1498,7 +1502,11 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
                 test match the parameters we have now.
                 b) Just get the result of the last test.
                 c) Either of the above, but choose to keep or remove the test in our history  */
-            
+            if ( (t[i].end - t[i].start) < 64 )
+            {
+              sprintf (tmpbuf, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+            }
+            statusCheck = STA_RES_ONLY;
           }
           /* Check for SSID being provided */
           else if ( !shrt_cmp (STR_STA_SSID, token) )
@@ -1516,8 +1524,8 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
             i++;
             if ( t[i].end - t[i].start == BSSID_STRLEN )
             {
-              sprintf (param, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-              sta_test->config.bssid_set = str2mac (param, sta_test->config.bssid);
+              sprintf (tmpbuf, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+              sta_test->config.bssid_set = str2mac (tmpbuf, sta_test->config.bssid);
             }
           }
           /* Check if we are being provided a password */
@@ -1534,12 +1542,23 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
       }
     }
 
-  // Create task to handle testing STA config
-  // *****************************************
-    if ( xTaskStaTestHandle == NULL )
+    bufptr = sprintf (&tmpbuf[bufptr], "{\"tip\":%d,", (xTaskStaTestHandle == NULL)?0:1);
+
+    // Is this a request for results from a previous run?
+    if ( statusCheck != STA_RES_GET )
+    {
+      sta_test_t item;
+      if ( xQueuePeek (sta_test_queue, &item, 0) )
+      {
+        F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars), status: %d", item.config.ssid, item.config.ssid_len, mac2str (item.config.bssid), item.config.bssid_set, item.config.password, item.config.pass_len, item.status);
+        bufptr += sprintf (&tmpbuf[bufptr], "\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,", STR_STA_TEST_STATUS, item.status, STR_STA_SSID, item.config.ssid, STR_STA_BSSID, mac2str (item.config.bssid), STR_STA_PASSW, item.config.password, STR_STA_BSSID_SET, item.config.bssid_set);
+        err = ESP_OK;
+      }
+    }
+    // Are we already running a test?
+    else if ( xTaskStaTestHandle == NULL )
     {
       //printf ("%08X -> %08X\n", (unsigned int)&sta_test, (unsigned int)sta_test);
-      sta_test->status = STA_TEST_RUNNING;
       xTaskCreate (test_sta_cfg, TASK_NAME_TEST_STA, STACKSIZE_TEST_STA, sta_test, TASK_PRIORITY_LOW, &xTaskStaTestHandle);
       err = (xTaskStaTestHandle == NULL);
     }
@@ -1547,14 +1566,8 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
 
   // Return our success or failure fulfilling our designated task.
   httpd_resp_set_hdr (req, "Content-Type", "application/json");
-  if ( ESP_OK == err )
-  {
-    httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));
-  }
-  else
-  {
-    httpd_resp_send_chunk (req, JSON_FAILURE_STR, strlen (JSON_FAILURE_STR));
-  }
+  bufptr += sprintf (&tmpbuf[bufptr], "%s", ((ESP_OK == err)?JSON_APPEND_SUCCESS_STR:JSON_APPEND_FAILURE_STR));
+  httpd_resp_send_chunk (req, tmpbuf, bufptr);
   httpd_resp_send_chunk (req, NULL, 0);
 
   return err;

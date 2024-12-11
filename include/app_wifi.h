@@ -16,10 +16,12 @@
 #define BSSID_STRLEN            17
 #define STR_STA_SSID            "sta_ssid"
 #define STR_STA_BSSID           "sta_bssid"
+#define STR_STA_BSSID_SET       "sta_bssid_set"
 #define STR_STA_UNAME           "sta_username"
 #define STR_STA_PASSW           "sta_password"
 #define STR_STA_IP_ADDR         "sta_ipaddr"
 #define STR_STA_NTP_ADDR        "sta_ntp_addr"
+#define STR_STA_TEST_STATUS     "test_status"
 
 #define STR_STA_TEST_RESULT     "test_result"
 
@@ -71,11 +73,16 @@ typedef enum
 typedef enum
 {
   STA_TEST_NONE,
-  STA_TEST_OK,
-  STA_TEST_FAIL,
-  STA_TEST_RUNNING,
-  STA_TEST_NOT_FOUND
+  STA_TEST_FAIL = 0,
+  STA_TEST_OK
 } sta_test_status_t;
+
+typedef enum
+{
+  STA_RES_GET,        // Run test
+  STA_RES_ONLY,       // Get last result
+  STA_RES_COMPARE     // Compare last result with parameters
+} sta_res_status_t;
 
 typedef struct
 {

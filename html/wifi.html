@@ -39,6 +39,7 @@
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
   <div class="main" id="main">
+    <div id="busy-wrapper"><div id="ring"><label id="busy-message"></label><span style="display:inline;">&nbsp;</span></div></div>
     <div>
       <h1>WiFi Mode</h1>
       <table class="status_table">
@@ -228,7 +229,8 @@
       <!--</form>-->
       <div class="btn_group">
         <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan(this)" /></div>
-        <div class="submit"><input type="submit" name="sta_test" class="wifi" id="sta_test" value="Test/Set" onclick="staTestConfig()" disabled/></div>
+        <div class="submit"><input type="submit" name="sta_test" class="wifi" id="sta_test" value="Test" onclick="staTestConfig(this)" disabled/></div>
+        <div class="submit"><input type="submit" name="sta_save" class="wifi" id="sta_save" value="Save" onclick="staSaveConfig(this)" disabled /></div>
         <div class="container">
           <div class="tickbox">
             <input type="checkbox" name="ap_fixed" id="ap_fixed" onchange="toggleFixedAP(this)" />

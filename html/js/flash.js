@@ -1,17 +1,5 @@
 let xhr = new XMLHttpRequest();
 var valid_apps = {};
-function _(el)
-{
-  return document.getElementById(el);
-}
-function openAjaxSpinner()
-{
-  _("spinner").style.display = 'block';
-}
-function closeAjaxSpinner()
-{
-  _("spinner").style.display = 'none';
-}
 function doCommonXHR(donecallback, successcallback)
 {
   xhr.onreadystatechange=function()
@@ -21,10 +9,10 @@ function doCommonXHR(donecallback, successcallback)
       if ( xhr.status >= 200 && xhr.status <= 400 )
       {
         var json_response = JSON.parse(xhr.responseText);
-        if ( json_response.success == false )
+        if ( json_response.noerr == false )
         {
           _("status").innerHTML="<strong style=\"color: red;\">Error: "+xhr.responseText+"</strong>";
-          closeAjaxSpinner();
+          closeBusyBox();
         }
         else
         {
@@ -37,7 +25,7 @@ function doCommonXHR(donecallback, successcallback)
       else
       {
         _("status").innerHTML="<strong style=\"color: red;\">Error!  Check connection.  HTTP status: " + xhr.status + "</strong>";
-        closeAjaxSpinner();
+        closeBusyBox();
       }
       if ( donecallback && typeof(donecallback) === "function" )
       {
@@ -49,7 +37,7 @@ function doCommonXHR(donecallback, successcallback)
 function doReboot(callback)
 {
   _("status").innerHTML="Sending reboot command...";
-  openAjaxSpinner();
+  openBusyBox("Rebooting...");
   xhr.open("GET", "/flash/reboot");
   doCommonXHR(callback, function(json_response)
   {
@@ -66,7 +54,7 @@ function doReboot(callback)
 function doVerify(partition, callback)
 {
   _("status").innerHTML="Verifying App in partition: " + partition + "...";
-  openAjaxSpinner();
+  openBusyBox("Verifying");
   xhr.open("GET", "/flash/info?verify=1" + ((partition)?("&partition=" + partition):("")));
   doCommonXHR(callback, function(flinfo)
   {
@@ -81,7 +69,7 @@ function doVerify(partition, callback)
     _("status").innerHTML="Finished verify.  " + partition + " is <b>" + ((valid_apps[partition])?("Valid"):("Not valid")) + "</b>";
     doInfo(function()
     {
-      closeAjaxSpinner();
+      closeBusyBox();
     });
   });
   xhr.send();
@@ -90,14 +78,14 @@ function doVerify(partition, callback)
 function doSetBoot(partition, callback)
 {
   _("status").innerHTML="Setting Boot Flag to partition: " + partition + "...";
-  openAjaxSpinner();
+  openBusyBox("Setting...");
   xhr.open("GET", "/flash/setboot" + ((partition)?("?partition=" + partition):("")));
   doCommonXHR(callback, function(json_response)
   {
     doInfo(function()
     {
       _("status").innerHTML="Finished setting Boot Flag to " + partition + ".  <b>Now press Reboot!</b>";
-      closeAjaxSpinner();
+      closeBusyBox();
     });
   });
   xhr.send();
@@ -106,14 +94,14 @@ function doSetBoot(partition, callback)
 function doEraseFlash(partition, callback)
 {
   _("status").innerHTML="Erasing data in: " + partition + "...";
-  openAjaxSpinner();
+  openBusyBox("Erasing...");
   xhr.open("GET", "/flash/erase" + ((partition)?("?partition=" + partition):("")));
   doCommonXHR(callback, function(json_response)
   {
     doInfo(function()
     {
       _("status").innerHTML="Finished erasing data in: " + partition + ".  <b>Must reboot to reformat it!</b>";
-      closeAjaxSpinner();
+      closeBusyBox();
     });
   });
   xhr.send();
@@ -269,10 +257,10 @@ function enable_fw_upload(set_enabled)
 }
 function page_onload()
 {
-  openAjaxSpinner();
+  openBusyBox("Loading...");
   doInfo(function()
   {
-    closeAjaxSpinner();
+    closeBusyBox();
     _("status").innerHTML="Ready.";
   });
 

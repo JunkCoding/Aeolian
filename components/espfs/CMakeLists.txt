@@ -53,7 +53,6 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/js/tasks.js"
   "${PROJECT_DIR}/html/js/themes.js"
   "${PROJECT_DIR}/html/js/wifi.js"
-  "${PROJECT_DIR}/html/img/ajax-spinner.gif"
   "${PROJECT_DIR}/html/img/arrow_down.png"
   "${PROJECT_DIR}/html/img/arrow_up.png"
   "${PROJECT_DIR}/html/img/bg.jpg"

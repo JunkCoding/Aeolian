@@ -25,6 +25,7 @@
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
   <div class="main" id="main">
+    <div id="busy-wrapper"><div id="ring"><label id="busy-message"></label><span style="display:inline;">&nbsp;</span></div></div>
     <h1>App Partitions</h1>
     <div class="fw-group">
       <div id="fw-selector">
@@ -66,7 +67,6 @@
     <br />
     <div><input type="submit" value="Reboot!" id="reboot" onclick="doReboot()" /></div>
     <div id="status" class="alert remark">Loading...</div>
-    <div id="spinner"></div>
     <div id="progbar" class="html5-progress-bar">
       <div class="prog-wrapper">
         <progress id="progressBar" value="0" max="100"></progress>

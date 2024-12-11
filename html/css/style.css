@@ -901,7 +901,7 @@ progress {
   left: 0%;
   width: 100%;
   height: 100%;
-  background-color: #17114e;
+  background-color: #030306de;
   border: 2px solid #ffffff;
   border-radius: 20px;  
   /*
@@ -924,23 +924,6 @@ progress::-moz-progress-bar {
   border-radius: 20px;  
 }
 /*********************************/
-#spinner {
-  display: none;
-  position:fixed;
-  top: 0%;
-  left: 0%;
-  width: 100%;
-  height: 100%;
-  background-color: #ababab;
-  background-image:url('/img/ajax-spinner.gif');
-  background-repeat:no-repeat;
-  background-position:center;
-  z-index: 1001;
-  -moz-opacity: 0.8;
-  opacity: .70;
-  filter: alpha(opacity=80);
-}
-
 .wifi_icon {
   background-image: url("/img/wifi_icons.png");
   background-color: transparent;
@@ -1833,4 +1816,99 @@ input[type="range"]::before {
   /* Makes the letters look embossed adding to the skeumorphic theme of the design */
   text-shadow: .5px .5px 0.9px rgba(0, 0, 0, .4);
   z-index: -1; 
+}
+div#busy-wrapper {
+  display: none;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  background-color: #030306de;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 2;
+}
+div#ring {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  height: 150px;
+  background: transparent;
+  border: 3px solid #3c3c3c;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 150px;
+  font-family: sans-serif;
+  font-size: .7em;
+  color: #fff000;
+  letter-spacing: .2em;
+  /*text-transform: uppercase;*/
+  text-shadow: 0 0 10px #fff000;
+  box-shadow: 0 0 88px rgba(10, 50, 80, 0.7);
+  z-index:2;
+}
+
+div#ring:before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 150px;
+  height: 150px;
+  border: 3px solid transparent;
+  border-top: 3px solid #fff000;
+  border-right: 3px solid #fff000;
+  border-radius: 50%;
+  animation: animateC 2s linear infinite;
+  z-index:2;
+}
+
+div#ring > span {
+  display: block;
+  position: absolute;
+  top: calc(50% - 2px);
+  left: 50%;
+  width: 50%;
+  height: 4px;
+  background: transparent;
+  transform-origin: left;
+  animation: animate 2s linear infinite;
+  z-index:2;
+}
+
+div#ring > span:before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff000;
+  top: -6px;
+  right: -8px;
+  box-shadow: 0 0 20px #fff000;
+  z-index:2;
+}
+
+@keyframes animateC {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes animate {
+  0% {
+    transform: rotate(45deg);
+  }
+
+  100% {
+    transform: rotate(405deg);
+  }
 }
