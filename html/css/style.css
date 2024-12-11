@@ -924,14 +924,6 @@ progress::-moz-progress-bar {
   border-radius: 20px;  
 }
 /*********************************/
-.wifi_icon {
-  background-image: url("/img/wifi_icons.png");
-  background-color: transparent;
-  width: 32px;
-  height: 32px;
-  display: inline-block;
-}
-
 /* ------ */
 /*
 #tblApp input:hover,
