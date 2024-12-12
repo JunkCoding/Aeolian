@@ -359,12 +359,12 @@ function sleep (ms)
 }
 /*****************************************************************/
 /*****************************************************************/
-function openBusyBox (mesg)
+function openBusyMesg (mesg)
 {
   _("busy-wrapper").style.display = 'block';
   _("busy-message").innerText = mesg
 }
-function closeBusyBox ()
+function closeBusyMesg ()
 {
   _("busy-wrapper").style.display = 'none';
 }

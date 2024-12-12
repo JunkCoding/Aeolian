@@ -263,7 +263,7 @@ async function staAwaitResults (el)
   let pwd_el = document.getElementById("sta_password");
   let sid_el = document.getElementById("sta_ssid");
 
-  openBusyBox("Testing...");
+  openBusyMesg("Testing...");
 
   const json = {
     test_result: "matching",
@@ -286,7 +286,7 @@ async function staAwaitResults (el)
   {
     if (data.tip === 0)
     {
-      closeBusyBox();      
+      closeBusyMesg();      
       return data;
     }
   }
@@ -299,7 +299,7 @@ async function staTestConfig (el)
   let pwd_el = document.getElementById("sta_password");
   let sid_el = document.getElementById("sta_ssid");
 
-  openBusyBox("Testing...");
+  openBusyMesg("Testing...");
 
   const json = {
     sta_ssid: sid_el.value,
@@ -325,10 +325,10 @@ async function staTestConfig (el)
   }
   else
   {
-    closeBusyBox();
+    closeBusyMesg();
   }
 }
-async  function staSaveConfig ()
+async function staSaveConfig ()
 {
   try
   {

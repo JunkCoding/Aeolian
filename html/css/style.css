@@ -807,9 +807,9 @@ input#ap_fixed {
   -webkit-appearance: none;
   appearance: none;
   vertical-align: middle;
-  background: #fff;
+  background: #ffffff9c;
   font-size: 1.4em;
-  border-radius: 0.125em;
+  border-radius: 0.325em;
   display: inline-block;
   border: var(--borderWidth) solid var(--borderColor);
   width: 1em;
@@ -1638,13 +1638,13 @@ span#fw-details {
   justify-content: space-between;
   width: 180px;
   margin: 5px;
-  background: whitesmoke;
+  background: #cdcdcd9c;
   border: #2c4891 1px solid;
-  border-radius: 8px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  border-radius: 15px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 /* No CSS3 support */
@@ -1859,7 +1859,7 @@ div#ring:before {
   z-index:2;
 }
 
-div#ring > span {
+div#ring > #gfx {
   display: block;
   position: absolute;
   top: calc(50% - 2px);
@@ -1872,7 +1872,7 @@ div#ring > span {
   z-index:2;
 }
 
-div#ring > span:before {
+div#ring > #gfx:before {
   content: '';
   position: absolute;
   width: 16px;

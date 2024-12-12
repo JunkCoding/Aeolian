@@ -39,7 +39,9 @@
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
   <div class="main" id="main">
-    <div id="busy-wrapper"><div id="ring"><label id="busy-message"></label><span style="display:inline;">&nbsp;</span></div></div>
+    <div id="busy-wrapper">
+      <div id="ring"><text id="busy-message"></text><span id="gfx" style="display:inline;">&nbsp;</span></div>
+    </div>
     <div>
       <h1>WiFi Mode</h1>
       <table class="status_table">
@@ -195,7 +197,7 @@
       </table>
       <div class="container">
         <div class="preference">
-          <label for="master">AP Auto Off:</label>
+          <label for="ap_autooff">AP Auto Off:</label>
           <div class="tickbox">
             <input type="checkbox" name="apAutoOff" id="ap_autooff" onclick="onClickHandler(this.id)" />
           </div>
@@ -226,17 +228,20 @@
           </tr>
         </tbody>
       </table>
+      <div class="container">
+        <div class="preference">
+          <label for="ap_fixed">Lock AP:</label>
+          <div class="tickbox">
+            <input type="checkbox" name="ap_fixed" id="ap_fixed" onchange="toggleFixedAP(this)" />
+          </div>
+        </div>
+        <label for="ap_fixed" class="pref_label">Lock to the specific AP using the BSSID.</label>
+      </div>
       <!--</form>-->
       <div class="btn_group">
         <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan(this)" /></div>
         <div class="submit"><input type="submit" name="sta_test" class="wifi" id="sta_test" value="Test" onclick="staTestConfig(this)" disabled/></div>
         <div class="submit"><input type="submit" name="sta_save" class="wifi" id="sta_save" value="Save" onclick="staSaveConfig(this)" disabled /></div>
-        <div class="container">
-          <div class="tickbox">
-            <input type="checkbox" name="ap_fixed" id="ap_fixed" onchange="toggleFixedAP(this)" />
-          </div>
-          <label for="ap_fixed" class="pref_label">Lock to the specific AP using the BSSID</label>
-        </div>
       </div>
     </div>
     <div>

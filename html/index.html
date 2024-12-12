@@ -32,6 +32,7 @@
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
   <div class="main" id="main">
+    <div id="busy-wrapper"><div id="ring"><text id="busy-message"></text><span id="gfx" style="display:inline;">&nbsp;</span></div></div>
     <h1>Status of host: %hostname%</h1>
     <table class="status_table">
       <tbody>
@@ -67,7 +68,7 @@
           <th>LED Lights:</th>
           <td style="padding: 0px 0px 0px 15px;">
             <div class="parent">
-              <div class='led_status child'><label id="led_status"></label></div>
+              <div class='led_status child'><span id="led_status"></span></div>
               <div class="led_lights child">
                 <form name="leds" class="led_lights child">
                   <input type="radio" title="on" name="state" class="on" id="on" value="0" onchange="switchLeds(this)" />

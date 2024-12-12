@@ -30,6 +30,7 @@
     <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
   <div class="main" id="main">
+    <div id="busy-wrapper"><div id="ring"><text id="busy-message"></text><span id="gfx" style="display:inline;">&nbsp;</span></div></div>
     <h1>MQTT Network Configuration</h1>
     <table class="status_table">
       <tbody>
@@ -107,21 +108,21 @@
     <div class="preferences">
       <div class="container">
         <div class="preference">
-          <label for="master">MQTT Master:</label>
+          <label for="mqtt_master">MQTT Master:</label>
           <div class="tickbox">
             <input type="checkbox" name="mqtt_master" id="mqtt_master" onclick="onClickHandler(this.id)" />
           </div>
         </div>
-        <label class="pref_label">Send commands to other MQTT clients</label>
+        <label for="mqtt_master" class="pref_label">Send commands to other MQTT clients</label>
       </div>
       <div class="container">
         <div class="preference">
-          <label for="slave">MQTT Slave:</label>
+          <label for="mqtt_slave">MQTT Slave:</label>
           <div class="tickbox">
             <input type="checkbox" name="mqtt_slave" id="mqtt_slave" onclick="onClickHandler(this.id)" />
           </div>
         </div>
-        <label class="pref_label">Receive commands via MQTT</label>
+        <label for="mqtt_slave" class="pref_label">Receive commands via MQTT</label>
       </div>
     </div>
     <div class="notes">

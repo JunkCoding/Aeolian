@@ -12,7 +12,7 @@ function doCommonXHR(donecallback, successcallback)
         if ( json_response.noerr == false )
         {
           _("status").innerHTML="<strong style=\"color: red;\">Error: "+xhr.responseText+"</strong>";
-          closeBusyBox();
+          closeBusyMesg();
         }
         else
         {
@@ -25,7 +25,7 @@ function doCommonXHR(donecallback, successcallback)
       else
       {
         _("status").innerHTML="<strong style=\"color: red;\">Error!  Check connection.  HTTP status: " + xhr.status + "</strong>";
-        closeBusyBox();
+        closeBusyMesg();
       }
       if ( donecallback && typeof(donecallback) === "function" )
       {
@@ -37,7 +37,7 @@ function doCommonXHR(donecallback, successcallback)
 function doReboot(callback)
 {
   _("status").innerHTML="Sending reboot command...";
-  openBusyBox("Rebooting...");
+  openBusyMesg("Rebooting...");
   xhr.open("GET", "/flash/reboot");
   doCommonXHR(callback, function(json_response)
   {
@@ -54,7 +54,7 @@ function doReboot(callback)
 function doVerify(partition, callback)
 {
   _("status").innerHTML="Verifying App in partition: " + partition + "...";
-  openBusyBox("Verifying");
+  openBusyMesg("Verifying");
   xhr.open("GET", "/flash/info?verify=1" + ((partition)?("&partition=" + partition):("")));
   doCommonXHR(callback, function(flinfo)
   {
@@ -69,7 +69,7 @@ function doVerify(partition, callback)
     _("status").innerHTML="Finished verify.  " + partition + " is <b>" + ((valid_apps[partition])?("Valid"):("Not valid")) + "</b>";
     doInfo(function()
     {
-      closeBusyBox();
+      closeBusyMesg();
     });
   });
   xhr.send();
@@ -78,14 +78,14 @@ function doVerify(partition, callback)
 function doSetBoot(partition, callback)
 {
   _("status").innerHTML="Setting Boot Flag to partition: " + partition + "...";
-  openBusyBox("Setting...");
+  openBusyMesg("Setting...");
   xhr.open("GET", "/flash/setboot" + ((partition)?("?partition=" + partition):("")));
   doCommonXHR(callback, function(json_response)
   {
     doInfo(function()
     {
       _("status").innerHTML="Finished setting Boot Flag to " + partition + ".  <b>Now press Reboot!</b>";
-      closeBusyBox();
+      closeBusyMesg();
     });
   });
   xhr.send();
@@ -94,14 +94,14 @@ function doSetBoot(partition, callback)
 function doEraseFlash(partition, callback)
 {
   _("status").innerHTML="Erasing data in: " + partition + "...";
-  openBusyBox("Erasing...");
+  openBusyMesg("Erasing...");
   xhr.open("GET", "/flash/erase" + ((partition)?("?partition=" + partition):("")));
   doCommonXHR(callback, function(json_response)
   {
     doInfo(function()
     {
       _("status").innerHTML="Finished erasing data in: " + partition + ".  <b>Must reboot to reformat it!</b>";
-      closeBusyBox();
+      closeBusyMesg();
     });
   });
   xhr.send();
@@ -257,10 +257,10 @@ function enable_fw_upload(set_enabled)
 }
 function page_onload()
 {
-  openBusyBox("Loading...");
+  openBusyMesg("Loading...");
   doInfo(function()
   {
-    closeBusyBox();
+    closeBusyMesg();
     _("status").innerHTML="Ready.";
   });
 
