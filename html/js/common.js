@@ -11,6 +11,76 @@ function _ (el)
   return document.getElementById(el);
 }
 /*****************************************************************/
+/*****************************************************************/
+function get_view_dimensions()
+{
+  // the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
+  if (typeof window.innerWidth != 'undefined')
+  {
+    viewportwidth = window.innerWidth,
+      viewportheight = window.innerHeight;
+  }
+  // IE6 in standards compliant mode (i.e. with a valid doctype as the first line in the document)
+  else if (typeof document.documentElement != 'undefined'
+    && typeof document.documentElement.clientWidth !=
+    'undefined' && document.documentElement.clientWidth != 0)
+  {
+    viewportwidth = document.documentElement.clientWidth,
+      viewportheight = document.documentElement.clientHeight;
+  }
+  // older versions of IE
+  else
+  {
+    viewportwidth = document.getElementsByTagName('body')[0].clientWidth,
+      viewportheight = document.getElementsByTagName('body')[0].clientHeight;
+  }
+  console.log('viewport size is ' + viewportwidth + 'x' + viewportheight);
+  return (viewportwidth, viewportheight);
+}
+/*****************************************************************/
+/*****************************************************************/
+function set_background ()
+{
+  var c = document.createElement('canvas');
+  c.width = 1440;
+  c.height = 2560;
+  ctx = c.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, c.width / 2, c.height / 2);
+  grad.addColorStop(0, "#000000");
+  grad.addColorStop(1, "#000000");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, c.width, c.height);
+  for (var x = 20; x < c.width; x = x + 38)
+  {
+    for (var y = 20; y < c.height; y = y + 38)
+    {
+      ctx.beginPath();
+      ctx.arc(x, y, 14, 0, 2 * Math.PI);
+      let i = (x + y) % 1400;
+      if (i < 350)
+        ctx.fillStyle = "#056DAA";
+      else if (i < 700)
+        ctx.fillStyle = "#C20772";
+      else if (i < 1050)
+        ctx.fillStyle = "#FEFE06";
+      else if (i < 1400)
+        ctx.fillStyle = "#554A50";
+      else
+        ctx.fillStyle = "#056DAA";
+      ctx.fill();
+    }
+  }
+  const grd = ctx.createRadialGradient(c.width / 2, 200, 450, 900, 0, 800);
+  grd.addColorStop(0, "rgba(10,10,10,0.01)");
+  grd.addColorStop(1, "rgba(10,10,10,0.5");
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, c.width, c.height);
+  document.body.style.background = 'url(' + c.toDataURL() + ')';
+  document.body.style.backgroundRepeat = 'no-repeat';
+  document.body.style.backgroundSize = 'cover';
+}
+/*****************************************************************/
 /* Initialise all dropboxes                                      */
 /*****************************************************************/
 function init_all_dropboxex ()

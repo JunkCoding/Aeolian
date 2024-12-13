@@ -14,6 +14,7 @@ function daysInMonth(mon, year)
 }
 function page_onload()
 {
+  set_background();
   fetchData(0);
   console.clear();
   fillCalendar(new Date().getFullYear());

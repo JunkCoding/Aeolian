@@ -17,6 +17,7 @@ function switchLeds(switchID)
 }
 function page_onload()
 {
+  set_background();
   /* Add our brightness dropdown box to our custom DropDown */
   init_dropbox(document.getElementById("dim"));
 

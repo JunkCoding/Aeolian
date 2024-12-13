@@ -257,6 +257,7 @@ function enable_fw_upload(set_enabled)
 }
 function page_onload()
 {
+  set_background();
   openBusyMesg("Loading...");
   doInfo(function()
   {

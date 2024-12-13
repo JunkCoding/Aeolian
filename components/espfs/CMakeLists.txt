@@ -55,7 +55,6 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/js/wifi.js"
   "${PROJECT_DIR}/html/img/arrow_down.png"
   "${PROJECT_DIR}/html/img/arrow_up.png"
-  "${PROJECT_DIR}/html/img/bg.jpg"
   "${PROJECT_DIR}/html/img/favicon.png"
   )
 # ---------------------------------------------------------

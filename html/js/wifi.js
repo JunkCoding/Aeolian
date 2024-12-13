@@ -428,6 +428,7 @@ function toggleFixedAP (el)
 }
 function page_onload ()
 {
+  set_background();
   init_all_dropboxex();
   staTestEnable();
 }
