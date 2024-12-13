@@ -2,7 +2,7 @@
 /* ------ */
 :root {
   --def-col-fg: #fff;
-  --def-col-bg: #000;
+  --def-col-bg: #1a1616f0;
   --def-col-border: #b90101d1;
   --def-col-input: #75d6ee;
   --def-col-shadow: #000;
@@ -23,20 +23,30 @@
   --tickbox-col-border: #004cffad;
   --tickbox-col-tick: #902020;
   --tickbox-col-bg: #ffffffe0;
-  --ticbox-width-border: .135em;
+  --tickbox-wid-border: .135em;
   
   --notes-col-bg: #000;
 
   --theme-col-th-fg: #0db8db99;
 
-  --switch-col-border: #ffffffba;
-  --submit-col-border: #ffffffba;
+  --switch-col-border: #ffffff6e;
+  --submit-col-border: #ffffff6e;
 
   --main-col-bg: #671b00db;
+
   --alert-col-border: #ffffffa0;
   --alert-col-error: #a02020;
   --alert-col-okay: #20a020;
   --alert-col-warn: #a0a020;
+
+  --pref-col-bg: #1b1c10;
+  --pref-col-border: #ffffff6e;
+
+  --navbar-col-border: #ffffffe0;
+  --navbar-col-bg: #7b0000f0;
+  --navbar-col-fg: #e1dede;
+  --navbar-col-hover: #ff9800e0;
+  --navbar-col-active: #d50000;
 }
 
 body {
@@ -402,22 +412,22 @@ pre {
 .navbar a {
   float: left;
   display: block;
-  color: var(--def-col-fg);;
+  color: var(--navbar-col-fg);
   text-align: center;
   width: 5.6em;
   padding: 0.1em;
-  background-color: #5d3700e0;
-  border: 1px solid #ffeb3be0;
+  background-color: var(--navbar-col-bg);
+  border: 1px solid var(--navbar-col-border);
   text-decoration: none;
   -webkit-text-decoration: none;
 }
 
 .navbar a:hover:not(.active) {
-  background-color: #ff9800e0;
+  background-color: var(--navbar-col-hover);
 }
 
 .navbar a.active {
-  background-color: #e54a19e0;
+  background-color: var(--navbar-col-active);
 }
 
 /*
@@ -797,7 +807,7 @@ input#ap_fixed {
   font-size: 1.4em;
   border-radius: 0.325em;
   display: inline-block;
-  border: var(--ticbox-width-border) solid var(--tickbox-col-border);
+  border: var(--tickbox-wid-border) solid var(--tickbox-col-border);
   width: 1em;
   height: 1em;
   position: relative;
@@ -808,38 +818,38 @@ input#ap_fixed {
   content: "";
   position: absolute;
   background: var(--tickbox-col-tick);
-  width: calc(var(--ticbox-width-border) * 3);
-  height: calc(var(--ticbox-width-border) * 1.5);
+  width: calc(var(--tickbox-wid-border) * 3);
+  height: calc(var(--tickbox-wid-border) * 1.5);
   top: 36%;
   left: 8%;
   transform-origin: left center;
 }
 
 .tickbox input[type=checkbox]:before {
-  transform: rotate(45deg) translate(calc(var(--ticbox-width-border) / -3), calc(var(--ticbox-width-border) / -3)) scaleX(0);
+  transform: rotate(45deg) translate(calc(var(--tickbox-wid-border) / -3), calc(var(--tickbox-wid-border) / -3)) scaleX(0);
   transition: transform 100ms ease-in 100ms;
 }
 
 .tickbox input[type=checkbox]:after {
-  width: calc(var(--ticbox-width-border) * 9);
-  transform: rotate(-45deg) translateY(calc(var(--ticbox-width-border) * 3)) scaleX(0);
+  width: calc(var(--tickbox-wid-border) * 9);
+  transform: rotate(-45deg) translateY(calc(var(--tickbox-wid-border) * 3)) scaleX(0);
   transform-origin: left center;
   transition: transform 100ms ease-in;
 }
 
 .tickbox input[type=checkbox]:checked:before {
-  transform: rotate(45deg) translate(calc(var(--ticbox-width-border) / -3), calc(var(--ticbox-width-border) / -3)) scaleX(1);
+  transform: rotate(45deg) translate(calc(var(--tickbox-wid-border) / -3), calc(var(--tickbox-wid-border) / -3)) scaleX(1);
   transition: transform 100ms ease-in;
 }
 
 .tickbox input[type=checkbox]:checked:after {
-  width: calc(var(--ticbox-width-border) * 9);
-  transform: rotate(-45deg) translateY(calc(var(--ticbox-width-border) * 3)) scaleX(1);
+  width: calc(var(--tickbox-wid-border) * 9);
+  transform: rotate(-45deg) translateY(calc(var(--tickbox-wid-border) * 3)) scaleX(1);
   transition: transform 100ms ease-out 100ms;
 }
 
 .tickbox input[type=checkbox]:focus {
-  outline: calc(var(--ticbox-width-border) / 2) dotted #00000040;
+  outline: calc(var(--tickbox-wid-border) / 2) dotted #00000040;
 }
 
 /* ---------------------------------------------------------- */
@@ -1266,7 +1276,7 @@ input#reboot:hover {
 div#fw-selector {
   padding: 1px 8px;
   background: #104dab;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--submit-col-border);
   margin: 0px 14px 8px 8px;
   position: relative;
   color: var(--def-col-fg);;
@@ -1703,8 +1713,8 @@ span#fw-details {
   justify-content: space-between;
   width: 180px;
   margin: 5px;
-  background: #cdcdcd9c;
-  border: #2c4891 1px solid;
+  background: var(--pref-col-bg);
+  border: 1px solid var(--pref-col-border);
   border-radius: 15px;
   padding-left: 15px;
   padding-right: 15px;
