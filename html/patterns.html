@@ -29,22 +29,18 @@
 
         var cell = document.createElement('TD');
         cell.className = "nopadding";
-        var selectList = document.createElement("select");
-        selectList.id = pattern.id;
-        selectList.setAttribute("onchange", 'toggleEnabled(this.id, this.value)');
-
-        var option = document.createElement("option");
-        option.value = 0;
-        option.text = "No";
-        selectList.appendChild(option);
-
-        var option = document.createElement("option");
-        option.value = 1;
-        option.text = "Yes";
-        selectList.appendChild(option);
-
-        selectList.selectedIndex = pattern.enabled;
-        cell.appendChild(selectList);
+        
+        // The Wrapper
+        let div = document.createElement("div");
+        div.className = "tickbox";
+        // The input (checkbox)
+        var select = document.createElement("input");
+        select.setAttribute("type", "checkbox");
+        select.id = pattern.id;
+        select.checked = pattern.enabled;
+        select.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
+        div.appendChild(select);
+        cell.appendChild(div);
         row.appendChild(cell);
 
         var cell = document.createElement('TD');
