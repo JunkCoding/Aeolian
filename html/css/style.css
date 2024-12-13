@@ -26,6 +26,8 @@
   --ticbox-width-border: .135em;
   
   --notes-col-bg: #000;
+
+  --theme-col-th-fg: #0db8db99;
 }
 
 body {
@@ -991,9 +993,9 @@ progress::-moz-progress-bar {
 
 .hdr_table tr th,
 .hdr_table tr td {
-  /*border-right: 1px solid #bbb;
-  border-bottom: 1px solid #bbb;*/
-  padding: 2px 15px 2px;
+  background-color: var(--def-col-bg);
+  color: var(--def-col-fg);
+  padding: 2px 10px 2px;
   height: 29px;
 }
 
@@ -1023,11 +1025,8 @@ progress::-moz-progress-bar {
   border-bottom-right-radius: 10px;
 }
 .hdr_table th {
-  background-color: #a94400d6;
+  /*background-color: #a94400d6;*/
   color: var(--def-col-fg);
-}
-.hdr_table td {
-  background-color: var(--def-col-bg);
 }
 
 /* WiFi */
