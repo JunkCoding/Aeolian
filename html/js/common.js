@@ -51,9 +51,9 @@ function set_background ()
   grad.addColorStop(1, "#000000");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, c.width, c.height);
-  for (var x = 20; x < c.width; x = x + 38)
+  for (var x = 17; x < c.width; x = x + 38)
   {
-    for (var y = 20; y < c.height; y = y + 38)
+    for (var y = 17; y < c.height; y = y + 38)
     {
       ctx.beginPath();
       ctx.arc(x, y, 14, 0, 2 * Math.PI);
