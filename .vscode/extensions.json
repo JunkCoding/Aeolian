@@ -4,7 +4,6 @@
     "recommendations": [
         "mhutchie.git-graph",
         "oderwat.indent-rainbow",
-        "lihui.vs-color-picker",
         "eamodio.gitlens",
         "anseki.vscode-color",
         "espressif.esp-idf-extension",
