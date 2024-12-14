@@ -1016,6 +1016,10 @@ progress::-moz-progress-bar {
   color: var(--def-col-fg);
 }
 
+#sched_weekly th,
+#sched_annual th {
+  text-align: center;
+}
 /* WiFi */
 .pwd_group {
   display: inline-flex;

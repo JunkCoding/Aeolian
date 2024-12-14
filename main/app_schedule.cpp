@@ -865,7 +865,15 @@ void scheduler_task(void *arg)
         // -----------------------------------------------------------
         // Flag we are initialised, so things can start happening
         // -----------------------------------------------------------
-        BSET(control_vars.bitflags, DISP_BF_INITIALISED);
+        BSET (control_vars.bitflags, DISP_BF_INITIALISED);
+
+        // -----------------------------------------------------------
+        // If schedule is set to ON, unpause the lights
+        // -----------------------------------------------------------
+        if ( control_vars.schedule == SCHED_ON )
+        {
+          lightsUnpause (PAUSE_SCHEDULE, false);
+        }
       }
       // -----------------------------------------------------------
       // Else, do daily maintenance, maybe reboot once a day...

@@ -32,6 +32,7 @@
 
 #define CFG_DATA_START_ADDR (INITDATAPOS - (CFG_DATA_NUM_BLOCKS + EXTRA_BLOCKS_AT_END) * SPI_FLASH_SEC_SIZE)
 #define CFG_START_MARKER 0xABCDABCD
+//#define CFG_START_MARKER 0xDEADBEEF
 
 #define NO_DATA_AVAILABLE -1
 #define NO_WRITE_BLOCK_AVAILABLE -2
@@ -782,9 +783,11 @@ static int user_config_get_start (void)
   user_settings.start = 0;
   do
   {
-    F_LOGV(true, true, LC_GREY, "Looking for marker (0x%04x) in block %d", CFG_START_MARKER, i);
+    F_LOGI(true, false, LC_GREY, "Looking for marker (0x%04x) in block %d ... ", CFG_START_MARKER, i);
 
     user_config_read (marker_loc, (char*)marker, (sizeof (uint32_t) * MARKER_SIZE));
+
+    F_LOGI (false, true, LC_GREY, "found (0x%04x)", marker[0]);
 
     marker_loc += SPI_FLASH_SEC_SIZE;
   }

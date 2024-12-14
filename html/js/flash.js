@@ -100,7 +100,7 @@ function doEraseFlash(partition, callback)
   {
     doInfo(function()
     {
-      _("status").innerHTML="Finished erasing data in: " + partition + ".  <b>Must reboot to reformat it!</b>";
+      _("status").innerHTML=`Finished erasing data in "${partition}".`;
       closeBusyMesg();
     });
   });

@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, user-scalable=no">
   <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
   <link rel="stylesheet" type="text/css" href="/css/style.css">
-  <link rel="stylesheet" type="text/css" href="/css/schedule.css">
   <script type="text/javascript" src="/js/common.js"></script>
   <script type="text/javascript" src="/js/schedule.js"></script>
 </head>
@@ -28,22 +27,53 @@
   <div class="main" id="main">
     <div id="busy-wrapper"><div id="ring"><text id="busy-message"></text><span id="gfx" style="display:inline;">&nbsp;</span></div></div>
     <h1>LED Schedule Settings</h1>
-    <div id="scheddiv">
-      <div class="year" id="year" data-title="Annual Events">
-        <ul id="m0" data-month="January"></ul>
-        <ul id="m1" data-month="February"></ul>
-        <ul id="m2" data-month="March"></ul>
-        <ul id="m3" data-month="April"></ul>
-        <ul id="m4" data-month="May"></ul>
-        <ul id="m5" data-month="June"></ul>
-        <ul id="m6" data-month="July"></ul>
-        <ul id="m7" data-month="August"></ul>
-        <ul id="m8" data-month="September"></ul>
-        <ul id="m9" data-month="October"></ul>
-        <ul id="m10" data-month="November"></ul>
-        <ul id="m11" data-month="December"></ul>
-        <ul id="time"></ul>
-      </div>
+    <div class="week" id="week" data-title="Weekly Events">
+      <h1>Weekly Events</h1>
+      <table class="hdr_table" id="sched_weekly">
+        <tr>
+          <th colspan="8">Weekly Events</th>
+        </tr>
+        <tr>
+          <th width="70"></th>
+          <th width="200" colspan="2">Start</th>
+          <th width="200" colspan="2">End</th>
+          <th width="200" colspan="3"></th>
+        </tr>
+        <tr>
+          <th>Day</th>
+          <th>Hour</th>
+          <th>Min</th>
+          <th>Hour</th>
+          <th>Min</th>
+          <th>Theme</th>
+          <th>Brightness</th>
+          <th>Flags</th>
+        </tr>
+      </table>
+    </div>
+    <div class="year" id="year" data-title="Annual Events">
+      <h1>Annual Events</h1>
+      <table class="hdr_table" id="sched_annual">
+        <tr>
+          <th colspan="9">Annual Events</th>
+        </tr>
+        <tr>
+          <th width="200" colspan="3">Start</th>
+          <th width="200" colspan="3">End</th>
+          <th width="200" colspan="3"></th>
+        </tr>
+        <tr>
+          <th>Day</th>
+          <th>Hour</th>
+          <th>Min</th>
+          <th>Day</th>
+          <th>Hour</th>
+          <th>Min</th>
+          <th>Theme</th>
+          <th>Brightness</th>
+          <th>Flags</th>
+        </tr>
+      </table>
     </div>
   </div>
 </body>

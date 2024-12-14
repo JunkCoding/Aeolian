@@ -148,7 +148,7 @@ var p = function (
  * Create DOM element
  *
  * Usage:
- *   var el = m('<h1>Hello</h1>');
+ *   var el = m('<h2>Hello</h2>');
  *   document.body.appendChild(el);
  *
  *
