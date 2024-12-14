@@ -39,6 +39,7 @@
 #include "app_schedule.h"
 #include "app_flash.h"
 #include "app_yuarel.h"
+#include "base64.h"
 
 
 // **************************************************************************************************
@@ -1534,8 +1535,11 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
             i++;
             if ( t[i].end - t[i].start <= PASSW_STRLEN )
             {
-              sta_test->config.pass_len = t[i].end - t[i].start;
-              sprintf (sta_test->config.password, "%.*s", sta_test->config.pass_len, rcvbuf + t[i].start);
+              sprintf (tmpbuf, "%.*s", (t[i].end - t[i].start), rcvbuf + t[i].start);
+              printf ("64enc: %.*s\n", (t[i].end - t[i].start), tmpbuf);
+
+              sta_test->config.pass_len = Base64_decode ((const char *)tmpbuf, (t[i].end - t[i].start), (uint8_t *)sta_test->config.password, 32);
+              printf ("passw: %.*s (%d)\n", sta_test->config.pass_len, sta_test->config.password, sta_test->config.pass_len);
             }
           }
         }

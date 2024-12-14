@@ -102,7 +102,9 @@
       "xloctime": "cpp",
       "xmemory": "cpp",
       "memory_resource": "cpp",
-      "cinttypes": "cpp"
+      "cinttypes": "cpp",
+      "numbers": "cpp",
+      "variant": "cpp"
     },
     "workbench.tree.indent": 8,
     "terminal.integrated.tabStopWidth": 2,

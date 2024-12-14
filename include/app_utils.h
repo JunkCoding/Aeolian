@@ -11,6 +11,15 @@
 #include <math.h>
 #include <esp_log.h>
 
+#ifndef _BASE64_H_
+#define _BASE64_H_
+
+#include <vector>
+#include <string>
+typedef unsigned char BYTE;
+
+#endif
+
 #undef MIN
 #undef MAX
 #define MAX(a,b) (((a)>(b)) ? (a) : (b))
@@ -193,5 +202,11 @@ int          str_cmp(const char *arg1, const char *arg2);
 int          shrt_cmp(const char *arg1, const char *arg2);
 uint16_t     url_encode(char *dstBuffer, const char *str, uint16_t buflen);
 uint16_t     url_decode(char *dstBuffer, const char *strURL, uint16_t buflen);
-char        *binary(char *buf, uint16_t bufSize, unsigned int val);
+char *binary (char *buf, uint16_t bufSize, unsigned int val);
+std::string  b64encode (const unsigned char *src, size_t len);
+std::string  b64decode (const void *data, const size_t len);
+
+std::string  base64_encode (BYTE const *buf, unsigned int bufLen);
+std::vector<BYTE> base64_decode (std::string const &);
+
 #endif

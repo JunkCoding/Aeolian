@@ -18,6 +18,7 @@ idf_component_register(SRCS
   "app_websockets.cpp"
   "app_wifi.cpp"
   "app_yuarel.cpp"
+  "base64.cpp"
   "cgi_config.cpp"
   "cgi_lightcontrol.cpp"
   "colours.cpp"
