@@ -377,10 +377,10 @@ async function staAwaitResults (el)
   let pwd_el = document.getElementById("sta_password");
   let sid_el = document.getElementById("sta_ssid");
 
-  openBusyMesg("Testing...");
+  openBusyMesg("Waiting...");
 
   const json = {
-    test_result: "matching",
+    command: "2",
     sta_ssid: sid_el.value,
     sta_password: baseEncode(pwd_el.value),
     sta_bssid: (fixedAP ? selAP.bssid : "")
@@ -393,7 +393,7 @@ async function staAwaitResults (el)
       'Content-Type': 'application/json'
     }
   };
-  const url = '/wifi/teststa';
+  const url = '/wifi/cfgsta';
   const response = await fetch(url, options).catch(handleError);
   const data = await response.json();
   if (data.noerr === true)
@@ -425,6 +425,7 @@ async function staTestConfig (el)
   openBusyMesg("Testing...");
 
   const json = {
+    command: "1",
     sta_ssid: sid_el.value,
     sta_password: baseEncode(pwd_el.value),
     sta_bssid: (fixedAP ? selAP.bssid : "")
@@ -437,7 +438,7 @@ async function staTestConfig (el)
       'Content-Type': 'application/json'
     }
   };
-  const url = '/wifi/teststa';
+  const url = '/wifi/cfgsta';
   const response = await fetch(url, options).catch(handleError);
   const data = await response.json();
   if (data.noerr === true)
@@ -450,14 +451,15 @@ async function staTestConfig (el)
     closeBusyMesg();
   }
 }
-async function staSaveConfig ()
+async function staSaveConfig (el)
 {
   let pwd_el = document.getElementById("sta_password");
   let sid_el = document.getElementById("sta_ssid");
 
-  openBusyMesg("Testing...");
+  openBusyMesg("Saving...");
 
   const json = {
+    command: "3",
     sta_ssid: sid_el.value,
     sta_password: baseEncode(pwd_el.value),
     sta_bssid: (fixedAP ? selAP.bssid : "")
@@ -470,7 +472,7 @@ async function staSaveConfig ()
       'Content-Type': 'application/json'
     }
   };
-  const url = '/wifi/teststa';
+  const url = '/wifi/cfgsta';
   const response = await fetch(url, options).catch(handleError);
   const data = await response.json();
   if (data.noerr === true)
@@ -478,10 +480,7 @@ async function staSaveConfig ()
     await sleep(1500);
     await staAwaitResults(el);
   }
-  else
-  {
-    closeBusyMesg();
-  }
+  closeBusyMesg();
 }
 function pwdShowHide (_this)
 {

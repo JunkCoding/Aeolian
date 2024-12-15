@@ -1031,12 +1031,12 @@ progress::-moz-progress-bar {
 }
 
 input.sta_test {
-  background-color: #1d3e97;
+  background-color: #1d6697;
   margin: 8px 0px 0px 8px;
 }
 
 input.sta_test:hover {
-  background-color: #1898c9;
+  background-color: #2b95db;
 }
 input.sta_save {
   background-color: #0c770c;

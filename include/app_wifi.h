@@ -14,6 +14,11 @@
 #define UNAME_STRLEN            64
 #define BSSID_BYTELEN           6
 #define BSSID_STRLEN            17
+//
+#define STR_COMMAND             "command"
+#define STR_TEST_STATUS         "test_status"
+#define STR_TEST_RESULT         "test_result"
+//
 #define STR_STA_SSID            "sta_ssid"
 #define STR_STA_BSSID           "sta_bssid"
 #define STR_STA_BSSID_SET       "sta_bssid_set"
@@ -21,10 +26,7 @@
 #define STR_STA_PASSW           "sta_password"
 #define STR_STA_IP_ADDR         "sta_ipaddr"
 #define STR_STA_NTP_ADDR        "sta_ntp_addr"
-#define STR_STA_TEST_STATUS     "test_status"
-
-#define STR_STA_TEST_RESULT     "test_result"
-
+//
 #define STR_AP_SSID             "ap_ssid"
 #define STR_AP_PASSW            "ap_password"
 #define STR_AP_PRIMARY          "ap_primary"
@@ -37,7 +39,7 @@
 #define STR_AP_MAX_CONN         "ap_connections"
 #define STR_AP_IP_ADDR          "ap_ipaddr"
 #define STR_AP_AUTO_OFF         "ap_autooff"
-
+//
 #define STR_WIFI_MODE           "wifi_mode"
 #define STR_WIFI_POWERSAVE      "wifi_powersave"
 
@@ -79,10 +81,11 @@ typedef enum
 
 typedef enum
 {
-  STA_RES_GET,        // Run test
-  STA_RES_ONLY,       // Get last result
-  STA_RES_COMPARE     // Compare last result with parameters
-} sta_res_status_t;
+  STA_CMD_NONE,
+  STA_CMD_TEST,            // Run test
+  STA_CMD_RESULT,          // Get last result
+  STA_CMD_SAVE             // Compare last result with parameters
+} sta_cmd_t;
 
 typedef struct
 {
@@ -161,8 +164,7 @@ esp_err_t   tplWifi(struct async_resp_arg *resp_arg, char *token);
 #else
 esp_err_t   tplWifi(httpd_req_t *req, char *token, void **arg);
 #endif
-esp_err_t   cgiWifiSetSta(httpd_req_t *req);
-esp_err_t   cgiWifiTestSta (httpd_req_t* req);
+esp_err_t   cgiStaCfg(httpd_req_t *req);
 esp_err_t   cgiWifiSetAp(httpd_req_t *req);
 esp_err_t   cgiWifiSetMode(httpd_req_t *req);
 

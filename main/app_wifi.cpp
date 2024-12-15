@@ -53,6 +53,7 @@
 #define CFG_TICKS         (1000 / portTICK_PERIOD_MS)
 #define CFG_DELAY         (100 / portTICK_PERIOD_MS)
 
+#define TMP_BUFSIZE       1024
 // **************************************************************************************************
 // global variables
 // **************************************************************************************************
@@ -1241,79 +1242,6 @@ void init_wifi (httpd_handle_t *httpServer)
 // --------------------------------------------------------------------------
 //
 // --------------------------------------------------------------------------
-#define RECEIVE_BUFFER  512
-#if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR esp_err_t cgiWifiSetSta (httpd_req_t *req)
-#else
-esp_err_t cgiWifiSetSta (httpd_req_t *req)
-#endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
-{
-  esp_err_t err = ESP_FAIL;
-  char rcvbuf[RECEIVE_BUFFER] = {};
-
-  if ( req->content_len > RECEIVE_BUFFER )
-  {
-    F_LOGE(true, true, LC_YELLOW, "Request larger than our expectations!");
-  }
-  else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, RECEIVE_BUFFER)) <= 0 )
-  {
-    F_LOGE(true, true, LC_YELLOW, "Some kind of error happened, go figure it out");
-  }
-  else
-  {
-    char token[64] __attribute__ ((aligned(4))) = {};
-    char param[128] __attribute__ ((aligned (4))) = {};
-    int i, r, len;
-    jsmn_parser p;
-    jsmntok_t t[12];
-
-    jsmn_init (&p);
-    r = jsmn_parse(&p, rcvbuf, req->content_len, t, sizeof (t) / sizeof (t[0]));
-    for ( i = 1; i < r; i++ )
-    {
-      snprintf(token, 63, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
-      if ( !shrt_cmp (STR_STA_SSID, token) )
-      {
-        i++;
-        len = t[i].end - t[i].start;
-        sprintf (param, "%.*s", len, token);
-
-        if (str_cmp (wifi_sta_cfg.ssid, param) != 0 && len < SSID_STRLEN)
-        {
-          if (save_nvs_str (NVS_WIFI_SETTINGS, STR_STA_SSID, param) == ESP_OK)
-          {
-            wifi_sta_cfg.ssid_len = len;
-            memcpy (wifi_sta_cfg.ssid, param, SSID_STRLEN);
-          }
-        }
-      }
-      else if ( !shrt_cmp (STR_STA_PASSW, token) )
-      {
-        i++;
-        len = t[i].end - t[i].start;
-        sprintf (param, "%.*s", len, token);
-
-        if (str_cmp (wifi_sta_cfg.password, param) != 0 && len < PASSW_STRLEN)
-        {
-          if (save_nvs_str (NVS_WIFI_SETTINGS, STR_STA_PASSW, param) == ESP_OK)
-          {
-            wifi_sta_cfg.pass_len = len;
-            memcpy (wifi_sta_cfg.password, param, PASSW_STRLEN + 1);
-          }
-        }
-      }
-    }
-  }
-
-  httpd_resp_set_hdr (req, "Content-Type", "application/json");
-  httpd_resp_send_chunk (req, JSON_SUCCESS_STR, strlen (JSON_SUCCESS_STR));
-  httpd_resp_send_chunk (req, NULL, 0);
-
-  return err;
-}
-// --------------------------------------------------------------------------
-//
-// --------------------------------------------------------------------------
 // Can't imagine two could try and run at the same time, but you never know...
 static TaskHandle_t xTaskStaTestHandle = NULL;
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
@@ -1420,19 +1348,17 @@ void test_sta_cfg (void *data)
 }
 // --------------------------------------------------------------------------
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR esp_err_t cgiWifiTestSta (httpd_req_t *req)
+IRAM_ATTR esp_err_t cgiStaCfg (httpd_req_t *req)
 #else
-esp_err_t cgiWifiTestSta (httpd_req_t *req)
+esp_err_t cgiStaCfg (httpd_req_t *req)
 #endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   char token[64]   __attribute__ ((aligned (4))) = {};
   char tmpbuf[1024] __attribute__ ((aligned (4))) = {};
   int  bufptr = 0;
-  char rcvbuf[RECEIVE_BUFFER] = {};
+  sta_cmd_t cmd = STA_CMD_NONE;
+  char rcvbuf[TMP_BUFSIZE] = {};
   //memset (rcvbuf, 0x0, RECEIVE_BUFFER);
-
-  /* Check results of previous run */
-  sta_res_status_t statusCheck = STA_RES_GET;
 
   esp_err_t err = ESP_FAIL; /* Things can only get better from here */
 
@@ -1441,17 +1367,6 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
     F_LOGI (true, true, LC_GREY, "created 'sta_test_queue'");
     sta_test_queue = xQueueCreate (1, sizeof(sta_test_t));
   }
-  /* Affirmation code */
-/*
-  else
-  {
-    sta_test_t item;
-    if ( xQueuePeek (sta_test_queue, &item, 0) )
-    {
-      F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars)", item.config.ssid, item.config.ssid_len, mac2str (item.config.bssid), item.config.bssid_set, item.config.password, item.config.pass_len);
-    }
-  }
-*/
 
   sta_test_t *sta_test = (sta_test_t *)pvPortMalloc (sizeof (sta_test_t));
   if ( sta_test == NULL )
@@ -1468,11 +1383,11 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
     /* Zerp our storage */
     memset (sta_test, 0x0, sizeof (sta_test_t));
 
-    if ( req->content_len > RECEIVE_BUFFER )
+    if ( req->content_len > TMP_BUFSIZE )
     {
       F_LOGE (true, true, LC_YELLOW, "Request larger than our expectations!");
     }
-    else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, RECEIVE_BUFFER)) <= 0 )
+    else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, TMP_BUFSIZE)) <= 0 )
     {
       F_LOGE (true, true, LC_YELLOW, "Some kind of error happened, go figure it out");
     }
@@ -1491,20 +1406,23 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
         {
           snprintf (token, 63, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
 
-          /* Are we being asked to provide details of a previous scan? */
-          if ( !shrt_cmp (STR_STA_TEST_RESULT, token) )
+          /* Check for SSID being provided */
+          if ( !shrt_cmp (STR_COMMAND, token) )
           {
             i++;
-            /*  Options, options, options...
-                a) I guess we can get the status of the last test and ensure the parameters given for the
-                test match the parameters we have now.
-                b) Just get the result of the last test.
-                c) Either of the above, but choose to keep or remove the test in our history  */
-            if ( (t[i].end - t[i].start) < 64 )
+            sprintf (tmpbuf, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+            switch ( atoi (tmpbuf) )
             {
-              sprintf (tmpbuf, "%.*s", t[i].end - t[i].start, rcvbuf + t[i].start);
+              case 1: // Test
+              case 2: // Wait
+              case 3: // Save
+                cmd = (sta_cmd_t)atoi(tmpbuf);
+                err = ESP_OK;
+                break;
+              default:
+                F_LOGE (true, true, LC_YELLOW, "Unknown command received");
+                break;
             }
-            statusCheck = STA_RES_ONLY;
           }
           /* Check for SSID being provided */
           else if ( !shrt_cmp (STR_STA_SSID, token) )
@@ -1545,23 +1463,45 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
 
     bufptr = sprintf (&tmpbuf[bufptr], "{\"tip\":%d,", (xTaskStaTestHandle == NULL)?0:1);
 
-    // Is this a request for results from a previous run?
-    if ( statusCheck != STA_RES_GET )
+    if ( err == ESP_OK )
     {
-      sta_test_t item;
-      if ( xQueuePeek (sta_test_queue, &item, 0) )
+      switch ( cmd )
       {
-        F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars), status: %d", item.config.ssid, item.config.ssid_len, mac2str (item.config.bssid), item.config.bssid_set, item.config.password, item.config.pass_len, item.status);
-        bufptr += sprintf (&tmpbuf[bufptr], "\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,", STR_STA_TEST_STATUS, item.status, STR_STA_SSID, item.config.ssid, STR_STA_BSSID, mac2str (item.config.bssid), STR_STA_BSSID_SET, item.config.bssid_set);
-        err = ESP_OK;
+        case STA_CMD_TEST:
+          if ( xTaskStaTestHandle == NULL )
+          {
+            //printf ("%08X -> %08X\n", (unsigned int)&sta_test, (unsigned int)sta_test);
+            xTaskCreate (test_sta_cfg, TASK_NAME_TEST_STA, STACKSIZE_TEST_STA, sta_test, TASK_PRIORITY_LOW, &xTaskStaTestHandle);
+            err = (xTaskStaTestHandle == NULL);
+          }
+          break;
+        case STA_CMD_RESULT:
+          sta_test_t item;
+          if ( xQueuePeek (sta_test_queue, &item, 0) )
+          {
+            F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars), status: %d", item.config.ssid, item.config.ssid_len, mac2str (item.config.bssid), item.config.bssid_set, item.config.password, item.config.pass_len, item.status);
+            bufptr += sprintf (&tmpbuf[bufptr], "\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,", STR_TEST_STATUS, item.status, STR_STA_SSID, item.config.ssid, STR_STA_BSSID, mac2str (item.config.bssid), STR_STA_BSSID_SET, item.config.bssid_set);
+            err = ESP_OK;
+          }
+          break;
+        case STA_CMD_SAVE:
+          if (wifi_sta_cfg.ssid_len > 0 )
+          {
+            if ( save_nvs_str (NVS_WIFI_SETTINGS, STR_STA_SSID, sta_test->config.ssid) == ESP_OK )
+            {
+              wifi_sta_cfg.ssid_len = sta_test->config.ssid_len;
+              memcpy (wifi_sta_cfg.ssid, sta_test->config.ssid, SSID_STRLEN);
+            }
+            if ( save_nvs_str (NVS_WIFI_SETTINGS, STR_STA_PASSW, sta_test->config.password) == ESP_OK )
+            {
+              wifi_sta_cfg.pass_len = sta_test->config.pass_len;
+              memcpy (wifi_sta_cfg.password, sta_test->config.password, wifi_sta_cfg.pass_len);
+            }
+          }
+          break;
+        default:
+          break;
       }
-    }
-    // Are we already running a test?
-    else if ( xTaskStaTestHandle == NULL )
-    {
-      //printf ("%08X -> %08X\n", (unsigned int)&sta_test, (unsigned int)sta_test);
-      xTaskCreate (test_sta_cfg, TASK_NAME_TEST_STA, STACKSIZE_TEST_STA, sta_test, TASK_PRIORITY_LOW, &xTaskStaTestHandle);
-      err = (xTaskStaTestHandle == NULL);
     }
   }
 
@@ -1583,13 +1523,13 @@ esp_err_t cgiWifiSetAp (httpd_req_t *req)
 #endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
 {
   esp_err_t err = ESP_FAIL;
-  char rcvbuf[RECEIVE_BUFFER] = {};
+  char rcvbuf[TMP_BUFSIZE] = {};
 
-  if ( req->content_len > RECEIVE_BUFFER )
+  if ( req->content_len > TMP_BUFSIZE )
   {
     F_LOGE(true, true, LC_YELLOW, "Request larger than our expectations!");
   }
-  else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, RECEIVE_BUFFER)) <= 0 )
+  else if ( httpd_req_recv (req, rcvbuf, MIN (req->content_len, TMP_BUFSIZE)) <= 0 )
   {
     F_LOGE(true, true, LC_YELLOW, "Some kind of error happened, go figure it out");
   }
