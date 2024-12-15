@@ -314,6 +314,7 @@ var scan = (function ()
               let nr = ntbdy.insertRow();
               createRowForAp(nr, apList.APs[i], (apList.APs[i].bssid === focusAP));
             }
+            _("apList").style.visibility = "visible";
             let otbdy = document.querySelector("#apList > tbody");
             otbdy.parentNode.replaceChild(ntbdy, otbdy);
           }

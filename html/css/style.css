@@ -50,7 +50,7 @@
 }
 
 body {
-  font-size: 16px;
+  font-size: 1em;
   font-weight: 300;
   font-family: sans-serif;
   line-height: 1.40;
@@ -129,7 +129,7 @@ h1,
 h2,
 h3 {
   font-weight: normal;
-  margin: 20px 0px 20px 8px;
+  margin: 15px 0px 15px 8px;
   display: block;
 }
 
@@ -137,43 +137,42 @@ h4,
 h5,
 h6 {
   font-weight: normal;
-  margin: 12px 0px 10px 12px;
+  margin: 10px 0px 0px 12px;
   display: block;
 }
 
 small {
   color: #bb4700;
-  font-size: 11px;
+  font-size: .55em;
 }
 
 h1 {
-  font-size: 24px;
+  font-size: 1.8em;
+  font-weight: bold;
 }
 
 h2 {
-  font-size: 32px;
-  line-height: 46px;
+  font-size: 1.4em;
 }
 
 h3 {
-  font-size: 28px;
-  line-height: 42px;
+  font-size: 1.2em;
 }
 
 h4 {
-  font-size: 24px;
+  font-size: 1em;
 }
 
 h5 {
-  font-size: 16px;
-}
-
-.alert, h6 {
-  font-size: 16px;
+  font-size: 1em;
 }
 
 h6 {
-  line-height: 30px;
+  font-size: .75em;
+}
+
+.alert {
+  font-size: 1em;
 }
 
 .alert {
@@ -198,7 +197,7 @@ h6 {
 code,
 pre {
   font-family: 'Open Sans';
-  font-size: 16px;
+  font-size: 1em;
   font-weight: 300;
   border-radius: 5px;
   background-color: var(--def-col-bg);
@@ -230,7 +229,7 @@ pre {
   box-sizing: border-box;
   margin: 0 5px 20px;
   font-family: 'Open Sans';
-  font-size: 16px;
+  font-size: 1em;
   font-weight: 300;
   display: inline-block;
   transition: all .3s;
@@ -279,7 +278,7 @@ pre {
 .form-input[type=submit],
 .form-input[type=button] {
   font-family: 'Open Sans';
-  font-size: 16px;
+  font-size: 1em;
   font-weight: 300;
   -webkit-touch-callout: none;
   -khtml-user-select: none;
@@ -302,7 +301,7 @@ pre {
 .form-select,
 .form-textarea {
   font-family: 'Open Sans';
-  font-size: 16px;
+  font-size: 1em;
   display: inline-block;
   width: 100%;
   transition: all .3s;
@@ -377,7 +376,7 @@ pre {
 
 .iconfont {
   font-family: "iconfont" !important;
-  font-size: 16px;
+  font-size: 1em;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -722,7 +721,7 @@ input[type="checkbox"] {
   display: block;
   overflow: hidden;
   cursor: pointer;
-  border-radius: 16px;
+  border-radius: 1em;
   border: 2px solid var(--switch-col-border);
 }
 
@@ -772,7 +771,7 @@ input[type="checkbox"] {
   top: 0;
   bottom: 0;
   right: 39px;
-  border-radius: 16px;
+  border-radius: 1em;
   transition: all 0.3s ease-in 0s;
 }
 
@@ -1105,7 +1104,7 @@ input.upload:disabled {
 }*/
 /*********************************/
 th {
-  font-size: 16px;
+  font-size: 1em;
 }
 
 .status_table {
@@ -1180,7 +1179,7 @@ th {
   background-color: var(--def-col-bg);
   color: var(--def-col-input);
   border: 0;
-  font-size: 16px;
+  font-size: 1em;
   font-style: oblique;
   cursor: pointer;
 }
@@ -1699,7 +1698,9 @@ span#fw-details {
   margin-top: 15px;
   border: #ffc233 1px solid;
 }
-
+span.help {
+  font-size: .8em;
+}
 .preferences {
   background: transparent;
   margin-top: 15px;
@@ -1978,8 +1979,8 @@ div#ring>#gfx {
 div#ring>#gfx:before {
   content: '';
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 1em;
+  height: 1em;
   border-radius: 50%;
   background: #fff000;
   top: -6px;

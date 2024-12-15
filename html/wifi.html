@@ -43,7 +43,7 @@
       <div id="ring"><text id="busy-message"></text><span id="gfx" style="display:inline;">&nbsp;</span></div>
     </div>
     <div>
-      <h1>WiFi Mode</h1>
+      <h2>WiFi Mode</h2>
       <table class="status_table">
         <tbody>
           <tr>
@@ -81,7 +81,7 @@
     </div>
     <hr class="dashed">
     <div>
-      <h1>WiFi Server (AP Mode)</h1>
+      <h2>WiFi Server (AP Mode)</h2>
       <!--<form id="f_ap" class="wifi">-->
       <table class="status_table">
         <tbody>
@@ -209,7 +209,7 @@
     </div>
     <hr class="dashed">
     <div>
-      <h1>WiFi Client (STA Mode)</h1>
+      <h2>WiFi Client (STA Mode)</h2>
       <!--<form id="f_sta" class="wifi">-->
       <table class="status_table">
         <tbody>
@@ -244,9 +244,12 @@
         <div class="submit"><input type="submit" name="sta_save" class="sta_save" id="sta_save" value="Save" onclick="staSaveConfig(this)" disabled /></div>
       </div>
     </div>
+    <div class="notes">
+      <span class="help">Enter your WiFi settings and click 'test'. If you are already connected to a network, the device will disconnect and test the settings before reconnecting to the current network.
+        If your settings are correct, the save button will become available. Once you have clicked 'save', the settings will replace those stored in the device. You will need to reboot for the changes to take affect.</span>
+    </div>
     <div>
-      <h5>&nbsp;To connect to a WiFi network, please select one of the detected networks...</h5>
-      <table id="apList" class="hdr_table">
+      <table id="apList" class="hdr_table" style="visibility: hidden">
         <thead id="aphdr">
           <tr>
             <th id="sel"></th>
