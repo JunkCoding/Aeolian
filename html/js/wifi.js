@@ -400,9 +400,9 @@ async function staAwaitResults (el)
   {
     if (data.tip === 0)
     {
+      let sav_el = document.getElementById("sta_save");
       if (data.test_status === 1)
       {
-        let sav_el = document.getElementById("sta_save");
         sav_el.disabled = false;
       }
       else
