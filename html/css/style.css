@@ -21,7 +21,7 @@
   --dd-col-bo-sel: #ffffffd9;
 
   --tickbox-col-border: #004cffad;
-  --tickbox-col-tick: #902020;
+  --tickbox-col-tick: #0a79d8;
   --tickbox-col-bg: #ffffffe0;
   --tickbox-wid-border: .135em;
   
@@ -818,9 +818,9 @@ input#ap_fixed {
   content: "";
   position: absolute;
   background: var(--tickbox-col-tick);
-  width: calc(var(--tickbox-wid-border) * 3);
-  height: calc(var(--tickbox-wid-border) * 1.5);
-  top: 36%;
+  width: calc(var(--tickbox-wid-border) * 4);
+  height: calc(var(--tickbox-wid-border) * 2.3);
+  top: 25%;
   left: 8%;
   transform-origin: left center;
 }
