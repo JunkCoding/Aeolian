@@ -382,8 +382,8 @@ async function staAwaitResults (el)
   const json = {
     test_result: "matching",
     sta_ssid: sid_el.value,
-    sta_bssid: (fixedAP ? selAP.bssid : ""),
-    sta_password: baseEncode(pwd_el.value)
+    sta_password: baseEncode(pwd_el.value),
+    sta_bssid: (fixedAP ? selAP.bssid : "")
   };
   // request options
   const options = {
@@ -400,6 +400,15 @@ async function staAwaitResults (el)
   {
     if (data.tip === 0)
     {
+      if (data.test_status === 1)
+      {
+        let sav_el = document.getElementById("sta_save");
+        sav_el.disabled = false;
+      }
+      else
+      {
+        sav_el.disabled = true;
+      }
       closeBusyMesg();      
       return data;
     }
@@ -417,8 +426,8 @@ async function staTestConfig (el)
 
   const json = {
     sta_ssid: sid_el.value,
-    sta_bssid: (fixedAP ? selAP.bssid : ""),
-    sta_password: baseEncode(pwd_el.value)
+    sta_password: baseEncode(pwd_el.value),
+    sta_bssid: (fixedAP ? selAP.bssid : "")
   };
   // request options
   const options = {
@@ -443,18 +452,35 @@ async function staTestConfig (el)
 }
 async function staSaveConfig ()
 {
-  try
-  {
-    const response = await fetch('<https://example.com/api/data>');
-    if (!response.ok)
-    {
-      throw new Error('Network response was not ok');
+  let pwd_el = document.getElementById("sta_password");
+  let sid_el = document.getElementById("sta_ssid");
+
+  openBusyMesg("Testing...");
+
+  const json = {
+    sta_ssid: sid_el.value,
+    sta_password: baseEncode(pwd_el.value),
+    sta_bssid: (fixedAP ? selAP.bssid : "")
+  };
+  // request options
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(json),
+    headers: {
+      'Content-Type': 'application/json'
     }
-    const data = await response.json();
-    console.log(data);
-  } catch (error)
+  };
+  const url = '/wifi/teststa';
+  const response = await fetch(url, options).catch(handleError);
+  const data = await response.json();
+  if (data.noerr === true)
   {
-    console.error(error);
+    await sleep(1500);
+    await staAwaitResults(el);
+  }
+  else
+  {
+    closeBusyMesg();
   }
 }
 function pwdShowHide (_this)

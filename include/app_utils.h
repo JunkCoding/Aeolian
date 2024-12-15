@@ -206,7 +206,4 @@ char *binary (char *buf, uint16_t bufSize, unsigned int val);
 std::string  b64encode (const unsigned char *src, size_t len);
 std::string  b64decode (const void *data, const size_t len);
 
-std::string  base64_encode (BYTE const *buf, unsigned int bufLen);
-std::vector<BYTE> base64_decode (std::string const &);
-
 #endif

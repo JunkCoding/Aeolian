@@ -39,7 +39,6 @@
 #include "app_schedule.h"
 #include "app_flash.h"
 #include "app_yuarel.h"
-#include "base64.h"
 
 
 // **************************************************************************************************
@@ -1355,18 +1354,16 @@ void test_sta_cfg (void *data)
     if ( sta_connect (&sta_test->config) )
     {
       // Wait for connection or other
-      int t = 5;
-      while ( t-- > 0 )
+      int t = 20;
+      do
       {
-        // Feed the watchdog
-        //*/CHECK_ERROR_CODE (esp_task_wdt_reset (), ESP_OK);
         EventBits_t uxBits = xEventGroupWaitBits (wifi_event_group, WIFI_STA_CONNECTED, false, true, 500 / portTICK_PERIOD_MS);
         if ( BTST (uxBits, WIFI_STA_CONNECTED) )
         {
           err = ESP_OK;
-          break;
         }
       }
+      while ( t-- > 0 && err != ESP_OK );
     }
   }
 
@@ -1536,10 +1533,10 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
             if ( t[i].end - t[i].start <= PASSW_STRLEN )
             {
               sprintf (tmpbuf, "%.*s", (t[i].end - t[i].start), rcvbuf + t[i].start);
-              printf ("64enc: %.*s\n", (t[i].end - t[i].start), tmpbuf);
+              std::string passw = b64decode (tmpbuf, (t[i].end - t[i].start));
 
-              sta_test->config.pass_len = Base64_decode ((const char *)tmpbuf, (t[i].end - t[i].start), (uint8_t *)sta_test->config.password, 32);
-              printf ("passw: %.*s (%d)\n", sta_test->config.pass_len, sta_test->config.password, sta_test->config.pass_len);
+              sta_test->config.pass_len = passw.length ();
+              strncpy (sta_test->config.password, passw.c_str (), sta_test->config.pass_len);
             }
           }
         }
@@ -1555,7 +1552,7 @@ esp_err_t cgiWifiTestSta (httpd_req_t *req)
       if ( xQueuePeek (sta_test_queue, &item, 0) )
       {
         F_LOGI (true, true, LC_MAGENTA, "S: %s (%d chars), B: %s (set: %d), P: %s (%d chars), status: %d", item.config.ssid, item.config.ssid_len, mac2str (item.config.bssid), item.config.bssid_set, item.config.password, item.config.pass_len, item.status);
-        bufptr += sprintf (&tmpbuf[bufptr], "\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,", STR_STA_TEST_STATUS, item.status, STR_STA_SSID, item.config.ssid, STR_STA_BSSID, mac2str (item.config.bssid), STR_STA_PASSW, item.config.password, STR_STA_BSSID_SET, item.config.bssid_set);
+        bufptr += sprintf (&tmpbuf[bufptr], "\"%s\":%d,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,", STR_STA_TEST_STATUS, item.status, STR_STA_SSID, item.config.ssid, STR_STA_BSSID, mac2str (item.config.bssid), STR_STA_BSSID_SET, item.config.bssid_set);
         err = ESP_OK;
       }
     }

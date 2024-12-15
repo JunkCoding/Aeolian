@@ -1030,22 +1030,29 @@ progress::-moz-progress-bar {
   margin: 10px 0px 0px 0px;
 }
 
-input.wifi {
-  background-color: #209d20;
+input.sta_test {
+  background-color: #1d3e97;
   margin: 8px 0px 0px 8px;
 }
 
-input.wifi:hover {
-  background-color: #21ca2f;
+input.sta_test:hover {
+  background-color: #1898c9;
+}
+input.sta_save {
+  background-color: #0c770c;
+  margin: 8px 0px 0px 8px;
 }
 
+input.sta_save:hover {
+  background-color: #15b215;
+}
 input.scan_start {
-  background-color: #c26f04;
+  background-color: #9d5d09;
   margin: 8px 0px 0px 8px;
 }
 
 input.scan_start:hover {
-  background-color: #ff9101;
+  background-color: #d57b05;
 }
 
 input.scan_stop {
