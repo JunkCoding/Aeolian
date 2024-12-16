@@ -346,6 +346,11 @@ pre {
   width: auto !important;
 }
 
+div,
+table {
+  cursor: default;
+}
+
 .table thead tr td {
   font-weight: 400;
   border-bottom: 2px solid var(--def-col-border);
@@ -786,6 +791,7 @@ input[type="checkbox"] {
 
 /* ---------------------------------------------------------- */
 input[type=checkbox],
+input[type=submit],
 input[type=radio] {
   cursor: pointer;
 }
