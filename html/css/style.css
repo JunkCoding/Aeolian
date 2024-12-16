@@ -6,7 +6,7 @@
   --def-col-border: #b90101d1;
   --def-col-input: #75d6ee;
   --def-col-shadow: #000;
-  
+
   --def-col-fg-tr: #fff;
   --def-col-fg-th: #fff;
   --def-col-fg-td: #d1d1d1;
@@ -25,7 +25,7 @@
   --tickbox-col-tick: #9c27b0;
   --tickbox-col-bg: #ffffffe0;
   --tickbox-wid-border: .135em;
-  
+
   --notes-col-bg: #000;
 
   --theme-col-th-fg: #0db8db99;
@@ -785,6 +785,11 @@ input[type="checkbox"] {
 }
 
 /* ---------------------------------------------------------- */
+input[type=checkbox],
+input[type=radio] {
+  cursor: pointer;
+}
+
 input#ap_fixed {
   margin-left: 20px;
 }
@@ -1184,7 +1189,6 @@ th {
   border: 0;
   font-size: 1em;
   font-style: oblique;
-  cursor: pointer;
 }
 
 /* ------ */
@@ -1234,6 +1238,15 @@ input[type=radio]:checked:after {
 }
 */
 /* ------ */
+#run_cmd {
+  background-color: var(--def-col-bg);
+  color: var(--def-col-fg);
+  cursor: text;
+}
+input {
+  background-color: var(--def-col-bg);
+  color: var(--def-col-fg);
+}
 input:disabled {
   background: grey;
   border: 2px solid black;
@@ -1242,14 +1255,6 @@ input:disabled {
 
 input.error {
   color: #dd0606;
-}
-
-input {
-  color: var(--def-col-fg);
-  /*padding: 1px 4px 1px 4px;
-  border-radius: 3px;
-  border: 0px;*/
-  cursor: pointer;
 }
 
 input[type=text]:focus {
