@@ -8,6 +8,7 @@
 
 #include "cgi_lightcontrol.h"
 #include "app_lightcontrol.h"
+#include "app_schedule.h"
 #include "app_main.h"
 #include "app_utils.h"
 #include "app_yuarel.h"
@@ -78,7 +79,7 @@ esp_err_t cgiThemes(httpd_req_t * req)
   struct   yuarel_param params[MAX_URI_PARTS];
   char     tmpbuf[BUF_SIZE + 1];
   bool     brief = false;
-  uint16_t buflen = 0;
+  uint16_t bufptr = 0;
   int      pos = 0;
   int      pc = 0;
   // Work with a url decoded version of the original uri string
@@ -112,54 +113,54 @@ esp_err_t cgiThemes(httpd_req_t * req)
       }
     }
 
-    tmpbuf[buflen++] = '{';
+    tmpbuf[bufptr++] = '{';
 
     // Is the current active item in this grouping?
     if (control_vars.cur_themeID >= pos && pos < (pos + MAX_ROWS))
     {
-      buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\"active\":\"%d\",", control_vars.cur_themeID);
+      bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"active\":\"%d\",", control_vars.cur_themeID);
     }
 
     // More to follow?
-    buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\"next\":\"%d\",\"items\":[", (pos + MAX_ROWS) >= control_vars.num_themes?0:(pos + MAX_ROWS));
+    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"next\":\"%d\",\"items\":[", (pos + MAX_ROWS) >= control_vars.num_themes?0:(pos + MAX_ROWS));
 
     // Iterate through all themes
     for (uint8_t x = 0; (pos < control_vars.num_themes) && (x < MAX_ROWS); x++, pos++)
     {
       if ( brief == true )
       {
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"id\": %d, \"name\":\"%s\"},", themes[pos].themeIdentifier, themes[pos].name);
+        bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "{\"id\": %d, \"name\":\"%s\"},", themes[pos].themeIdentifier, themes[pos].name);
       }
       else
       {
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"id\": %d, \"name\":\"%s\",\"items\":[", x, themes[pos].name);
+        bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "{\"id\": %d, \"name\":\"%s\",\"items\":[", x, themes[pos].name);
         for (uint8_t y = 0; y < themes[pos].count; y++)
         {
           CRGBPalette16 pal = themes[pos].list[y];
-          buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"%d\":[", y);
+          bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "{\"%d\":[", y);
           for (uint8_t z = 0; z < 16; z++)
           {
             cRGB col = (cRGB)pal.entries[z];
-            buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\"#%02X%02X%02X\",", col.r, col.g, col.b);
+            bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"#%02X%02X%02X\",", col.r, col.g, col.b);
           }
-          buflen--;  // Remove trailing ','
-          buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "]},");
+          bufptr--;  // Remove trailing ','
+          bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "]},");
         }
-        buflen--;  // Remove trailing ','
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "]},");
+        bufptr--;  // Remove trailing ','
+        bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "]},");
       }
     }
-    buflen--;    // Remove trailing ','
-    buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "]}");
-    tmpbuf[buflen] = 0x0;
+    bufptr--;    // Remove trailing ','
+    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "]}");
+    tmpbuf[bufptr] = 0x0;
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
     send_async_header_using_ext (req, "/config.json");
-    httpd_socket_send (req->hd, req->fd, tmpbuf, buflen, 0);
+    httpd_socket_send (req->hd, req->fd, tmpbuf, bufptr, 0);
     httpd_sess_trigger_close (req->hd, req->fd);
 #else
     httpd_resp_set_hdr (req, "Content-Type", "application/json");
-    httpd_resp_send_chunk (req, tmpbuf, buflen);
+    httpd_resp_send_chunk (req, tmpbuf, bufptr);
     httpd_resp_send_chunk (req, NULL, 0);
 #endif
     err = ESP_OK;
@@ -182,7 +183,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
   struct   yuarel url;
   struct   yuarel_param params[MAX_URI_PARTS];
   char     tmpbuf[BUF_SIZE + 1];
-  uint16_t buflen = 0;
+  uint16_t bufptr = 0;
   int      pos = 0;
   int      pc = 0;
   // Work with a url decoded version of the original uri string
@@ -210,38 +211,25 @@ esp_err_t cgiSchedule (httpd_req_t * req)
     }
 
     // Begin our response
-    buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"weekly\":[");
+    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "{\"weekly\":[");
 
     // Iterate through all themes
-    for (uint8_t x = 0; (pos < control_vars.num_themes) && (x < MAX_ROWS); x++, pos++)
+    for (uint8_t x = 0; (pos < _get_num_w_events()) && (x < MAX_ROWS); x++, pos++)
     {
-      buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"name\":\"%s\",\"palettes\":[", themes[pos].name);
-      for (uint8_t y = 0; y < themes[pos].count; y++)
-      {
-        CRGBPalette16 pal = themes[pos].list[y];
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"%d\":[", y);
-        for (uint8_t z = 0; z < 16; z++)
-        {
-          cRGB col = (cRGB)pal.entries[z];
-          buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\"#%02X%02X%02X\",", col.r, col.g, col.b);
-        }
-        buflen--;  // Remove trailing ','
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "]},");
-      }
-      buflen--;  // Remove trailing ','
-      buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "]},");
+      bufptr += _get_weekly_event (&tmpbuf[bufptr], (BUF_SIZE - bufptr), x);
+      tmpbuf[bufptr++] = ',';
     }
-    buflen--;    // Remove trailing ','
-    buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "]}");
-    tmpbuf[buflen] = 0x0;
+    bufptr--;    // Remove trailing ','
+    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "]}");
+    tmpbuf[bufptr] = 0x0;
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
     send_async_header_using_ext (req, "/config.json");
-    httpd_socket_send (req->hd, req->fd, tmpbuf, buflen, 0);
+    httpd_socket_send (req->hd, req->fd, tmpbuf, bufptr, 0);
     httpd_sess_trigger_close (req->hd, req->fd);
 #else
     httpd_resp_set_hdr (req, "Content-Type", "application/json");
-    httpd_resp_send_chunk (req, tmpbuf, buflen);
+    httpd_resp_send_chunk (req, tmpbuf, bufptr);
     httpd_resp_send_chunk (req, NULL, 0);
 #endif
     err = ESP_OK;
@@ -265,7 +253,7 @@ esp_err_t cgiPatterns (httpd_req_t * req)
   struct   yuarel_param params[MAX_URI_PARTS];
   char     tmpbuf[BUF_SIZE + 1];
   bool     brief = false;
-  uint16_t buflen = 0;
+  uint16_t bufptr = 0;
   uint16_t sp = 0;  // Start pos
   uint16_t cp = 0;  // Current pos
   int      pc = 0;
@@ -319,7 +307,7 @@ esp_err_t cgiPatterns (httpd_req_t * req)
       x++;
     }
 
-    buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"items\":[");
+    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "{\"items\":[");
 
     while ( cp < (sp + MAX_ROWS) && x <= control_vars.num_patterns )
     {
@@ -328,13 +316,13 @@ esp_err_t cgiPatterns (httpd_req_t * req)
         if (patterns[x].enabled)
         {
           cp++;
-          buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "{\"id\": %d," " \"name\": \"%s\"},", x, patterns[x].name);
+          bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "{\"id\": %d," " \"name\": \"%s\"},", x, patterns[x].name);
         }
       }
       else
       {
         cp++;
-        buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen),
+        bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr),
                           "{\"id\": %d,"
                           " \"name\": \"%s\","
                           " \"enabled\": %d,"
@@ -345,20 +333,20 @@ esp_err_t cgiPatterns (httpd_req_t * req)
       x++;
     }
     // Remove trailing ','
-    buflen--;
+    bufptr--;
 
-    buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "],\"active\": %d,", control_vars.cur_pattern);
-    buflen += snprintf(&tmpbuf[buflen], (BUF_SIZE - buflen), "\"next\": %d}", x > control_vars.num_patterns?0:cp);
+    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "],\"active\": %d,", control_vars.cur_pattern);
+    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"next\": %d}", x > control_vars.num_patterns?0:cp);
 
-    tmpbuf[buflen] = 0x0;
+    tmpbuf[bufptr] = 0x0;
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
     send_async_header_using_ext (req, "/config.json");
-    httpd_socket_send (req->hd, req->fd, tmpbuf, buflen, 0);
+    httpd_socket_send (req->hd, req->fd, tmpbuf, bufptr, 0);
     httpd_sess_trigger_close (req->hd, req->fd);
 #else
     httpd_resp_set_hdr (req, "Content-Type", "application/json");
-    httpd_resp_send_chunk (req, tmpbuf, buflen);
+    httpd_resp_send_chunk (req, tmpbuf, bufptr);
     httpd_resp_send_chunk (req, NULL, 0);
 #endif
 

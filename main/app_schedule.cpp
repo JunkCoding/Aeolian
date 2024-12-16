@@ -1,5 +1,6 @@
 
 
+// ToDo: Make this a fucking class
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -418,6 +419,44 @@ esp_err_t init_scheduler ( void )
 }
 
 // ***********************************************************
+// * Dirty, and needs to be wrapped in a class
+// ***********************************************************
+uint16_t _get_num_a_events (void)
+{
+  return num_annual_events;
+}
+uint16_t _get_num_w_events(void)
+{
+  return num_weekly_events;
+}
+uint16_t _get_weekly_event (char *stor, size_t size, uint16_t i)
+{
+  uint16_t len = 0;
+
+  if (i < num_weekly_events)
+  {
+    len = snprintf (stor, size, "{\"D\":%d,\"SH\":%d,\"SM\":%d,\"EH\":%d,\"EM\":%d,\"Th\":%d,\"Fl\":%d}",
+            weekly_events[i].day, weekly_events[i].start.hour, weekly_events[i].start.minute, weekly_events[i].end.hour,
+            weekly_events[i].end.minute, weekly_events[i].theme, weekly_events[i].flags);
+  }
+
+  return len;
+}
+uint16_t _get_annual_event (char *stor, size_t size, uint16_t i)
+{
+  uint16_t len = 0;
+
+  if (i < num_annual_events)
+  {
+    len = snprintf (stor, size, "{\"M\":%d,\"DS\":%d,\"DE\":%d,\"SH\":%d,\"SM\":%d,\"EH\":%d,\"EM\":%d,\"Th\":%d,\"Fl\":%d}",
+              annual_events[i].month, annual_events[i].dayStart, annual_events[i].dayEnd, annual_events[i].start.hour, annual_events[i].start.minute,
+              annual_events[i].end.hour, annual_events[i].end.minute, annual_events[i].theme, annual_events[i].flags);
+  }
+
+  return len;
+}
+
+// ***********************************************************
 // * This controls weekly theme changes (run once a minute)  *
 // ***********************************************************
 #if defined (CONFIG_APPTRACE_SV_ENABLE)
@@ -433,12 +472,12 @@ static bool check_weekly_event (struct tm tm)
   bool match = false;
 
   // Only process if we are not a slave controller
-  if ( !BTST(control_vars.bitflags, DISP_BF_SLAVE) )
+  if (!BTST (control_vars.bitflags, DISP_BF_SLAVE))
   {
     uint16_t tod = (tm.tm_hour * 60) + tm.tm_min;
 
     // Reset index at the beginning of the week
-    if ( cur_weekly_event < num_weekly_events )
+    if (cur_weekly_event < num_weekly_events)
     {
       eval_pos = cur_weekly_event;
     }

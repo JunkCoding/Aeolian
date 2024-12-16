@@ -52,5 +52,9 @@ void      reboot (void);
 esp_err_t init_scheduler (void);
 //void    scheduler_task(void* pvParameters);
 void      scheduler_task (void *arg);
+uint16_t  _get_num_a_events (void);
+uint16_t  _get_num_w_events (void);
+uint16_t  _get_weekly_event (char *stor, size_t size, uint16_t i);
+uint16_t  _get_annual_event (char *stor, size_t size, uint16_t i);
 
 #endif /* __SCHEDULE_H__ */

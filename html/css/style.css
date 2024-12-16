@@ -20,8 +20,9 @@
   --dd-col-bo-def: #ff000061;
   --dd-col-bo-sel: #ffffffd9;
 
-  --tickbox-col-border: #004cffad;
-  --tickbox-col-tick: #0a79d8;
+  --tickbox-col-border-def: #004cffad;
+  --tickbox-col-border-sel: #8e24aa;
+  --tickbox-col-tick: #9c27b0;
   --tickbox-col-bg: #ffffffe0;
   --tickbox-wid-border: .135em;
   
@@ -803,24 +804,26 @@ input#ap_fixed {
   appearance: none;
   vertical-align: middle;
   background: var(--tickbox-col-bg);
-  font-size: 1.4em;
+  font-size: 1.6em;
   border-radius: 0.325em;
   display: inline-block;
-  border: var(--tickbox-wid-border) solid var(--tickbox-col-border);
+  border: var(--tickbox-wid-border) solid var(--tickbox-col-border-def);
   width: 1em;
   height: 1em;
   position: relative;
 }
-
+.tickbox input[type=checkbox]:checked {
+  border: var(--tickbox-wid-border) solid var(--tickbox-col-border-sel);
+}
 .tickbox input[type=checkbox]:before,
 .tickbox input[type=checkbox]:after {
   content: "";
   position: absolute;
   background: var(--tickbox-col-tick);
-  width: calc(var(--tickbox-wid-border) * 4);
-  height: calc(var(--tickbox-wid-border) * 2.3);
-  top: 25%;
-  left: 8%;
+  width: calc(var(--tickbox-wid-border) * 4.18);
+  height: calc(var(--tickbox-wid-border) * 1.7);
+  top: 26%;
+  left: 13%;
   transform-origin: left center;
 }
 

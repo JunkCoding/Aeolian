@@ -206,28 +206,28 @@ const char *SecondChanStr (wifi_second_chan_t second)
       return "Unknown";
   }
 }
-const char *mac2str (unsigned char *mac_bin)
+const char * mac2str (unsigned char * mac_bin)
 {
   static char mac_str_buf[18];
   snprintf (mac_str_buf, sizeof (mac_str_buf), "%02X:%02X:%02X:%02X:%02X:%02X", mac_bin[0], mac_bin[1], mac_bin[2], mac_bin[3], mac_bin[4], mac_bin[5]);
   return (const char *)mac_str_buf;
 }
-bool str2mac (const char *mac, uint8_t *values)
+bool str2mac (const char * mac, uint8_t * values)
 {
   sscanf (mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &values[0], &values[1], &values[2], &values[3], &values[4], &values[5]);
   return strlen (mac) == 17;
 }
 
-void set_hostname (const char* hostname)
+void set_hostname (const char * hostname)
 {
-  if ( netif_ap )
+  if (netif_ap)
   {
-    esp_netif_set_hostname(netif_ap, hostname);
+    esp_netif_set_hostname (netif_ap, hostname);
   }
 
-  if ( netif_sta )
+  if (netif_sta)
   {
-    esp_netif_set_hostname(netif_sta, hostname);
+    esp_netif_set_hostname (netif_sta, hostname);
   }
 }
 
@@ -737,15 +737,28 @@ void verify_ap_config (void)
 // **************************************************************************************************
 static void stop_ap (bool forceStop)
 {
-  // Check if we are not configured to run SoftAP
-  if ( !(wifi_cfg.mode & WIFI_MODE_AP) || forceStop )
-  {
-    wifi_mode_t  cMode;
-    esp_wifi_get_mode(&cMode);
+  EventBits_t uxBits = xEventGroupGetBits (wifi_event_group);
 
-    if ( cMode | WIFI_MODE_AP )
+  // Firstly, are we running an AP?
+  if (BTST(uxBits, WIFI_AP_STARTED) || forceStop)
+  {
+    // Are we connected to an AP and have an IP?
+    // We won't stop AP if the user has no way to manage us
+    if (BTST (uxBits, WIFI_STA_GOT_IP) || forceStop)
     {
-      wifi_set_mode((wifi_mode_t)(cMode &~ WIFI_MODE_AP));
+      // And, finally, are we auto off or being forced to stop the AP
+      if (wifi_ap_cfg.auto_off || forceStop)
+      {
+        wifi_mode_t  cMode;
+        esp_wifi_get_mode (&cMode);
+
+        F_LOGW (true, true, LC_YELLOW, "Turning AP off (requested)");
+
+        if (cMode | WIFI_MODE_AP)
+        {
+          wifi_set_mode((wifi_mode_t)(cMode & ~ WIFI_MODE_AP));
+        }
+      }
     }
   }
 }
