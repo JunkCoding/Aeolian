@@ -199,7 +199,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
   // Parse the HTTP request
   if (-1 == yuarel_parse (&url, decUri))
   {
-    F_LOGE(true, true, LC_YELLOW, "Could not parse url!");
+    F_LOGV(true, true, LC_GREY, "Could not parse url!");
   }
   else if ((pc = yuarel_parse_query (url.query, '&', params, MAX_URI_PARTS)))
   {
@@ -213,12 +213,12 @@ esp_err_t cgiSchedule (httpd_req_t * req)
       }
       else if (!str_cmp ("schedule", params[pc].key))
       {
-        if (!str_cmp ("week", params[pc].val))
+        if (!str_cmp ("weekly", params[pc].val))
         {
           err = ESP_OK;
           schedType = SCHED_WEEKLY;
         }
-        else if (!str_cmp ("month", params[pc].val))
+        else if (!str_cmp ("annual", params[pc].val))
         {
           err = ESP_OK;
           schedType = SCHED_ANNUAL;
@@ -245,7 +245,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
           {
             pos = 0;
           }        // Begin our response
-          bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"weekly\":[");
+          bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"sched\":\"weekly\",\"items\":[");
 
           // Iterate through all themes
           for (lines = 0; (pos < _get_num_w_events ()) && (lines < MAX_ROWS); lines++, pos++)
@@ -259,7 +259,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
           {
             pos = 0;
           }        // Begin our response
-          bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"annual\":[");
+          bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"sched\":\"annual\",\"items\":[");
 
           // Iterate through all themes
           for (lines = 0; (pos < _get_num_a_events ()) && (lines < MAX_ROWS); lines++, pos++)
@@ -277,7 +277,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
       if (lines > 0)
       {
         bufptr--;    // Remove trailing ','
-        bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "]");
+        bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "],");
         tmpbuf[bufptr] = 0x0;
       }
     }
