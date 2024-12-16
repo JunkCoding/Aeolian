@@ -6,7 +6,14 @@
 #include "app_yuarel.h"
 #include "app_httpd.h"
 
-const char *uri_arg(struct yuarel_param params[], int parts, const char *key);
+typedef enum
+{
+  SCHED_NONE,
+  SCHED_WEEKLY,
+  SCHED_ANNUAL
+} light_sched_t;
+
+const char *uri_arg (struct yuarel_param params[], int parts, const char *key);
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
 esp_err_t cgiLed(struct async_resp_arg *resp_arg);

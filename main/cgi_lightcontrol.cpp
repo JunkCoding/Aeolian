@@ -1,6 +1,10 @@
 
 
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_http_server.h>
@@ -180,6 +184,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
 {
 #endif
   esp_err_t err = ESP_FAIL;
+  light_sched_t schedType = SCHED_NONE;
   struct   yuarel url;
   struct   yuarel_param params[MAX_URI_PARTS];
   char     tmpbuf[BUF_SIZE + 1];
@@ -190,6 +195,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
   char decUri[URI_DECODE_BUFLEN] = {};
   url_decode (decUri, req->uri, URI_DECODE_BUFLEN);
 
+
   // Parse the HTTP request
   if (-1 == yuarel_parse (&url, decUri))
   {
@@ -197,31 +203,87 @@ esp_err_t cgiSchedule (httpd_req_t * req)
   }
   else if ((pc = yuarel_parse_query (url.query, '&', params, MAX_URI_PARTS)))
   {
-    // Start position requested?
-    const char* ptr = uri_arg (params, pc, "start");
-    if (ptr != NULL)
+    while (pc-- > 0)
     {
-      pos = atoi (ptr);
-
-      // Valid start position?
-      if (pos < 0 || pos >= control_vars.num_themes)
+      F_LOGI (true, true, LC_BRIGHT_GREEN, "%s -> %s", params[pc].key, params[pc].val);
+      // ptype, verify, partition,
+      if (!str_cmp ("start", params[pc].key))
       {
-        pos = 0;
+        pos = str2int (params[pc].val);
+      }
+      else if (!str_cmp ("schedule", params[pc].key))
+      {
+        if (!str_cmp ("week", params[pc].val))
+        {
+          err = ESP_OK;
+          schedType = SCHED_WEEKLY;
+        }
+        else if (!str_cmp ("month", params[pc].val))
+        {
+          err = ESP_OK;
+          schedType = SCHED_ANNUAL;
+        }
+        else
+        {
+          F_LOGE (true, true, LC_YELLOW, "Invalid value for key pair: %s -> %s", params[pc].key, params[pc].val);
+        }
       }
     }
 
-    // Begin our response
-    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "{\"weekly\":[");
+    // Begin our JSON response
+    bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "{");
 
-    // Iterate through all themes
-    for (uint8_t x = 0; (pos < _get_num_w_events()) && (x < MAX_ROWS); x++, pos++)
+    // Iterate over any schedule events
+    if (err == ESP_OK && schedType > SCHED_NONE)
     {
-      bufptr += _get_weekly_event (&tmpbuf[bufptr], (BUF_SIZE - bufptr), x);
-      tmpbuf[bufptr++] = ',';
+      uint16_t lines = 0;
+
+      switch (schedType)
+      {
+        case SCHED_WEEKLY:
+          if (pos < 0 || pos >= _get_num_w_events ())
+          {
+            pos = 0;
+          }        // Begin our response
+          bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"weekly\":[");
+
+          // Iterate through all themes
+          for (lines = 0; (pos < _get_num_w_events ()) && (lines < MAX_ROWS); lines++, pos++)
+          {
+            bufptr += _get_weekly_event (&tmpbuf[bufptr], (BUF_SIZE - bufptr), pos);
+            tmpbuf[bufptr++] = ',';
+          }
+          break;
+        case SCHED_ANNUAL:
+          if (pos < 0 || pos >= _get_num_a_events ())
+          {
+            pos = 0;
+          }        // Begin our response
+          bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"annual\":[");
+
+          // Iterate through all themes
+          for (lines = 0; (pos < _get_num_a_events ()) && (lines < MAX_ROWS); lines++, pos++)
+          {
+            bufptr += _get_annual_event (&tmpbuf[bufptr], (BUF_SIZE - bufptr), pos);
+            tmpbuf[bufptr++] = ',';
+          }
+          break;
+        default:
+          err = ESP_FAIL;
+          break;
+      }
+
+      // Only append on valid
+      if (lines > 0)
+      {
+        bufptr--;    // Remove trailing ','
+        bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "]");
+        tmpbuf[bufptr] = 0x0;
+      }
     }
-    bufptr--;    // Remove trailing ','
-    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "]}");
-    tmpbuf[bufptr] = 0x0;
+
+    // Add our success/failure response
+    bufptr += sprintf (&tmpbuf[bufptr], ((ESP_OK == err)?JSON_APPEND_SUCCESS_STR:JSON_APPEND_FAILURE_STR));
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
     send_async_header_using_ext (req, "/config.json");

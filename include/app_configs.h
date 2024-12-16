@@ -125,7 +125,7 @@ typedef Configuration_Item_t *Configuration_List_t;
 
 Configuration_List_t * get_configuration_list( void );
 
-int     str2int( const char *s );
+
 bool    str2ip( const char* str, void *ip );
 int     str2int_array( char* str, int* array, int num_values );
 

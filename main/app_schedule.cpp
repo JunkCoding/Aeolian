@@ -435,7 +435,7 @@ uint16_t _get_weekly_event (char *stor, size_t size, uint16_t i)
 
   if (i < num_weekly_events)
   {
-    len = snprintf (stor, size, "{\"D\":%d,\"SH\":%d,\"SM\":%d,\"EH\":%d,\"EM\":%d,\"Th\":%d,\"Fl\":%d}",
+    len = snprintf (stor, size, "{\"N\":%d,\"D\":%d,\"SH\":%d,\"SM\":%d,\"EH\":%d,\"EM\":%d,\"Th\":%d,\"Fl\":%d}", i,
             weekly_events[i].day, weekly_events[i].start.hour, weekly_events[i].start.minute, weekly_events[i].end.hour,
             weekly_events[i].end.minute, weekly_events[i].theme, weekly_events[i].flags);
   }
@@ -448,7 +448,7 @@ uint16_t _get_annual_event (char *stor, size_t size, uint16_t i)
 
   if (i < num_annual_events)
   {
-    len = snprintf (stor, size, "{\"M\":%d,\"DS\":%d,\"DE\":%d,\"SH\":%d,\"SM\":%d,\"EH\":%d,\"EM\":%d,\"Th\":%d,\"Fl\":%d}",
+    len = snprintf (stor, size, "{\"N\":%d,\"M\":%d,\"DS\":%d,\"DE\":%d,\"SH\":%d,\"SM\":%d,\"EH\":%d,\"EM\":%d,\"Th\":%d,\"Fl\":%d}", i,
               annual_events[i].month, annual_events[i].dayStart, annual_events[i].dayEnd, annual_events[i].start.hour, annual_events[i].start.minute,
               annual_events[i].end.hour, annual_events[i].end.minute, annual_events[i].theme, annual_events[i].flags);
   }

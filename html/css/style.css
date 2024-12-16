@@ -49,7 +49,14 @@
   --navbar-col-hover: #ff9800e0;
   --navbar-col-active: #d50000;
 }
-
+/*no worky
+.main {
+  border-image: linear-gradient(to right, #3acfd5 0%, #3a4ed5 100%) 1;
+  border-radius: 5px;
+  border-width: 4px;
+  border-style: solid;
+  padding: 5px;
+}*/
 body {
   font-size: 1em;
   font-weight: 300;

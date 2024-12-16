@@ -202,8 +202,8 @@ int          str_cmp(const char *arg1, const char *arg2);
 int          shrt_cmp(const char *arg1, const char *arg2);
 uint16_t     url_encode(char *dstBuffer, const char *str, uint16_t buflen);
 uint16_t     url_decode(char *dstBuffer, const char *strURL, uint16_t buflen);
-char *binary (char *buf, uint16_t bufSize, unsigned int val);
+char         *binary (char *buf, uint16_t bufSize, unsigned int val);
 std::string  b64encode (const unsigned char *src, size_t len);
 std::string  b64decode (const void *data, const size_t len);
-
+int          str2int (const char *s);
 #endif
