@@ -314,7 +314,7 @@ var scan = (function ()
               let nr = ntbdy.insertRow();
               createRowForAp(nr, apList.APs[i], (apList.APs[i].bssid === focusAP));
             }
-            _("apList").style.visibility = "visible";
+            _("apDiv").style.visibility = "visible";
             let otbdy = document.querySelector("#apList > tbody");
             otbdy.parentNode.replaceChild(ntbdy, otbdy);
           }
@@ -410,7 +410,7 @@ async function staAwaitResults (el)
       {
         sav_el.disabled = true;
       }
-      closeBusyMesg();      
+      closeBusyMesg();
       return data;
     }
   }
@@ -570,4 +570,6 @@ function page_onload ()
   set_background();
   init_all_dropboxex();
   staTestEnable();
+  // Make wifi AP list moveable
+  dragElement(document.getElementById("apDiv"));
 }

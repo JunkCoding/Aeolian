@@ -10,6 +10,7 @@
   <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
   <script type="text/javascript" src="/js/common.js"></script>
   <script type="text/javascript" src="/js/wifi.js"></script>
+  <script type="text/javascript" src="/js/dragable.js"></script>
   <script language="javascript">
     document.addEventListener("DOMContentLoaded", function (event)
     {
@@ -22,6 +23,16 @@
       set_dd('ap_primary', %ap_primary%);
       document.getElementById("ap_autooff").checked = %ap_autooff%;
     });
+  </script>
+  <script type="text/css">
+    #apDiv {
+      position:absolute;
+      width:500px;
+    }
+    #mydivheader {
+      width:500px;
+      cursor:move;
+    }
   </script>
 </head>
 
@@ -38,6 +49,23 @@
     <a href="/console.html">Console</a>
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
+    </div>
+    <div id="apDiv" style="position:absolute;visibility:hidden;z-index:20;">
+      <div id="mydivheader">Click here to move</div>
+      <table id="apList" class="hdr_table">
+        <thead id="aphdr">
+          <tr>
+            <th id="sel"></th>
+            <th id="str">Str</th>
+            <th id="rssi">RSSI</th>
+            <th id="chan">Chan #</th>
+            <th id="name">Name</th>
+            <th id="enc">Security</th>
+          </tr>
+        </thead>
+        <tbody id="aps"></tbody>
+      </table>
+    </div>
   <div class="main" id="main">
     <div id="busy-wrapper">
       <div id="ring"><text id="busy-message"></text><span id="gfx" style="display:inline;">&nbsp;</span></div>
@@ -248,22 +276,7 @@
       <span class="help">Enter your WiFi settings and click 'test'. If you are already connected to a network, the device will disconnect and test the settings before reconnecting back to the current network.
         If your settings are correct, the save button will become available. Once you have clicked 'save', the settings will replace those stored in the device and will become active when rebooted.</span>
     </div>
-    <div>
-      <table id="apList" class="hdr_table" style="visibility: hidden">
-        <thead id="aphdr">
-          <tr>
-            <th id="sel"></th>
-            <th id="str">Str</th>
-            <th id="rssi">RSSI</th>
-            <th id="chan">Chan #</th>
-            <th id="name">Name</th>
-            <th id="enc">Security</th>
-          </tr>
-        </thead>
-        <tbody id="aps"></tbody>
-      </table>
-    </div>
-  </div>
+
 </body>
 
 </html>

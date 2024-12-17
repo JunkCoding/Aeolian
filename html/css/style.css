@@ -809,6 +809,7 @@ input#ap_fixed {
 
 .tickbox {
   font-size: 12px;
+  z-index: 2;
 }
 
 .tickbox label {

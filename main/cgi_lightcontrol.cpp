@@ -205,7 +205,6 @@ esp_err_t cgiSchedule (httpd_req_t * req)
   {
     while (pc-- > 0)
     {
-      F_LOGI (true, true, LC_BRIGHT_GREEN, "%s -> %s", params[pc].key, params[pc].val);
       // ptype, verify, partition,
       if (!str_cmp ("start", params[pc].key))
       {

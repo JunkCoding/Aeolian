@@ -1,4 +1,8 @@
 
+var dow=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+var moy=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+var ds=["st", "nd", "rd", "th"];
+
 function fillTable(type, jsonData)
 {
   tbl=_(type);
@@ -15,36 +19,62 @@ function fillTable(type, jsonData)
   {
     let sched=jsonData.items[i];
     let nr=ntbdy.insertRow();
-    // Weekly / Anmual (repectively)
-    // Day, hour, min, hour, min, theme, brightness, flags
-    // Day, hour, min, day, hour, min, theme, brightness, flags
 
-    // Start
-    let day=document.createElement('td');
-    nr.appendChild(day);
-    let hour=document.createElement('td');
-    nr.appendChild(hour);
-    let min=document.createElement('td');
-    nr.appendChild(min);
-
-    // End
+    var td;
+    var el;
+    // Annual only
     if(type==="annual")
     {
-      day=document.createElement('td');
-      nr.appendChild(day);
+      el=document.createElement('td');
+      el.classList.add("ts-month");
+      el.innerHTML=moy[sched.M];
+      nr.appendChild(el);
+
+      el=document.createElement('td');
+      el.classList.add("ts-date");
+      el.innerHTML=sched.sd;
+      nr.appendChild(el);
+
+      el=document.createElement('td');
+      el.classList.add("ts-date");
+      el.innerHTML=sched.ed;
+      nr.appendChild(el);
     }
-    hour=document.createElement('td');
-    nr.appendChild(hour);
-    min=document.createElement('td');
-    nr.appendChild(min);
+    else
+    {
+      el=document.createElement('td');
+      el.classList.add("ts-wday");
+      el.innerHTML=dow[sched.D];
+      nr.appendChild(el);
+    }
+
+    // The rest is shared
+    td=document.createElement('td');
+    el=document.createElement('input');
+    el.type='time';
+    el.classList.add("ts-hour");
+    el.innerHTML=`${sched.SH}:${sched.SM}`;
+    td.appendChild(el);
+    nr.appendChild(td);
+
+    td=document.createElement('td');
+    el=document.createElement('input');
+    el.type='time';
+    el.classList.add("ts-hour");
+    el.innerHTML=`${sched.EH}:${sched.EM}`;
+    td.appendChild(el);
+    nr.appendChild(td);
 
     // Attributes
-    let theme=document.createElement('td');
-    nr.appendChild(theme);
-    let brightness=document.createElement('td');
-    nr.appendChild(brightness);
-    let flags=document.createElement('td');
-    nr.appendChild(flags);
+    el=document.createElement('td');
+    el.innerHTML=sched.Th;
+    nr.appendChild(el);
+    el=document.createElement('td');
+    el.innerHTML="";
+    nr.appendChild(el);
+    el=document.createElement('td');
+    el.innerHTML=sched.Fl;
+    nr.appendChild(el);
 
     // Append to the tbody
     ntbdy.appendChild(nr);

@@ -7,8 +7,31 @@
   <meta name="viewport" content="width=device-width, user-scalable=no">
   <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
   <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="stylesheet" type="text/css" href="/css/clock.css">
   <script type="text/javascript" src="/js/common.js"></script>
   <script type="text/javascript" src="/js/schedule.js"></script>
+  <style>
+    .sched_x1 {
+      background: #000;
+      min-width: 110px;
+      padding: 5px;
+    }
+    .sched_x2 {
+      background: #000;
+      padding: 5px;
+      text-align: center;
+    }
+    .sched_day {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    .sched_time {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+  </style>
 </head>
 
 <body style="user-select: none;" onload="page_onload()">
@@ -32,17 +55,14 @@
       <table class="hdr_table" id="weekly">
         <thead>
         <tr>
-          <th width="70"></th>
-          <th width="200" colspan="2">Start</th>
-          <th width="200" colspan="2">End</th>
-          <th width="200" colspan="3">Settings</th>
+          <th class="sched_x1" colspan="1"></th>
+          <th class="sched_time" colspan="2">Time</th>
+          <th colspan="5">Settings</th>
         </tr>
         <tr>
           <th>Day</th>
-          <th>Hour</th>
-          <th>Min</th>
-          <th>Hour</th>
-          <th>Min</th>
+          <th>Start</th>
+          <th>End</th>
           <th>Theme</th>
           <th>Brightness</th>
           <th>Flags</th>
@@ -56,17 +76,17 @@
       <table class="hdr_table" id="annual">
         <thead>
         <tr>
-          <th width="200" colspan="3">Start</th>
-          <th width="200" colspan="3">End</th>
-          <th width="200" colspan="3">Settings</th>
+          <th class="sched_x1" colspan="1"></th>
+          <th class="sched_day" colspan="2">Day</th>
+          <th class="sched_time" colspan="2">Time</th>
+          <th colspan="4">Settings</th>
         </tr>
         <tr>
-          <th>Day</th>
-          <th>Hour</th>
-          <th>Min</th>
-          <th>Day</th>
-          <th>Hour</th>
-          <th>Min</th>
+          <th>Month</th>
+          <th>First</th>
+          <th>Last</th>
+          <th>Start</th>
+          <th>End</th>
           <th>Theme</th>
           <th>Brightness</th>
           <th>Flags</th>
