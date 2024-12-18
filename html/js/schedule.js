@@ -3,6 +3,17 @@ var dow=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
 var moy=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 var ds=["st", "nd", "rd", "th"];
 
+var mousedown=false;
+var hasMoved=false;
+var setDates=false;
+var sPos={
+  target: null,
+  doy: 0,
+};
+var ePos={
+  target: null,
+  doy: 0,
+};
 function fillTable(type, jsonData)
 {
   tbl=_(type);
