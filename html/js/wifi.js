@@ -350,19 +350,21 @@ var scan = (function ()
   };
   return o;
 })();
-function toggleScan (_this)
+function toggleScan ()
 {
+  let btn=_("ap_scan");
+
   if (scan.running() === true)
   {
     scan.stop();
-    _this.className = "scan_start";
-    _this.value = "Scan Start";
+    btn.className = "scan_start";
+    btn.value = "Scan Start";
   }
   else
   {
     scan.start();
-    _this.className = "scan_stop";
-    _this.value = "Scan Stop";
+    btn.className = "scan_stop";
+    btn.value = "Scan Stop";
   }
 }
 var handleError = function (err)
@@ -564,6 +566,14 @@ function validateSSID (el)
 function toggleFixedAP (el)
 {
   fixedAP = el.checked;
+}
+function stopAndClose()
+{
+  if(scan.running()===true)
+  {
+    toggleScan();
+  }
+  _("apDiv").style.visibility='hidden';
 }
 function page_onload ()
 {
