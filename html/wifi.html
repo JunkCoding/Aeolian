@@ -39,25 +39,6 @@
     <a href="/console.html">Console</a>
     <a href="javascript:void( 0 );" style="font-size:15px;" class="icon" onclick="navbar()">&#9776;</a>
   </div>
-    </div>
-    <div id="apDiv" style="position:absolute;visibility:hidden;z-index:20;">
-      <div id="mydivheader">
-        <span class="close-button" onclick="stopAndClose()"></span>
-      </div>
-      <table id="apList" class="hdr_table">
-        <thead id="aphdr">
-          <tr>
-            <th id="sel"></th>
-            <th id="str">Str</th>
-            <th id="rssi">RSSI</th>
-            <th id="chan">Chan #</th>
-            <th id="name" style="width:250px;min-width:250px">Name</th>
-            <th id="enc">Security</th>
-          </tr>
-        </thead>
-        <tbody id="aps"></tbody>
-      </table>
-    </div>
   <div class="main" id="main">
     <div id="busy-wrapper">
       <div id="ring"><text id="busy-message"></text><span id="gfx" style="display:inline;">&nbsp;</span></div>
@@ -102,7 +83,26 @@
     <hr class="dashed">
     <div>
       <h2>WiFi Server (AP Mode)</h2>
-      <!--<form id="f_ap" class="wifi">-->
+      <!-- We want the AP list to appear at this initial location. -->
+      <div id="apDiv" style="position:absolute;visibility:hidden;z-index:20;">
+        <div id="mydivheader">
+          <span class="close-button" onclick="stopAndClose()"></span>
+        </div>
+        <table id="apList" class="hdr_table">
+          <thead id="aphdr">
+            <tr>
+              <th id="sel"></th>
+              <th id="str">Str</th>
+              <th id="rssi">RSSI</th>
+              <th id="chan">Chan #</th>
+              <th id="name" style="width:250px;min-width:250px">Name</th>
+              <th id="enc">Security</th>
+            </tr>
+          </thead>
+          <tbody id="aps"></tbody>
+        </table>
+      </div>
+      <!-- End of moveable div -->
       <table class="status_table">
         <tbody>
           <tr>
@@ -224,13 +224,10 @@
         </div>
         <label for="ap_autooff" class="pref_label">Disable AP when the device has a valid STA connection.</label>
       </div>
-      <!--<div class="submit"><input type="submit" name="configure" value="Configure!" class="wifi" id="config" onclick="onClickHandler(this.id)" /></div>-->
-      <!--</form>-->
     </div>
     <hr class="dashed">
     <div>
       <h2>WiFi Client (STA Mode)</h2>
-      <!--<form id="f_sta" class="wifi">-->
       <table class="status_table">
         <tbody>
           <tr>
@@ -257,7 +254,6 @@
         </div>
         <label for="ap_fixed" class="pref_label">Lock to the specific AP using the BSSID.</label>
       </div>
-      <!--</form>-->
       <div class="btn_group">
         <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan()" /></div>
         <div class="submit"><input type="submit" name="sta_test" class="sta_test" id="sta_test" value="Test" onclick="staTestConfig(this)" disabled/></div>
@@ -268,7 +264,6 @@
       <span class="help">Enter your WiFi settings and click 'test'. If you are already connected to a network, the device will disconnect and test the settings before reconnecting back to the current network.
         If your settings are correct, the save button will become available. Once you have clicked 'save', the settings will replace those stored in the device and will become active when rebooted.</span>
     </div>
-
+  </div>
 </body>
-
 </html>

@@ -287,7 +287,7 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
       }
     case WIFI_EVENT_SCAN_DONE:
       {
-        F_LOGI(true, true, LC_GREY, "WIFI_EVENT_SCAN_DONE");
+        F_LOGD(true, true, LC_GREY, "WIFI_EVENT_SCAN_DONE");
 
         // We can set this one here, at the beginning
         xEventGroupSetBits (wifi_event_group, WIFI_SCAN_DONE);
@@ -498,7 +498,7 @@ void wifi_eventHandler (void *arg, esp_event_base_t event_base, int32_t event_id
         F_LOGI(true, true, LC_GREY, "WIFI_EVENT_HOME_CHANNEL_CHANGE: channel changed from %u to %u.", chan_data->old_chan, chan_data->new_chan);
         // Fin
         break;
-      } 
+      }
     default:
       F_LOGE(true, true, LC_YELLOW, "Unhandled WiFi Event ID: %d", event_id);
       // Fin
@@ -588,10 +588,16 @@ IRAM_ATTR void wifi_startScan (void)
 #else
 void wifi_startScan (void)
 #endif /* CONFIG_COMPILER_OPTIMIZATION_PERF */
-{ 
+{
+  // If we are trying to upload firmware, prevent scans from happening
+  if (BTST (control_vars.pauseFlags, PAUSE_UPLOADING))
+  {
+    return;
+  }
+
   EventBits_t uxBits = xEventGroupGetBits (wifi_event_group);
-  if ( BTST(uxBits, WIFI_SCAN_INPROGRESS) )
-  { 
+  if (BTST (uxBits, WIFI_SCAN_INPROGRESS))
+  {
     F_LOGV(true, true, LC_YELLOW, "Scan already in progress...");
   }
   else
@@ -647,7 +653,7 @@ void wifi_startScan (void)
       // Non blocking scan
       esp_wifi_scan_start(&scan_config, false);
 
-      F_LOGI(true, true, LC_BRIGHT_YELLOW, "WiFi scan started");
+      F_LOGD(true, true, LC_BRIGHT_YELLOW, "WiFi scan started");
     }
     else
     {
