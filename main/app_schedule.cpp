@@ -43,6 +43,7 @@
 
 const char *dayNames[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 const char *monNames[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+const int daysInMon[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 // ***********************************************************
 // *  Default weekly events                                  *

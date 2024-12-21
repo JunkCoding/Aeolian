@@ -61,20 +61,22 @@ function fillTable(type, jsonData)
 
     // The rest is shared
     td=document.createElement('td');
-    el=document.createElement('input');
-    el.type='time';
-    el.classList.add("ts-hour");
-    el.innerHTML=`${sched.SH}:${sched.SM}`;
+    el=document.createElement('div');
+    el.id=`stime_${type}_${sched.N}`;
+    el.classList.add("timesel");
+    el.setAttribute('data-value', `${sched.SH}:${sched.SM}`);
     td.appendChild(el);
     nr.appendChild(td);
+    append_timesel(el);
 
     td=document.createElement('td');
-    el=document.createElement('input');
-    el.type='time';
-    el.classList.add("ts-hour");
-    el.innerHTML=`${sched.EH}:${sched.EM}`;
+    el=document.createElement('div');
+    el.id=`etime_${type}_${sched.N}`;
+    el.classList.add("timesel");
+    el.setAttribute('data-value', `${sched.EH}:${sched.EM}`);
     td.appendChild(el);
     nr.appendChild(td);
+    append_timesel(el);
 
     // Attributes
     el=document.createElement('td');
