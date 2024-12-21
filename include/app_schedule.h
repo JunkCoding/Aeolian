@@ -9,8 +9,8 @@
 typedef enum
 {
   // Lower nibble for integers/bitflags
-  EVENT_LIGHTSON      = 0x01,  // Event forces lights to be on during period or whole day
-  EVENT_LIGHTSOFF     = 0x02,  // Event forces lights to be off during period or whole day
+  EVENT_NOFLAGS       = 0x00,  // No flags set
+  EVENT_LIGHTSOFF     = 0x01,  // Lights will be off during time period (12th night, for example).
   // Higher nibble for bitflags
   EVENT_AUTONOMOUS    = 0x10,  // Event will display with sunset/sunrise switching
   EVENT_DEFAULT       = 0x20,  // Default event to be run when no other event is matched

@@ -3,6 +3,13 @@ var dow=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
 var moy=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 var ds=["st", "nd", "rd", "th"];
 
+const EVENT_NOFLAGS    = 0x00     // Event forces lights to be on during period or whole day
+const EVENT_LIGHTSOFF  = 0x01     // Event forces lights to be off during period or whole day
+const EVENT_AUTONOMOUS = 0x10     // Event will display with sunset/sunrise switching
+const EVENT_DEFAULT    = 0x20     // Default event to be run when no other event is matched
+const EVENT_IMMUTABLE  = 0x40     // Event cannot be removed/altered
+const EVENT_INACTIVE   = 0x80     // Event is not active (don't run)
+
 var mousedown=false;
 var hasMoved=false;
 var setDates=false;
@@ -79,15 +86,53 @@ function fillTable(type, jsonData)
     append_timesel(el);
 
     // Attributes
-    el=document.createElement('td');
-    el.innerHTML=sched.Th;
-    nr.appendChild(el);
-    el=document.createElement('td');
-    el.innerHTML="";
-    nr.appendChild(el);
-    el=document.createElement('td');
-    el.innerHTML=sched.Fl;
-    nr.appendChild(el);
+    td=document.createElement('td');
+    td.className="nopadding";
+
+    td.innerHTML=sched.Th;
+    nr.appendChild(td);
+    td=document.createElement('td');
+    td.innerHTML="";
+    nr.appendChild(td);
+
+    td=document.createElement('td');
+    td.className="nopadding";
+    let div=document.createElement("div");
+    div.className="tickbox";
+    el=document.createElement("input");
+    el.setAttribute("type", "checkbox");
+    el.id=`def_${type}_${sched.N}`;
+    el.checked=((Number(sched.Fl)&EVENT_DEFAULT)===EVENT_DEFAULT);
+    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
+    div.appendChild(el);
+    td.appendChild(div);
+    nr.appendChild(td);
+
+    td=document.createElement('td');
+    td.className="nopadding";
+    div=document.createElement("div");
+    div.className="tickbox";
+    el=document.createElement("input");
+    el.setAttribute("type", "checkbox");
+    el.id=`def_${type}_${sched.N}`;
+    el.checked=((Number(sched.Fl)&EVENT_LIGHTSOFF)===EVENT_LIGHTSOFF);
+    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
+    div.appendChild(el);
+    td.appendChild(div);
+    nr.appendChild(td);
+
+    td=document.createElement('td');
+    td.className="nopadding";
+    div=document.createElement("div");
+    div.className="tickbox";
+    el=document.createElement("input");
+    el.setAttribute("type", "checkbox");
+    el.id=`def_${type}_${sched.N}`;
+    el.checked=((Number(sched.Fl)&EVENT_AUTONOMOUS)===EVENT_AUTONOMOUS);
+    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
+    div.appendChild(el);
+    td.appendChild(div);
+    nr.appendChild(td);
 
     // Append to the tbody
     ntbdy.appendChild(nr);

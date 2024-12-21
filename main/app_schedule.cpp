@@ -51,8 +51,8 @@ const int daysInMon[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 weekly_event_t _initial_weekly_events[] = {
 //     Start    |      End     |
 //  Hour   Min  |  Hour   Min  |  Day  |  Theme          |  Brightness      |  Flags
-  {{20,    00},   {20,    30},    1,      THEME_DEFAULT,    DIM_HIGH,          EVENT_LIGHTSON | EVENT_INACTIVE},
-  {{20,    00},   {20,    30},    4,      THEME_DEFAULT,    DIM_HIGH,          EVENT_LIGHTSON | EVENT_INACTIVE},
+  {{20,    00},   {20,    30},    1,      THEME_DEFAULT,    DIM_HIGH,          EVENT_INACTIVE},
+  {{20,    00},   {20,    30},    4,      THEME_DEFAULT,    DIM_HIGH,          EVENT_INACTIVE},
 };
 #define NUM_WEEKLY_EVENTS (sizeof(_initial_weekly_events) / sizeof(weekly_event_t))
 
@@ -68,7 +68,7 @@ annual_event_t _initial_annual_events[] = {
 //{{07,    00},   {21,    30},     10,     10,    4,      THEME_JESS,         DIM_MED,       EVENT_AUTONOMOUS},                    // Jess commemorative
   {{07,    00},   {22,    00},     31,     31,    9,      THEME_HALLOWEEN,    DIM_MED,       EVENT_AUTONOMOUS},                    // All-Hallows Eve
   {{07,    00},   {22,    00},     01,     31,    11,     THEME_CHRISTMAS,    DIM_MED,       EVENT_AUTONOMOUS},                    // Christmas (normal Christmas schedule)
-  {{07,    00},   {22,    30},     24,     26,    11,     THEME_CHRISTMAS,    DIM_MAX,       EVENT_LIGHTSON}                       // Christmas (on all day for Eve, Day & Box. Day)
+  {{07,    00},   {22,    30},     24,     26,    11,     THEME_CHRISTMAS,    DIM_MAX,       EVENT_NOFLAGS}                        // Christmas (on all day for Eve, Day & Box. Day)
 };
 #define NUM_ANNUAL_EVENTS (sizeof(_initial_annual_events) / sizeof(annual_event_t))
 
@@ -788,7 +788,7 @@ void process_annual(struct tm tmz, uint16_t ae)
     }
     // Lights will be forced on during this period
     // ---------------------------------------------------------------------------
-    else  // if ( BTST (annual_events[ae].flags, EVENT_LIGHTSON) )
+    else
     {
       F_LOGV(true, true, LC_WHITE, "fixed hours: on");
       lightsUnpause(PAUSE_SCHEDULE, false);
