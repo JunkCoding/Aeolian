@@ -8,7 +8,7 @@ const EVENT_LIGHTSOFF  = 0x01     // Event forces lights to be off during period
 const EVENT_AUTONOMOUS = 0x10     // Event will display with sunset/sunrise switching
 const EVENT_DEFAULT    = 0x20     // Default event to be run when no other event is matched
 const EVENT_IMMUTABLE  = 0x40     // Event cannot be removed/altered
-const EVENT_INACTIVE   = 0x80     // Event is not active (don't run)
+const EVENT_DISABLED   = 0x80     // Event is not active (don't run)
 
 var mousedown=false;
 var hasMoved=false;
@@ -114,7 +114,7 @@ function fillTable(type, jsonData)
     div.className="tickbox";
     el=document.createElement("input");
     el.setAttribute("type", "checkbox");
-    el.id=`def_${type}_${sched.N}`;
+    el.id=`off_${type}_${sched.N}`;
     el.checked=((Number(sched.Fl)&EVENT_LIGHTSOFF)===EVENT_LIGHTSOFF);
     el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
     div.appendChild(el);
@@ -127,8 +127,21 @@ function fillTable(type, jsonData)
     div.className="tickbox";
     el=document.createElement("input");
     el.setAttribute("type", "checkbox");
-    el.id=`def_${type}_${sched.N}`;
+    el.id=`aut_${type}_${sched.N}`;
     el.checked=((Number(sched.Fl)&EVENT_AUTONOMOUS)===EVENT_AUTONOMOUS);
+    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
+    div.appendChild(el);
+    td.appendChild(div);
+    nr.appendChild(td);
+
+    td=document.createElement('td');
+    td.className="nopadding";
+    div=document.createElement("div");
+    div.className="tickbox";
+    el=document.createElement("input");
+    el.setAttribute("type", "checkbox");
+    el.id=`dis_${type}_${sched.N}`;
+    el.checked=((Number(sched.Fl)&EVENT_DISABLED)===EVENT_DISABLED);
     el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
     div.appendChild(el);
     td.appendChild(div);
