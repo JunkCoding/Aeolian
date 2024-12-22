@@ -980,7 +980,7 @@ progress::-moz-progress-bar {
 
 /***** ***** ***** ***** Tables **** **** **** ****/
 table {
-  box-shadow: 0 0 0 1px var(--def-col-border);
+  box-shadow: 0 0 10px var(--def-col-border);
   border-collapse: separate;
   border-spacing: 0px;
   background-color: var(--def-col-border);
@@ -999,9 +999,10 @@ table {
     padding: 2px 10px 2px;
     height: 29px;
   }
+  /*
   th {
     box-shadow: 0 1px 0 0 var(--def-col-border);
-  }
+  }*/
   td {
     box-shadow: 0 0 0 1px var(--def-col-border);
   }
@@ -1031,6 +1032,9 @@ table {
   }
 }
 .hdr_table {
+  th {
+    box-shadow: 0 0 0 1px var(--def-col-border);
+  }
   select {
     height: 20px;
     width: 100px;

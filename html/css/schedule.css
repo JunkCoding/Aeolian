@@ -44,7 +44,7 @@ th.sbri_hdr {
   width: 40px;
   min-width: 40px;
   max-width: 40px;
-  position: relative;
+  position: static;
   vertical-align: bottom;
   padding: 0;
   font-size: 17px;
@@ -52,7 +52,9 @@ th.sbri_hdr {
 }
 
 .row-header {
+  box-shadow: 0 0 0 1px var(--def-col-border);
   vertical-align: bottom;
+  padding-bottom: 5px;
 }
 
 .table-header-rotated th.rotate-45 > div {
@@ -62,7 +64,7 @@ th.sbri_hdr {
   left: -31px;
   height: 84px;
   width: 41px;
-  border-left: 1px solid #cf0c0c;
+  box-shadow: inset 2px 0px 0 var(--def-col-border);
   -ms-transform: skew(35deg, 0deg);
   -moz-transform: skew(35deg, 0deg);
   -webkit-transform: skew(35deg, 0deg);
