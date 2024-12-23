@@ -189,7 +189,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
   struct   yuarel_param params[MAX_URI_PARTS];
   char     tmpbuf[BUF_SIZE + 1];
   uint16_t bufptr = 0;
-  int      pos = 0;
+  int      sp = 0;
   int      pc = 0;
   // Work with a url decoded version of the original uri string
   char decUri[URI_DECODE_BUFLEN] = {};
@@ -208,7 +208,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
       // ptype, verify, partition,
       if (!str_cmp ("start", params[pc].key))
       {
-        pos = str2int (params[pc].val);
+        sp = str2int (params[pc].val);
       }
       else if (!str_cmp ("schedule", params[pc].key))
       {
@@ -235,50 +235,63 @@ esp_err_t cgiSchedule (httpd_req_t * req)
     // Iterate over any schedule events
     if (err == ESP_OK && schedType > SCHED_NONE)
     {
-      uint16_t lines = 0;
-
+      // Get the number of events available;
+      int ne = 0;
+      char *type = NULL;
       switch (schedType)
       {
         case SCHED_WEEKLY:
-          if (pos < 0 || pos >= _get_num_w_events ())
-          {
-            pos = 0;
-          }        // Begin our response
-          bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"sched\":\"weekly\",\"items\":[");
-
-          // Iterate through all themes
-          for (lines = 0; (pos < _get_num_w_events ()) && (lines < MAX_ROWS); lines++, pos++)
-          {
-            bufptr += _get_weekly_event (&tmpbuf[bufptr], (BUF_SIZE - bufptr), pos);
-            tmpbuf[bufptr++] = ',';
-          }
+          ne = _get_num_w_events ();
+          type = "weekly";
           break;
         case SCHED_ANNUAL:
-          if (pos < 0 || pos >= _get_num_a_events ())
-          {
-            pos = 0;
-          }        // Begin our response
-          bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"sched\":\"annual\",\"items\":[");
-
-          // Iterate through all themes
-          for (lines = 0; (pos < _get_num_a_events ()) && (lines < MAX_ROWS); lines++, pos++)
-          {
-            bufptr += _get_annual_event (&tmpbuf[bufptr], (BUF_SIZE - bufptr), pos);
-            tmpbuf[bufptr++] = ',';
-          }
+          ne = _get_num_a_events ();
+          type = "annual";
           break;
         default:
-          err = ESP_FAIL;
           break;
       }
 
-      // Only append on valid
-      if (lines > 0)
+      // Check start position is valid
+      if (sp < 0 || sp > ne)
       {
-        bufptr--;    // Remove trailing ','
-        bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "],");
-        tmpbuf[bufptr] = 0x0;
+        sp = 0;
       }
+
+      printf ("sp: %d, sp: %d\n", sp, ne);
+      // set current position
+      int cp = sp;
+      if (cp < ne)
+      {
+        // Begin our response
+        bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"sched\":\"%s\",\"items\":[", type);
+
+        while (cp < (sp + MAX_ROWS) && cp < ne)
+        {
+          switch (schedType)
+          {
+            case SCHED_WEEKLY:
+                bufptr += _get_weekly_event (&tmpbuf[bufptr], (BUF_SIZE - bufptr), cp);
+              break;
+            case SCHED_ANNUAL:
+                bufptr += _get_annual_event (&tmpbuf[bufptr], (BUF_SIZE - bufptr), cp);
+              break;
+            default:
+              err = ESP_FAIL;
+              break;
+          }
+          tmpbuf[bufptr++] = ',';
+          cp++;
+          printf ("%.*s\n", bufptr, tmpbuf);
+        }
+
+        // Remove any trailing ','
+        bufptr--;
+        bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "],");
+      }
+
+      // More to follow?
+      bufptr += snprintf (&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"next\":%d,", (cp + MAX_ROWS) >= ne?0:(cp + MAX_ROWS));
     }
 
     // Add our success/failure response

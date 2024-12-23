@@ -141,10 +141,46 @@ function fetchSchedule(type, start)
   };
   req.send(null);
 }
+function fetchData(JSONSource, start)
+{
+  var req=new XMLHttpRequest();
+  req.overrideMimeType("application/json");
+  req.open("get", JSONSource+".json?terse=1&start="+start, true);
+
+  req.onload=function()
+  {
+    var jsonResponse;
+    try
+    {
+      jsonResponse=JSON.parse(req.responseText);
+    }
+    catch(error)
+    {
+      console.error(error);
+    }
+    if(typeof jsonResponse==='object')
+    {
+      fillTable(JSONSource, jsonResponse);
+    }
+  };
+  req.send(null);
+}
 
 function page_onload()
 {
   set_background();
   fetchSchedule("weekly", 0);
   fetchSchedule("annual", 0);
+}
+
+
+function monthPicker(el)
+{
+
+}
+monthPicker.prototype={
+  init: function()
+  {
+    return false;
+  }
 }
