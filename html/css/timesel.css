@@ -28,7 +28,6 @@ input[type="number"] {
 
 /******* Time Selection *******/
 .timesel {
-  background-color: #222;
   text-decoration: none;
   line-height: 20px;
   font-size: 17px;
@@ -39,7 +38,7 @@ input[type="number"] {
   display: grid;
   grid-template: 'hours divider minutes';
   grid-gap: 0px;
-  width: 70px;
+  width: 40px;
   height: 24px; /* needs to be 1px higher than input.time */
 }
 

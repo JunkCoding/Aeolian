@@ -361,25 +361,6 @@ pre {
   width: auto !important;
 }
 
-div,
-table {
-  cursor: default;
-}
-
-.table thead tr td {
-  font-weight: 400;
-  border-bottom: 2px solid var(--def-col-border);
-  background-color: var(--def-col-bg);
-}
-
-.table tr td {
-  border-bottom: 1px solid var(--def-col-border);
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 5px;
-}
-
-
 /* Eye Icon (for password label) */
 @font-face {
   font-family: "iconfont";
@@ -996,8 +977,11 @@ table {
   tr td {
     background-color: var(--def-col-bg);
     color: var(--def-col-fg);
-    padding: 2px 10px 2px;
+    padding: 2px 6px 2px;
     height: 29px;
+  }
+  .nopadding {
+    padding: 0px 6px 0px;
   }
   /*
   th {
@@ -1039,9 +1023,6 @@ table {
     height: 20px;
     width: 100px;
   }
-  .nopadding {
-    padding: 0px 10px 0px;
-  }
   #enabled,
   #stars {
     width: 200px;
@@ -1054,7 +1035,6 @@ table {
   tr td {
     padding: 2px 15px 2px;
   }
-
   /* ------ */
   select.custSel {
     padding: 1px;
@@ -1075,7 +1055,6 @@ table {
     appearance: none;
     cursor: pointer;
   }
-
   label.custSel:after {
     content: '<>';
     font: 14px "Consolas", monospace;
@@ -1091,7 +1070,6 @@ table {
     position: absolute;
     pointer-events: none;
   }
-
   label.custSel:before {
     content: '';
     right: 6px;
@@ -1103,49 +1081,40 @@ table {
     pointer-events: none;
     display: block;
   }
-
   tr th {
     box-shadow: 0 0 0 1px var(--def-col-border);
     background-color: var(--def-col-bg);
     color: var(--def-col-fg);
     text-align: left;
   }
-
   tr:first-child th:last-child {
     border-top-right-radius: 10px;
   }
-
   tr:first-child th:first-child {
     border-top-left-radius: 10px;
   }
-
   tr:first-child td:last-child {
     border-top-right-radius: 10px;
   }
-
   tr:last-child th:first-child,
   tr:last-child td:first-child {
     border-bottom-left-radius: 10px;
   }
-
   tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
   }
-
   th {
     width: 300px;
     min-width: 300px;
     max-width: 300px;
     height: 32px;
   }
-
   td {
     min-width: 300px;
     background-color: var(--def-col-bg);
     color: #d1d1d1;
     height: 32px;
   }
-
   input,
   text {
     height: 18px;
@@ -1158,6 +1127,21 @@ table {
     font-style: oblique;
   }
 }
+div,
+table {
+  cursor: default;
+}
+.table thead tr td {
+  font-weight: 400;
+  border-bottom: 2px solid var(--def-col-border);
+  background-color: var(--def-col-bg);
+}
+.table tr td {
+  border-bottom: 1px solid var(--def-col-border);
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+}
 #sched_weekly th,
 #sched_annual th {
   text-align: center;
@@ -1167,17 +1151,14 @@ table {
 .pwd_group {
   display: inline-flex;
 }
-
 .btn_group {
   display: inline-flex;
   margin: 10px 0px 0px 0px;
 }
-
 input.sta_test {
   background-color: #1d6697;
   margin: 8px 0px 0px 8px;
 }
-
 input.sta_test:hover {
   background-color: #2b95db;
 }
@@ -1185,7 +1166,6 @@ input.sta_save {
   background-color: #0c770c;
   margin: 8px 0px 0px 8px;
 }
-
 input.sta_save:hover {
   background-color: #15b215;
 }
@@ -1197,49 +1177,38 @@ input.scan_start {
 input.scan_start:hover {
   background-color: #d57b05;
 }
-
 input.scan_stop {
   background-color: #880f0f;
   margin: 8px 0px 0px 8px;
 }
-
 input.scan_stop:hover {
   background-color: #c01818;
 }
-
 /* OTA Update */
 input.verify {
   background-color: #0f750f;
 }
-
 input.verify:hover {
   background-color: #21ca2f;
 }
-
 input.erase {
   background-color: #a56916;
 }
-
 input.erase:hover {
   background-color: #e09020;
 }
-
 input.upload {
   background-color: #128d91;
 }
-
 input.upload:hover {
   background-color: #17c6cc;
 }
-
 input.setboot {
   background-color: #7e1870;
 }
-
 input.setboot:hover {
   background-color: #ca21b4;
 }
-
 /*
 input.upload:disabled {
   background-color: grey;
@@ -1545,15 +1514,6 @@ span#fw-details {
 
 .switch_table {
   margin: auto;
-}
-
-/* ------ */
-#Table_MQTTClientConfig {
-  table-layout: fixed;
-}
-
-#table_WifiConfig {
-  table-layout: fixed;
 }
 
 /* GLOBALS */

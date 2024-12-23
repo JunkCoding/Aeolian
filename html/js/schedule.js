@@ -96,7 +96,7 @@ function fillTable(type, jsonData)
     nr.appendChild(td);
 
     td=document.createElement('td');
-    td.className="nopadding";
+    td.className="fla_td";
     let div=document.createElement("div");
     div.className="tickbox";
     el=document.createElement("input");
@@ -109,7 +109,7 @@ function fillTable(type, jsonData)
     nr.appendChild(td);
 
     td=document.createElement('td');
-    td.className="nopadding";
+    td.className="fla_td";
     div=document.createElement("div");
     div.className="tickbox";
     el=document.createElement("input");
@@ -122,7 +122,7 @@ function fillTable(type, jsonData)
     nr.appendChild(td);
 
     td=document.createElement('td');
-    td.className="nopadding";
+    td.className="fla_td";
     div=document.createElement("div");
     div.className="tickbox";
     el=document.createElement("input");
@@ -135,7 +135,7 @@ function fillTable(type, jsonData)
     nr.appendChild(td);
 
     td=document.createElement('td');
-    td.className="nopadding";
+    td.className="fla_td";
     div=document.createElement("div");
     div.className="tickbox";
     el=document.createElement("input");
