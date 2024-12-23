@@ -58,6 +58,7 @@
   padding: 5px;
 }*/
 body {
+  font: 100%/17px 'Helvetica Neue', helvetica, arial, sans-serif;
   font-size: 1em;
   font-weight: 300;
   font-family: sans-serif;
@@ -188,7 +189,7 @@ h6 {
 }
 
 .alert {
-  font-size: 1em;
+  font-size: .9em;
 }
 
 .alert {
@@ -212,8 +213,7 @@ h6 {
 
 code,
 pre {
-  font-family: 'Open Sans';
-  font-size: 1em;
+  font-size: .9em;
   font-weight: 300;
   border-radius: 5px;
   background-color: var(--def-col-bg);
@@ -244,8 +244,6 @@ pre {
   outline: 0;
   box-sizing: border-box;
   margin: 0 5px 20px;
-  font-family: 'Open Sans';
-  font-size: 1em;
   font-weight: 300;
   display: inline-block;
   transition: all .3s;
@@ -293,8 +291,6 @@ pre {
 
 .form-input[type=submit],
 .form-input[type=button] {
-  font-family: 'Open Sans';
-  font-size: 1em;
   font-weight: 300;
   -webkit-touch-callout: none;
   -khtml-user-select: none;
@@ -316,8 +312,6 @@ pre {
 
 .form-select,
 .form-textarea {
-  font-family: 'Open Sans';
-  font-size: 1em;
   display: inline-block;
   width: 100%;
   transition: all .3s;
@@ -963,23 +957,28 @@ progress::-moz-progress-bar {
 /***** ***** ***** ***** Tables **** **** **** ****/
 table {
   box-shadow: 0 0 10px var(--def-col-border);
+  color: var(--def-col-fg);
   border-collapse: separate;
   border-spacing: 0px;
-  background-color: var(--def-col-border);
   -webkit-border-radius: 10px;
   -moz-border-radius: 10px;
   border-radius: 10px;
   min-width: 800px;
   width: 100%;
   color: #444;
-  font: 100%/18px 'Helvetica Neue', helvetica, arial, sans-serif;
-
+  /*  ** */
   tr th,
-  tr td {
-    background-color: var(--def-col-bg);
-    color: var(--def-col-fg);
-    padding: 2px 6px 2px;
-    height: 29px;
+  tbody th,
+  thead th {
+    font-size: 17px;
+    font-weight: 400;
+  }
+  tr td,
+  tbody td,
+  thead td {
+    font-size:16px;
+    font-weight: lighter;
+    font-style: italic;
   }
   .nopadding {
     padding: 0px 6px 0px;
@@ -996,9 +995,11 @@ table {
   tr td:first-child {
     border-left: 1px solid #bbb;
   }*/
-  tr th {
+  th,
+  td {
+    padding: 2px 6px 2px;
+    height: 29px;
     text-align: left;
-    font-size: 1em;
   }
   tr:first-child th:first-child {
     border-top-left-radius: 10px;
@@ -1012,7 +1013,8 @@ table {
   tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
   }
-  th {
+  th, td {
+    background-color: var(--def-col-bg);
     color: var(--def-col-fg);
   }
 }
@@ -1124,24 +1126,14 @@ table {
     background-color: var(--def-col-bg);
     color: var(--def-col-input);
     border: 0;
-    font-size: 1em;
+    font-size: 16px;
     font-style: oblique;
+    font-weight: 100;;
   }
 }
 div,
 table {
   cursor: default;
-}
-.table thead tr td {
-  font-weight: 400;
-  border-bottom: 2px solid var(--def-col-border);
-  background-color: var(--def-col-bg);
-}
-.table tr td {
-  border-bottom: 1px solid var(--def-col-border);
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 5px;
 }
 #sched_weekly th,
 #sched_annual th {
@@ -1315,7 +1307,7 @@ input#reboot:hover {
 
 .fw-group {
   height: 25px;
-  font-size: 14px;
+  font-size: .95em;
 }
 
 div#fw-selector {
@@ -1348,7 +1340,6 @@ input[type=file] {
   right: 0;
   top: 0;
   height: 100%;
-  font-size: 24px;
   width: 100%;
   */
 }
@@ -1463,7 +1454,7 @@ span#fw-details {
 .label {
   display: inline;
   padding: .2em .6em .3em;
-  font-size: 75%;
+  font-size:15x;
   font-weight: 700;
   line-height: 1;
   color: var(--def-col-fg);;
@@ -1557,7 +1548,6 @@ span#fw-details {
 }
 
 .ddlist {
-  font: 100%/18px 'Helvetica Neue', helvetica, arial, sans-serif;
   position: relative;
   width: 200px;
   height: 24px;
@@ -1685,13 +1675,14 @@ span.help {
 }
 
 .pref_label {
-  /* fixme: hack to center label attached to tickbox */
   margin-left: 15px;
-  line-height: 0.9;
-  height: 11px;
+  line-height: 17px;
+  height: 17px;
+  font-size: 16px;
 }
 
 .preference {
+  font-size: 0.7em;
   display: flex;
   justify-content: space-between;
   width: 180px;
