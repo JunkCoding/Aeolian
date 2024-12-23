@@ -1676,13 +1676,13 @@ span.help {
 
 .pref_label {
   margin-left: 15px;
-  line-height: 17px;
-  height: 17px;
-  font-size: 16px;
+  line-height: 16px;
+  height: 16px;
+  font-size: 15px;
 }
 
 .preference {
-  font-size: 0.7em;
+  font-size: 15px;
   display: flex;
   justify-content: space-between;
   width: 180px;
