@@ -109,7 +109,9 @@ static void send_schedule (async_resp_arg *resp_arg)
 {
   char  *buf = NULL;
   int buflen = 0;
-  send_async_frame(resp_arg, (uint8_t *)buf, buflen);
+  send_async_frame (resp_arg, (uint8_t *)buf, buflen);
+
+  //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "d) Releasing allocation 0x%08X", (unsigned int)resp_arg);
   vPortFree (resp_arg);
 }
 
@@ -123,8 +125,11 @@ static void send_status_update (async_resp_arg *resp_arg)
 {
   char  *buf = NULL;
   int buflen = prepareSystemStatusMsg(&buf);
-  send_async_frame(resp_arg, (uint8_t *)buf, buflen);
-  free(buf);
+  send_async_frame (resp_arg, (uint8_t *)buf, buflen);
+  //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "e) Releasing allocation 0x%08X", (unsigned int)buf);
+  free (buf);
+
+  //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "f) Releasing allocation 0x%08X", (unsigned int)resp_arg);
   vPortFree (resp_arg);
 }
 
@@ -138,8 +143,10 @@ static void send_tasks_update (async_resp_arg *resp_arg)
 {
   char  *buf = NULL;
   int buflen = getSystemTasksJsonString(&buf);
-  send_async_frame(resp_arg, (uint8_t *)buf, buflen);
-  vPortFree(resp_arg);
+  send_async_frame (resp_arg, (uint8_t *)buf, buflen);
+
+  //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "g) Releasing allocation 0x%08X", (unsigned int)resp_arg);
+  vPortFree (resp_arg);
 }
 
 // --------------------------------------------------------------------------
@@ -155,11 +162,14 @@ static void send_log_messages(async_resp_arg *resp_arg)
 
   if ( buflen > 0 )
   {
-    send_async_frame(resp_arg, (uint8_t *)buf, buflen);
-    vPortFree(buf);
+    send_async_frame (resp_arg, (uint8_t *)buf, buflen);
+
+    //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "h) Releasing allocation 0x%08X", (unsigned int)buf);
+    vPortFree (buf);
     buf = NULL;
   }
-  vPortFree(resp_arg);
+  //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "i) Releasing allocation 0x%08X", (unsigned int)resp_arg);
+  vPortFree (resp_arg);
 }
 
 // --------------------------------------------------------------------------
@@ -172,7 +182,9 @@ static void send_eng_data (async_resp_arg *resp_arg)
 {
   char  *buf = NULL;
   int buflen = getEngDataJsonString (&buf);
-  send_async_frame(resp_arg, (uint8_t *)buf, buflen);
+  send_async_frame (resp_arg, (uint8_t *)buf, buflen);
+
+  //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "j) Releasing allocation 0x%08X", (unsigned int)resp_arg);
   vPortFree (resp_arg);
 }
 
@@ -338,7 +350,7 @@ char *ws_scan_results (uint16_t *strLen)
       }
       *strLen += snprintf (&jsonStr[*strLen], SIZE_JSONBUF - *strLen, JSON_SCAN_STR,
         cgiWifiAps.apList[i].ssid,
-        cgiWifiAps.apList[i].bssid[0], cgiWifiAps.apList[i].bssid[1], cgiWifiAps.apList[i].bssid[2], cgiWifiAps.apList[i].bssid[3], cgiWifiAps.apList[i].bssid[4], cgiWifiAps.apList[i].bssid[5], 
+        cgiWifiAps.apList[i].bssid[0], cgiWifiAps.apList[i].bssid[1], cgiWifiAps.apList[i].bssid[2], cgiWifiAps.apList[i].bssid[3], cgiWifiAps.apList[i].bssid[4], cgiWifiAps.apList[i].bssid[5],
         cgiWifiAps.apList[i].primary, cgiWifiAps.apList[i].second,
         cgiWifiAps.apList[i].rssi, auth2str (cgiWifiAps.apList[i].authmode));
     }
@@ -348,7 +360,8 @@ char *ws_scan_results (uint16_t *strLen)
   // Release memory
   if ( cgiWifiAps.apList != NULL )
   {
-    vPortFree(cgiWifiAps.apList);
+    //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "k) Releasing allocation 0x%08X", (unsigned int)cgiWifiAps.apList);
+    vPortFree (cgiWifiAps.apList);
     cgiWifiAps.apList = NULL;
   }
 
@@ -554,7 +567,7 @@ wss_keep_alive_t wss_keep_alive_start(wss_keep_alive_config_t *config)
 {
   size_t queue_size       = config->max_clients / 2;
   size_t client_list_size = config->max_clients + queue_size;
-  ws_client_control       = (wss_keep_alive_storage_t *)calloc(1, sizeof (wss_keep_alive_storage_t) + client_list_size * sizeof (client_fd_action_t));
+  ws_client_control       = (wss_keep_alive_storage_t *)pvPortMalloc(sizeof (wss_keep_alive_storage_t) + client_list_size * sizeof (client_fd_action_t));
 
   if ( ws_client_control != NULL )
   {
@@ -604,7 +617,9 @@ bool check_client_alive_cb (wss_keep_alive_t h, int fd)
 {
   bool work_queued = false;
 
-  struct async_resp_arg *resp_arg = (async_resp_arg *)malloc(sizeof (struct async_resp_arg));
+  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc (sizeof (struct async_resp_arg));
+  //F_LOGI (true, true, LC_BRIGHT_CYAN, "Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
+
   resp_arg->hd = wss_keep_alive_get_user_ctx (h);
   resp_arg->fd = fd;
 
@@ -659,7 +674,8 @@ void wss_server_send_messages(void *data)
           resp_arg->fd      = keep_alive_storage->clients[i].fd;
           resp_arg->voidPtr = (void *)&keep_alive_storage->clients[i].user_int;
 
-          F_LOGV(true, true, LC_BRIGHT_GREEN, "Active client (hd=%p fd=%d) -> sending async message", resp_arg->hd, resp_arg->fd);
+          //F_LOGI (true, true, LC_BRIGHT_CYAN, "Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
+          F_LOGV (true, true, LC_BRIGHT_GREEN, "Active client (hd=%p fd=%d) -> sending async message", resp_arg->hd, resp_arg->fd);
 
           // Check what information we are sending
           switch ( (ws_info_type_t)keep_alive_storage->clients[i].ws_info )
@@ -692,6 +708,7 @@ void wss_server_send_messages(void *data)
               if ( apScanResLen > 0 )
               {
                 send_async_frame(resp_arg, (uint8_t *)apScanResPtr, apScanResLen);
+                //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "l) Releasing allocation 0x%08X", (unsigned int)resp_arg);
                 vPortFree(resp_arg);
               }
               break;
@@ -728,7 +745,8 @@ void wss_server_send_messages(void *data)
     // Housekeeping
     if ( apScanResPtr )
     {
-      vPortFree(apScanResPtr);
+      //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "m) Releasing allocation 0x%08X", (unsigned int)apScanResPtr);
+      vPortFree (apScanResPtr);
       apScanResPtr = NULL;
     }
   }
@@ -753,6 +771,7 @@ static void ws_async_send (void *arg)
 
   httpd_ws_send_frame_async (resp_arg->hd, resp_arg->fd, &ws_pkt);
 
+  //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "n) Releasing allocation 0x%08X", (unsigned int)resp_arg);
   vPortFree (resp_arg);
 }
 
@@ -773,6 +792,10 @@ static esp_err_t trigger_async_send (httpd_handle_t handle, httpd_req_t *req)
     resp_arg->hd = req->handle;
     resp_arg->fd = httpd_req_to_sockfd (req);
     err = httpd_queue_work (handle, ws_async_send, resp_arg);
+  }
+  else
+  {
+    //F_LOGI (true, true, LC_BRIGHT_CYAN, "Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
   }
 
   return err;
@@ -796,7 +819,6 @@ esp_err_t ws_handler (httpd_req_t *req)
   }
 
   httpd_ws_frame_t ws_pkt = {};
-  uint8_t* buf = NULL;
 
   /* Set max_len = 0 to get the frame len */
   err = httpd_ws_recv_frame (req, &ws_pkt, 0);
@@ -806,42 +828,43 @@ esp_err_t ws_handler (httpd_req_t *req)
   }
   else
   {
-    F_LOGV(true, true, LC_BRIGHT_GREEN, "frame len is %d", ws_pkt.len);
-    if ( ws_pkt.len )
+    F_LOGV (true, true, LC_BRIGHT_GREEN, "frame len is %d", ws_pkt.len);
+    if (ws_pkt.len)
     {
       /* ws_pkt.len + 1 is for NULL termination as we are expecting a string */
-      buf = (uint8_t *)calloc(1, ws_pkt.len + 1);
-      if ( buf == NULL )
+      uint8_t *buf = (uint8_t *)pvPortMalloc (ws_pkt.len + 1);
+      if (buf == NULL)
       {
-        F_LOGE(true, true, LC_YELLOW, "Failed to calloc memory for buf");
+        //F_LOGE (true, true, LC_YELLOW, "Failed to allocate %d bytes of memory for buf", ws_pkt.len + 1);
         return ESP_ERR_NO_MEM;
       }
       ws_pkt.payload = buf;
       /* Set max_len = ws_pkt.len to get the frame payload */
       err = httpd_ws_recv_frame (req, &ws_pkt, ws_pkt.len);
-      if ( err != ESP_OK )
+      if (err != ESP_OK)
       {
-        F_LOGE(true, true, LC_YELLOW, "failed with %d", err);
+        F_LOGE (true, true, LC_YELLOW, "failed with %d", err);
+        //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "o) Releasing allocation 0x%08X", (unsigned int)buf);
         vPortFree (buf);
         return err;
       }
-      F_LOGV(true, true, LC_BRIGHT_GREEN, "Got packet with message: %s", ws_pkt.payload);
+      F_LOGV (true, true, LC_BRIGHT_GREEN, "Got packet with message: %s", ws_pkt.payload);
     }
 
     bool send_frame = false;
-    F_LOGV(true, true, LC_BRIGHT_GREEN, "Packet type: %d", ws_pkt.type);
-    switch ( ws_pkt.type )
+    F_LOGV (true, true, LC_BRIGHT_GREEN, "Packet type: %d", ws_pkt.type);
+    switch (ws_pkt.type)
     {
       // If it was a PONG, update the keep-alive
       case HTTPD_WS_TYPE_PONG:
-        F_LOGV(true, true, LC_BRIGHT_GREEN, "Received PONG message");
+        F_LOGV (true, true, LC_BRIGHT_GREEN, "Received PONG message");
         err = wss_keep_alive_client_is_active ((wss_keep_alive_t)httpd_get_global_user_ctx (req->handle), httpd_req_to_sockfd (req));
         break;
       // If it was a TEXT message, just echo it back
       case HTTPD_WS_TYPE_TEXT:
         send_frame = true;
-        F_LOGV(true, true, LC_BRIGHT_GREEN, "Received packet with message: %s", ws_pkt.payload);
-        if ( strcmp ((char *)ws_pkt.payload, "Trigger async") == 0 )
+        F_LOGV (true, true, LC_BRIGHT_GREEN, "Received packet with message: %s", ws_pkt.payload);
+        if (strcmp ((char *)ws_pkt.payload, "Trigger async") == 0)
         {
           err = trigger_async_send (req->handle, req);
         }
@@ -849,7 +872,7 @@ esp_err_t ws_handler (httpd_req_t *req)
       // Response PONG packet to peer
       case HTTPD_WS_TYPE_PING:
         send_frame = true;
-        F_LOGV(true, true, LC_BRIGHT_GREEN, "Got a WS PING frame, Replying PONG");
+        F_LOGV (true, true, LC_BRIGHT_GREEN, "Got a WS PING frame, Replying PONG");
         ws_pkt.type = HTTPD_WS_TYPE_PONG;
         break;
       // Response CLOSE packet with no payload to peer
@@ -863,20 +886,16 @@ esp_err_t ws_handler (httpd_req_t *req)
         break;
     }
 
-    if ( send_frame )
+    if (send_frame)
     {
       err = httpd_ws_send_frame (req, &ws_pkt);
-      if ( err != ESP_OK )
+      if (err != ESP_OK)
       {
-        F_LOGE(true, true, LC_YELLOW, "httpd_ws_send_frame failed with %d", err);
+        F_LOGE (true, true, LC_YELLOW, "httpd_ws_send_frame failed with %d", err);
       }
     }
-    F_LOGV(true, true, LC_BRIGHT_GREEN, "ws_handler: httpd_handle_t=%p, sockfd=%d, client_info:%d", req->handle, httpd_req_to_sockfd (req), httpd_ws_get_fd_info (req->handle, httpd_req_to_sockfd (req)));
-
-    // Tidy up
-    vPortFree (buf);
+    F_LOGV (true, true, LC_BRIGHT_GREEN, "ws_handler: httpd_handle_t=%p, sockfd=%d, client_info:%d", req->handle, httpd_req_to_sockfd (req), httpd_ws_get_fd_info (req->handle, httpd_req_to_sockfd (req)));
   }
-
   // Return to sender with our status
   return err;
 }

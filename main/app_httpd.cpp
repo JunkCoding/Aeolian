@@ -359,14 +359,16 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
       else
       {
         // Try an allocate some work space
-        char *tmpBuffer = (char *)pvPortMalloc(stat.size);
+        char *tmpBuffer = (char *)pvPortMalloc (stat.size);
         if ( tmpBuffer == NULL )
         {
           F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'tmpBuffer' (%d bytes)", stat.size);
         }
         else
         {
-          int bytes = espfs_fread(f, tmpBuffer, stat.size);
+          //F_LOGI (true, true, LC_BRIGHT_CYAN, "y) Allocated %d bytes of memory starting at: 0x%08X", stat.size, (unsigned int)tmpBuffer);
+
+          int bytes = espfs_fread (f, tmpBuffer, stat.size);
           espfs_fclose(f);
 
 #if defined (CONFIG_HTTPD_USE_ASYNC)
@@ -405,7 +407,8 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 #endif
 
           // Free our work space
-          vPortFree(tmpBuffer);
+          //F_LOGI (true, true, LC_MAGENTA, "a) Releasing allocation 0x%08X", (unsigned int)tmpBuffer);
+          vPortFree (tmpBuffer);
           tmpBuffer = NULL;
         }
       }
@@ -427,7 +430,9 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 
   // Clean up our mess
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-  vPortFree(req->uri);
+  //F_LOGI (true, true, LC_MAGENTA, "b) Releasing allocation 0x%08X", (unsigned int)req->uri);
+  vPortFree (req->uri);
+  //F_LOGI (true, true, LC_MAGENTA, "c) Releasing allocation 0x%08X", (unsigned int)arg);
   vPortFree(arg);
 #else
   return err;
@@ -440,23 +445,25 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 #if defined (CONFIG_HTTPD_USE_ASYNC)
 IRAM_ATTR static  esp_err_t  async_espfs_handler (httpd_req_t * req)
 {
-  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc (sizeof(struct async_resp_arg));
-  if ( resp_arg == NULL )
+  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc (sizeof (struct async_resp_arg));
+  if (resp_arg == NULL)
   {
     F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'resp_arg'", sizeof(struct async_resp_arg));
   }
   else
   {
+    //F_LOGI (true, true, LC_BRIGHT_CYAN, "x) Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
+
     char decUri[512] = {};
     url_decode (decUri, req->uri, 512);
-    //printf("cgiConfig: %s -> %s\n", req->uri, decUri);
+    //F_LOGV(true, true, LC_GREY, "cgiConfig: %s -> %s\n", req->uri, decUri);
 
     resp_arg->uri = strdup (decUri);
     resp_arg->fd  = httpd_req_to_sockfd (req);
     resp_arg->hd  = req->handle;
     resp_arg->fp  = req->user_ctx;
 
-    //printf("%0X -> %0X *\n", (unsigned int)&resp_arg->fp, (unsigned int)resp_arg->fp);
+    //F_LOGV(true, true, LC_MAGENTA, "%0X -> %0X *\n", (unsigned int)&resp_arg->fp, (unsigned int)resp_arg->fp);
 
     if ( resp_arg->fd < 0 )
     {
@@ -497,13 +504,16 @@ IRAM_ATTR static esp_err_t  async_cgi_handler (httpd_req_t *req)
 static esp_err_t  async_cgi_handler (httpd_req_t *req)
 #endif
 {
-  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc(sizeof(struct async_resp_arg));
-  if ( resp_arg == NULL )
+  struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc (sizeof (struct async_resp_arg));
+
+  if (resp_arg == NULL)
   {
     F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating %d bytes for 'resp_arg'", sizeof(struct async_resp_arg));
   }
   else
   {
+    //F_LOGI (true, true, LC_BRIGHT_CYAN, "z) Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
+
     char  decUri[512] = {};
     url_decode (decUri, req->uri, 512);
 

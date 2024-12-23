@@ -355,6 +355,8 @@ uint32_t get_log_messages(char **buf, uint32_t *logstart)
     }
     else
     {
+      //F_LOGI (true, true, LC_BRIGHT_CYAN, "Allocated %d bytes of memory at location 0x%08X", buflen, tmpbuf);
+
       // Pass the allocated memory address back to the caller.
       (*buf) = tmpbuf;
 

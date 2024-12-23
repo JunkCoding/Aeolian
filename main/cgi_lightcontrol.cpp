@@ -195,7 +195,6 @@ esp_err_t cgiSchedule (httpd_req_t * req)
   char decUri[URI_DECODE_BUFLEN] = {};
   url_decode (decUri, req->uri, URI_DECODE_BUFLEN);
 
-
   // Parse the HTTP request
   if (-1 == yuarel_parse (&url, decUri))
   {
@@ -258,7 +257,6 @@ esp_err_t cgiSchedule (httpd_req_t * req)
         sp = 0;
       }
 
-      printf ("sp: %d, sp: %d\n", sp, ne);
       // set current position
       int cp = sp;
       if (cp < ne)
@@ -282,7 +280,6 @@ esp_err_t cgiSchedule (httpd_req_t * req)
           }
           tmpbuf[bufptr++] = ',';
           cp++;
-          printf ("%.*s\n", bufptr, tmpbuf);
         }
 
         // Remove any trailing ','

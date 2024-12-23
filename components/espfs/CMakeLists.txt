@@ -68,11 +68,11 @@ if(AEOLIAN_DEV_ROCKET)
 endif()
 # ---------------------------------------------------------
 
-if (CONFIG_AEOLIAN_DEBUG_DEV)
+if (CONFIG_COMPRESS_ESPFS)
+  set(ESPFS_CONFIG "espfs_defaults.yaml")
+else()
   message(AUTHOR_WARNING "** Using debug espfs configuration **")
   set(ESPFS_CONFIG "espfs_debug.yaml")
-else()
-  set(ESPFS_CONFIG "espfs_defaults.yaml")
 endif()
 
 # A list of things we require to work
