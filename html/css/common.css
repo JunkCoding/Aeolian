@@ -91,7 +91,7 @@ pre {
 }
 
 .alert {
-  border-radius: 15px;
+  border-radius: 14px;
 }
 
 .heart:after {
@@ -812,16 +812,16 @@ input#ap_fixed {
   appearance: none;
   vertical-align: middle;
   background: var(--tickbox-col-bg);
-  font-size: 1.6em;
-  border-radius: 0.325em;
+  font-size: 1.2em;
+  border-radius: 0.3em;
   display: inline-block;
-  border: var(--tickbox-wid-border) solid var(--tickbox-col-border-def);
+  box-shadow: 0px 0px 0px 4px var(--tickbox-col-border-def);
   width: 1em;
   height: 1em;
   position: relative;
 }
 .tickbox input[type=checkbox]:checked {
-  border: var(--tickbox-wid-border) solid var(--tickbox-col-border-sel);
+  box-shadow: 0px 0px 0px 2px var(--tickbox-col-border-sel);
 }
 .tickbox input[type=checkbox]:before,
 .tickbox input[type=checkbox]:after {
@@ -865,6 +865,7 @@ input#ap_fixed {
 /* ---------------------------------------------------------- */
 .main {
   background-color: var(--main-col-bg);
+  box-shadow: 0 0 20px 5px #ffb5008a;
   -moz-border-radius: 12px;
   -webkit-border-radius: 12px;
   border-radius: 12px;
@@ -952,7 +953,7 @@ progress::-moz-progress-bar {
   border: 2px solid black;
   */
   margin: 0;
-  height: 24px;
+  /*height: 24px;*/
   min-width: 128px;
   cursor: pointer;
   font-size: 13px;
@@ -1289,9 +1290,9 @@ input[type=text]:focus {
 
 input[type=submit] {
   border: 2px solid var(--submit-col-border);
-  border-radius: 20px;
+  border-radius: 14px;
   min-width: 128px;
-  min-height: 24px;
+  min-height: 20px;
 }
 
 /*

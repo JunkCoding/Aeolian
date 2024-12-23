@@ -31,6 +31,21 @@ function fillTable(type, jsonData)
     return;
   }
 
+  function createFlagEl(id, state)
+  {
+    td=document.createElement('td');
+    td.className="fla_td";
+    let div=document.createElement("div");
+    div.className="tickbox";
+    el=document.createElement("input");
+    el.setAttribute("type", "checkbox");
+    el.id=id;
+    el.checked=state;
+    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
+    div.appendChild(el);
+    td.appendChild(div);
+    return td;
+  }
   let ntbdy=document.createElement('tbody');
   let l=jsonData.items.length;
   for(var i=0; i < l; i++)
@@ -95,57 +110,10 @@ function fillTable(type, jsonData)
     td.innerHTML="";
     nr.appendChild(td);
 
-    td=document.createElement('td');
-    td.className="fla_td";
-    let div=document.createElement("div");
-    div.className="tickbox";
-    el=document.createElement("input");
-    el.setAttribute("type", "checkbox");
-    el.id=`def_${type}_${sched.N}`;
-    el.checked=((Number(sched.Fl)&EVENT_DEFAULT)===EVENT_DEFAULT);
-    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
-    div.appendChild(el);
-    td.appendChild(div);
-    nr.appendChild(td);
-
-    td=document.createElement('td');
-    td.className="fla_td";
-    div=document.createElement("div");
-    div.className="tickbox";
-    el=document.createElement("input");
-    el.setAttribute("type", "checkbox");
-    el.id=`off_${type}_${sched.N}`;
-    el.checked=((Number(sched.Fl)&EVENT_LIGHTSOFF)===EVENT_LIGHTSOFF);
-    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
-    div.appendChild(el);
-    td.appendChild(div);
-    nr.appendChild(td);
-
-    td=document.createElement('td');
-    td.className="fla_td";
-    div=document.createElement("div");
-    div.className="tickbox";
-    el=document.createElement("input");
-    el.setAttribute("type", "checkbox");
-    el.id=`aut_${type}_${sched.N}`;
-    el.checked=((Number(sched.Fl)&EVENT_AUTONOMOUS)===EVENT_AUTONOMOUS);
-    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
-    div.appendChild(el);
-    td.appendChild(div);
-    nr.appendChild(td);
-
-    td=document.createElement('td');
-    td.className="fla_td";
-    div=document.createElement("div");
-    div.className="tickbox";
-    el=document.createElement("input");
-    el.setAttribute("type", "checkbox");
-    el.id=`dis_${type}_${sched.N}`;
-    el.checked=((Number(sched.Fl)&EVENT_DISABLED)===EVENT_DISABLED);
-    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
-    div.appendChild(el);
-    td.appendChild(div);
-    nr.appendChild(td);
+    nr.appendChild(createFlagEl(`def_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_DEFAULT)===EVENT_DEFAULT)));
+    nr.appendChild(createFlagEl(`off_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_LIGHTSOFF)===EVENT_LIGHTSOFF)));
+    nr.appendChild(createFlagEl(`aut_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_AUTONOMOUS)===EVENT_AUTONOMOUS)));
+    nr.appendChild(createFlagEl(`dis_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_DISABLED)===EVENT_DISABLED)));
 
     // Append to the tbody
     ntbdy.appendChild(nr);
