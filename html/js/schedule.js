@@ -3,6 +3,11 @@ var dow=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
 var moy=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 var ds=["st", "nd", "rd", "th"];
 
+var monList=[];
+var mongrp=[];
+var dayList=[];
+var dayGrp=[];
+
 const EVENT_NOFLAGS    = 0x00     // Event forces lights to be on during period or whole day
 const EVENT_LIGHTSOFF  = 0x01     // Event forces lights to be off during period or whole day
 const EVENT_AUTONOMOUS = 0x10     // Event will display with sunset/sunrise switching
@@ -33,15 +38,15 @@ function fillTable(type, jsonData)
 
   function createFlagEl(id, state)
   {
-    td=document.createElement('td');
+    let td=document.createElement('td');
     td.className="fla_td";
     let div=document.createElement("div");
     div.className="tickbox";
-    el=document.createElement("input");
+    let el=document.createElement("input");
     el.setAttribute("type", "checkbox");
     el.id=id;
     el.checked=state;
-    el.setAttribute("onchange", 'toggleEnabled(this.id, this.checked)');
+    el.setAttribute("onchange", 'toggleFlag(this.id, this.checked)');
     div.appendChild(el);
     td.appendChild(div);
     return td;
@@ -58,27 +63,35 @@ function fillTable(type, jsonData)
     // Annual only
     if(type==="annual")
     {
-      el=document.createElement('td');
+      td=document.createElement('td');
+      el=document.createElement('div');
       el.classList.add("ts-month");
-      el.innerHTML=moy[sched.M];
-      nr.appendChild(el);
+      el.setAttribute('data-value', `${sched.M}`);
+      td.appendChild(el);
+      nr.appendChild(td);
 
-      el=document.createElement('td');
+      td=document.createElement('td');
+      el=document.createElement('div');
       el.classList.add("ts-date");
-      el.innerHTML=sched.sd;
-      nr.appendChild(el);
+      el.setAttribute('data-value', `${sched.sd}`);
+      td.appendChild(el);
+      nr.appendChild(td);
 
-      el=document.createElement('td');
+      td=document.createElement('td');
+      el=document.createElement('div');
       el.classList.add("ts-date");
-      el.innerHTML=sched.ed;
-      nr.appendChild(el);
+      el.setAttribute('data-value', `${sched.ed}`);
+      td.appendChild(el);
+      nr.appendChild(td);
     }
     else
     {
-      el=document.createElement('td');
+      td=document.createElement('td');
+      el=document.createElement('div');
       el.classList.add("ts-wday");
-      el.innerHTML=dow[sched.D];
-      nr.appendChild(el);
+      el.setAttribute('data-value', `${sched.D}`);
+      td.appendChild(el);
+      nr.appendChild(td);
     }
 
     // The rest is shared
@@ -102,12 +115,17 @@ function fillTable(type, jsonData)
 
     // Attributes
     td=document.createElement('td');
-    td.className="nopadding";
-
-    td.innerHTML=sched.Th;
+    el=document.createElement('div');
+    el.className="nopadding";
+    el.setAttribute('data-value', `${sched.Th}`);
+    td.appendChild(el);
     nr.appendChild(td);
+
     td=document.createElement('td');
-    td.innerHTML="";
+    el=document.createElement('div');
+    el.className="nopadding";
+    el.setAttribute('data-value', `${sched.Br}`);
+    td.appendChild(el);
     nr.appendChild(td);
 
     nr.appendChild(createFlagEl(`def_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_DEFAULT)===EVENT_DEFAULT)));
@@ -168,6 +186,8 @@ function fetchData(JSONSource, start)
 
 function page_onload()
 {
+  var months=new monthPicker();
+
   set_background();
   fetchSchedule("weekly", 0);
   fetchSchedule("annual", 0);
@@ -181,6 +201,31 @@ function monthPicker(el)
 monthPicker.prototype={
   init: function()
   {
+    // Remove any existing dropDown class associations
+    // ------------------------------------------------
+    let mlc=monList.length;
+    if(mlc>0)
+    {
+      for(let i=0; i<mlc; i++)
+      {
+        /*
+        let oldNode=document.getElementById(ddgrp[i].id);
+        let newNode=oldNode.cloneNode(true);
+        oldNode.parentNode.insertBefore(newNode, oldNode);
+        oldNode.parentNode.removeChild(oldNode);
+        ddgrp[i]=undefined;
+        */
+      }
+      monList=[];
+    }
+
+    monList=document.getElementsByClassName("ts-month");
+    let l=monList.length;
+    for(let i=0; i<l; i++)
+    {
+      monGrp[i]=new dDropDown(moy[i]);
+    }
+
     return false;
   }
 }
