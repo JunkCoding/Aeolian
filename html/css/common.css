@@ -194,7 +194,7 @@ h6 {
 
 .alert {
   width: 100%;
-  border: 2px solid var(--alert-col-border);
+  border: 1px solid var(--alert-col-border);
   background-color: var(--def-col-bg);
   padding: 8px 14px;
 }
@@ -523,7 +523,7 @@ hr.dashed {
   /* align horizontal */
   align-items: center;
   /* align vertical */
-  border: 2px solid grey;
+  border: 1px solid grey;
 }
 
 .led_status {
@@ -549,7 +549,7 @@ hr.dashed {
 */
 .led_lights {
   /*background-color: rgba(0, 0, 0, 0.1);*/
-  padding-top: 2px;
+  padding-top: 1px;
   ;
   /*border-radius: 1.9rem;*/
   /*width: 6.5rem;*/
@@ -718,7 +718,7 @@ input[type="checkbox"] {
   overflow: hidden;
   cursor: pointer;
   border-radius: 1em;
-  border: 2px solid var(--switch-col-border);
+  border: 1px solid var(--switch-col-border);
 }
 
 .onoffswitch-inner {
@@ -815,7 +815,7 @@ input#ap_fixed {
   position: relative;
 }
 .tickbox input[type=checkbox]:checked {
-  box-shadow: 0px 0px 0px 2px var(--tickbox-col-border-sel);
+  box-shadow: 0px 0px 0px 1px var(--tickbox-col-border-sel);
 }
 .tickbox input[type=checkbox]:before,
 .tickbox input[type=checkbox]:after {
@@ -908,7 +908,7 @@ progress {
   width: 100%;
   height: 100%;
   background-color: var(--def-col-bg);
-  border: 2px solid #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 20px;
   /*
   -moz-opacity: 0.1;
@@ -944,7 +944,7 @@ progress::-moz-progress-bar {
 #tblData input {
   /*
   background-color:#0d5f97;
-  border: 2px solid black;
+  border: 1px solid black;
   */
   margin: 0;
   /*height: 24px;*/
@@ -997,7 +997,7 @@ table {
   }*/
   th,
   td {
-    padding: 2px 6px 2px;
+    padding: 1px 6px 1px;
     height: 29px;
     text-align: left;
   }
@@ -1036,7 +1036,7 @@ table {
 .status_table {
   tr th,
   tr td {
-    padding: 2px 15px 2px;
+    padding: 1px 15px 1px;
   }
   /* ------ */
   select.custSel {
@@ -1050,7 +1050,7 @@ table {
     box-shadow: 0;
     background-color: var(--def-col-bg);
     color: #888;
-    border: 2px #222;
+    border: 1px #222;
     outline: none;
     display: inline-block;
     -webkit-appearance: none;
@@ -1067,7 +1067,7 @@ table {
     -ms-transform: rotate(90deg);
     transform: rotate(90deg);
     right: 8px;
-    top: 2px;
+    top: 1px;
     padding: 0px;
     border-bottom: 1px solid var(--def-col-border);
     position: absolute;
@@ -1205,7 +1205,7 @@ input.setboot:hover {
 /*
 input.upload:disabled {
   background-color: grey;
-  border: 2px solid black;
+  border: 1px solid black;
   pointer-events: none;
 }*/
 /*********************************/
@@ -1268,7 +1268,7 @@ input {
 }
 input:disabled {
   background: grey;
-  border: 2px solid black;
+  border: 1px solid black;
   pointer-events: none;
 }
 
@@ -1281,10 +1281,13 @@ input[type=text]:focus {
 }
 
 input[type=submit] {
-  border: 2px solid var(--submit-col-border);
+  /*border: 1px solid var(--submit-col-border);*/
+  box-shadow: 0 0px 0px 1px var(--submit-col-border);
   border-radius: 14px;
   min-width: 128px;
-  min-height: 20px;
+  height:22px;
+  min-height: 22px;
+  line-height:18px;
 }
 
 /*
@@ -1313,7 +1316,8 @@ input#reboot:hover {
 div#fw-selector {
   padding: 1px 8px;
   background: #104dab;
-  border: 2px solid var(--submit-col-border);
+  box-shadow: 0 0px 0px 1px var(--submit-col-border);
+  /*border: 1px solid var(--submit-col-border);*/
   margin: 0px 14px 8px 8px;
   position: relative;
   color: var(--def-col-fg);;
@@ -1323,7 +1327,8 @@ div#fw-selector {
   float: inline-start;
   cursor: pointer;
   width: 110px;
-  height: 24px;
+  height: 22px;
+  line-height:18px;
 }
 
 div#fw-selector:hover {
@@ -1448,7 +1453,7 @@ span#fw-details {
 .table-row.row {
   border-top: 1px solid var(--def-col-border);
   border-collapse: collapse;
-  padding-top: 2px;
+  padding-top: 1px;
 }
 
 .label {
@@ -1552,7 +1557,7 @@ span#fw-details {
   width: 200px;
   height: 24px;
   margin: 0 0 auto;
-  padding: 2px 5px;
+  padding: 1px 5px 1px;
   background-color: var(--def-col-bg);
   border-radius: 7px;
   border: 1px solid var(--dd-col-bo-def);
@@ -1580,7 +1585,7 @@ span#fw-details {
   top: 140%;
   left: 0;
   right: 0;
-  padding: 2px 5px;
+  padding: 1px 5px 1px;
   background-color: var(--dd-col-bg);
   border-radius: inherit;
   border: 1px solid var(--dd-col-bo-sel);
@@ -1647,7 +1652,7 @@ span#fw-details {
 
 .ddlist.active .dropdown {
   opacity: 1;
-  padding: 2px 5px;
+  padding: 1px 5px 1px;
   pointer-events: auto;
   z-index: 10;
 }
@@ -1708,21 +1713,23 @@ span.help {
 .no-pointerevents .ddlist.active .dropdown {
   display: block;
 }
-
+/* ------ */
+input:hover {
+  background-color: #a0202085;
+}
 /* ------ */
 .radiobtn {
   all: initial;
   position: relative;
   display: block;
 }
-
 .radiobtn label {
   display: block;
   background: #4e46464d;
   color: #222;
   border-radius: 5px;
   padding: 10px 20px;
-  border: 2px solid #4e464633;
+  border: 1px solid #4e464633;
   margin-bottom: 5px;
   cursor: pointer;
 }

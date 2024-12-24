@@ -113,8 +113,9 @@
   background-color: var(--main-col-bg);
   position: absolute;
   border-radius:14px;
-  padding: 5px;
-  width: 750px;
+  padding:5px;
+  width:820px;
+  min-width:820px;
 }
 
 #mydivheader {
