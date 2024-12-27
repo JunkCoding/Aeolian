@@ -1538,130 +1538,87 @@ span#fw-details {
   background: #30303030;
   color: greenyellow;
 }
-
 .dd-wrapper {
-  margin: 0px;
-  font-weight: 400;
-}
+  div {
+    position: relative;
+    width: 200px;
+    height: 24px;
+    margin: 0 0 auto;
+    padding: 1px 5px 1px;
+    background-color: var(--def-col-bg);
+    color: var(--def-col-fg);
+    border-radius: 4px;
+    border: 0;
+    cursor: pointer;
+    outline: none;
+  }
 
+  div:after {
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    margin-top: -3px;
+    border-width: 6px 6px 0 6px;
+    border-style: solid;
+  }
+
+  ul {
+    max-height: 220px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    box-shadow: 0 0 2px 1px var(--dd-col-lu-bo);
+    position: absolute;
+    top: 140%;
+    left: 0;
+    right: 0;
+    padding: 1px 5px 1px;
+    background-color: var(--dd-col-lu-bg);
+    color: var(--dd-col-lu-fg);
+    box-shadow: 0 0 2px 1px var(--dd-col-lu-bo);
+    border-radius: inherit;
+    font-weight: normal;
+    list-style: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  li a {
+    display: block;
+    height: 27px;
+    padding: 5px;
+    text-decoration: none;
+    background: var(--dd-col-li-bg);
+    color: var(--dd-col-li-fg);
+    border-bottom: 1px solid var(--dd-col-bo-sel);
+    /*box-shadow: inset 0px 1px 25px 0px #517e9280;*/
+    box-shadow: inset 0px 1px 1px 0px var(--def-col-shadow);
+  }
+
+  li i {
+    float: right;
+    color: inherit;
+  }
+
+  li:hover a {
+    background-color: var(--dd-col-bg-hl);
+    color: var(--dd-col-fg-hl);
+  }
+
+  .ddlist.active .dropdown {
+    opacity: 1;
+    padding: 0;
+    pointer-events: auto;
+    z-index: 10;
+  }
+}
 .dd-wrapper:after {
   clear: both;
   content: "";
   display: table;
 }
-
-/* DEMO 3 */
-.dropdown {
-  max-height: 220px;
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-
-.ddlist {
-  position: relative;
-  width: 200px;
-  height: 24px;
-  margin: 0 0 auto;
-  padding: 1px 5px 1px;
-  background-color: var(--def-col-bg);
-  color: var(--dd-col-fg-sel);
-  border-radius: 7px;
-  border: 1px solid var(--dd-col-bo-def);
-  box-shadow: 0 1px 1px var(--def-col-shadow);
-  cursor: pointer;
-  outline: none;
-}
-
-.ddlist:after {
-  content: "";
-  width: 0;
-  height: 0;
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  margin-top: -3px;
-  border-width: 6px 6px 0 6px;
-  border-style: solid;
-}
-
-.ddlist .dropdown {
-  box-shadow: 0 0 2px 1px var(--dd-col-lu-bo);
-  position: absolute;
-  top: 140%;
-  left: 0;
-  right: 0;
-  padding: 1px 5px 1px;
-  background-color: var(--dd-col-bg);
-  border-radius: inherit;
-  box-shadow: 0 0 5px var(--def-col-shadow);
-  font-weight: normal;
-  list-style: none;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.ddlist .dropdown:after {
-  content: "";
-  width: 0;
-  height: 0;
-  position: absolute;
-  bottom: 100%;
-  right: 15px;
-  border-width: 0 6px 6px 6px;
-  border-style: solid;
-  border-color: var(--def-col-border);
-}
-
-.ddlist .dropdown:before {
-  content: "";
-  width: 0;
-  height: 0;
-  position: absolute;
-  bottom: 100%;
-  right: 13px;
-  border-width: 0 8px 8px 8px;
-  border-style: solid;
-  border-color: var(--def-col-border);
-}
-
-.ddlist .dropdown li a {
-  display: block;
-  height: 27px;
-  padding: 5px;
-  text-decoration: none;
-  background: var(--dd-col-li-bg);
-  color: var(--dd-col-li-fg);
-  border-bottom: 1px solid var(--dd-col-bo-sel);
-  /*box-shadow: inset 0px 1px 25px 0px #517e9280;*/
-  box-shadow: inset 0px 1px 1px 0px var(--def-col-shadow);
-}
-
-.ddlist .dropdown li i {
-  float: right;
-  color: inherit;
-}
-
-.ddlist .dropdown li:first-of-type a {
-  border-radius: 7px 7px 0 0;
-}
-
-.ddlist .dropdown li:last-of-type a {
-  border: none;
-  border-radius: 0 0 7px 7px;
-}
-
-.ddlist .dropdown li:hover a {
-  background-color: var(--dd-col-bg-hl);
-  color: var(--dd-col-fg-hl);
-}
-
-.ddlist.active .dropdown {
-  opacity: 1;
-  padding: 1px 5px 1px;
-  pointer-events: auto;
-  z-index: 10;
-}
-
 .notes {
   display: block;
   padding: 8px;
