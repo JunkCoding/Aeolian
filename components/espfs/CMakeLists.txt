@@ -49,6 +49,7 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/js/flash.js"
   "${PROJECT_DIR}/html/js/graphs.js"
   "${PROJECT_DIR}/html/js/index.js"
+  "${PROJECT_DIR}/html/js/monthsel.js"
   "${PROJECT_DIR}/html/js/schedule.js"
   "${PROJECT_DIR}/html/js/smoothie.js"
   "${PROJECT_DIR}/html/js/tasks.js"

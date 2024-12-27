@@ -3,7 +3,7 @@
 :root {
   --def-col-fg: #fff;
   --def-col-bg: #1a1616f0;
-  --def-col-border: #b90101d1;
+  --def-col-border: #b90101e5;
   --def-col-input: #75d6ee;
   --def-col-shadow: #000;
 
@@ -13,12 +13,17 @@
 
   --dd-col-fg: #d99f17;
   --dd-col-bg: #5f0000;
-  --dd-col-bg-hl: #d28e11;
+  --dd-col-bg-hl: #1287a5e0;
   --dd-col-fg-hl: #fff;
-  --dd-col-fg-sel: #75d6ee;
+  --dd-col-fg-sel: #1287a5e0;
   --dd-col-fg-lis: #fff;
   --dd-col-bo-def: #ff000061;
-  --dd-col-bo-sel: #ffffffd9;
+  --dd-col-bo-sel: #ffffffe5;
+  --dd-col-lu-bo: #fff;
+  --dd-col-lu-bg: #5f0231e5;
+  --dd-col-lu-fg: #fff;
+  --dd-col-li-bg: #5f0231e5;
+  --dd-col-li-fg: #fff;
 
   --tickbox-col-border-def: #004cffad;
   --tickbox-col-border-sel: #8e24aa;
@@ -1559,12 +1564,12 @@ span#fw-details {
   margin: 0 0 auto;
   padding: 1px 5px 1px;
   background-color: var(--def-col-bg);
+  color: var(--dd-col-fg-sel);
   border-radius: 7px;
   border: 1px solid var(--dd-col-bo-def);
   box-shadow: 0 1px 1px var(--def-col-shadow);
   cursor: pointer;
   outline: none;
-  color: var(--dd-col-fg-sel);
 }
 
 .ddlist:after {
@@ -1577,10 +1582,10 @@ span#fw-details {
   margin-top: -3px;
   border-width: 6px 6px 0 6px;
   border-style: solid;
-  border-color: var(--def-col-border);
 }
 
 .ddlist .dropdown {
+  box-shadow: 0 0 2px 1px var(--dd-col-lu-bo);
   position: absolute;
   top: 140%;
   left: 0;
@@ -1588,7 +1593,6 @@ span#fw-details {
   padding: 1px 5px 1px;
   background-color: var(--dd-col-bg);
   border-radius: inherit;
-  border: 1px solid var(--dd-col-bo-sel);
   box-shadow: 0 0 5px var(--def-col-shadow);
   font-weight: normal;
   list-style: none;
@@ -1625,7 +1629,8 @@ span#fw-details {
   height: 27px;
   padding: 5px;
   text-decoration: none;
-  color: var(--dd-col-fg-sel);
+  background: var(--dd-col-li-bg);
+  color: var(--dd-col-li-fg);
   border-bottom: 1px solid var(--dd-col-bo-sel);
   /*box-shadow: inset 0px 1px 25px 0px #517e9280;*/
   box-shadow: inset 0px 1px 1px 0px var(--def-col-shadow);

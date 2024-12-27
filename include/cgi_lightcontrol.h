@@ -6,6 +6,9 @@
 #include "app_yuarel.h"
 #include "app_httpd.h"
 
+#define STR_ANNUAL    "annual"
+#define STR_WEEKLY    "weekly"
+
 typedef enum
 {
   SCHED_NONE,

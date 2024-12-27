@@ -1,12 +1,6 @@
 
 var dow=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-var moy=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 var ds=["st", "nd", "rd", "th"];
-
-var monList=[];
-var mongrp=[];
-var dayList=[];
-var dayGrp=[];
 
 const EVENT_NOFLAGS    = 0x00     // Event forces lights to be on during period or whole day
 const EVENT_LIGHTSOFF  = 0x01     // Event forces lights to be off during period or whole day
@@ -65,9 +59,10 @@ function fillTable(type, jsonData)
     {
       td=document.createElement('td');
       el=document.createElement('div');
-      el.classList.add("ts-month");
+      el.classList.add("monthsel");
       el.setAttribute('data-value', `${sched.M}`);
       td.appendChild(el);
+      append_monthSel(el);
       nr.appendChild(td);
 
       td=document.createElement('td');
@@ -186,46 +181,8 @@ function fetchData(JSONSource, start)
 
 function page_onload()
 {
-  var months=new monthPicker();
-
   set_background();
   fetchSchedule("weekly", 0);
   fetchSchedule("annual", 0);
 }
 
-
-function monthPicker(el)
-{
-
-}
-monthPicker.prototype={
-  init: function()
-  {
-    // Remove any existing dropDown class associations
-    // ------------------------------------------------
-    let mlc=monList.length;
-    if(mlc>0)
-    {
-      for(let i=0; i<mlc; i++)
-      {
-        /*
-        let oldNode=document.getElementById(ddgrp[i].id);
-        let newNode=oldNode.cloneNode(true);
-        oldNode.parentNode.insertBefore(newNode, oldNode);
-        oldNode.parentNode.removeChild(oldNode);
-        ddgrp[i]=undefined;
-        */
-      }
-      monList=[];
-    }
-
-    monList=document.getElementsByClassName("ts-month");
-    let l=monList.length;
-    for(let i=0; i<l; i++)
-    {
-      monGrp[i]=new dDropDown(moy[i]);
-    }
-
-    return false;
-  }
-}

@@ -46,3 +46,60 @@ function dragElement(elmnt)
     document.onmousemove=null;
   }
 }
+
+/*
+function Dragger(element)
+{
+  this.element=element;
+  this.x=0;
+  this.y=0;
+  this.element.addEventListener('mousedown', this);
+}
+
+// trigger .ontype from event.type, like onmousedown
+Dragger.prototype.handleEvent=function(event)
+{
+  var method='on'+event.type;
+  // call method if there
+  if(this[method])
+  {
+    this[method](event);
+  }
+};
+
+Dragger.prototype.onmousedown=function(event)
+{
+  this.dragStartX=this.x;
+  this.dragStartY=this.y;
+  this.pointerDownX=event.pageX;
+  this.pointerDownY=event.pageY;
+
+  window.addEventListener('mousemove', this);
+  window.addEventListener('mouseup', this);
+};
+
+Dragger.prototype.onmousemove=function(event)
+{
+  var moveX=event.pageX-this.pointerDownX;
+  var moveY=event.pageY-this.pointerDownY;
+  this.x=this.dragStartX+moveX;
+  this.y=this.dragStartY+moveY;
+  this.element.style.left=this.x+'px';
+  this.element.style.top=this.y+'px';
+};
+
+Dragger.prototype.onmouseup=function()
+{
+  window.removeEventListener('mousemove', this);
+  window.removeEventListener('mouseup', this);
+};
+
+// --------------- //
+
+var dragElems=document.querySelectorAll('.draggable');
+for(var i=0; i<dragElems.length; i++)
+{
+  var dragElem=dragElems[i];
+  new Dragger(dragElem);
+}
+*/

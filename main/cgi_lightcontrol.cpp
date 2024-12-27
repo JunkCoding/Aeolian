@@ -189,8 +189,8 @@ esp_err_t cgiSchedule (httpd_req_t * req)
   struct   yuarel_param params[MAX_URI_PARTS];
   char     tmpbuf[BUF_SIZE + 1];
   uint16_t bufptr = 0;
-  int      sp = 0;
-  int      pc = 0;
+  int16_t  sp = 0;
+  int16_t  pc = 0;
   // Work with a url decoded version of the original uri string
   char decUri[URI_DECODE_BUFLEN] = {};
   url_decode (decUri, req->uri, URI_DECODE_BUFLEN);
@@ -211,12 +211,12 @@ esp_err_t cgiSchedule (httpd_req_t * req)
       }
       else if (!str_cmp ("schedule", params[pc].key))
       {
-        if (!str_cmp ("weekly", params[pc].val))
+        if (!str_cmp (STR_WEEKLY, params[pc].val))
         {
           err = ESP_OK;
           schedType = SCHED_WEEKLY;
         }
-        else if (!str_cmp ("annual", params[pc].val))
+        else if (!str_cmp (STR_ANNUAL, params[pc].val))
         {
           err = ESP_OK;
           schedType = SCHED_ANNUAL;
@@ -235,17 +235,17 @@ esp_err_t cgiSchedule (httpd_req_t * req)
     if (err == ESP_OK && schedType > SCHED_NONE)
     {
       // Get the number of events available;
-      int ne = 0;
-      char *type = NULL;
+      int16_t ne = 0;
+      const char *type = NULL;
       switch (schedType)
       {
         case SCHED_WEEKLY:
           ne = _get_num_w_events ();
-          type = "weekly";
+          type = STR_WEEKLY;
           break;
         case SCHED_ANNUAL:
           ne = _get_num_a_events ();
-          type = "annual";
+          type = STR_ANNUAL;
           break;
         default:
           break;
@@ -258,7 +258,7 @@ esp_err_t cgiSchedule (httpd_req_t * req)
       }
 
       // set current position
-      int cp = sp;
+      int16_t cp = sp;
       if (cp < ne)
       {
         // Begin our response
