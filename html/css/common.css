@@ -975,6 +975,7 @@ table {
   tr th,
   tbody th,
   thead th {
+    padding: 1px 2px 1px 8px;
     font-size: 17px;
     font-weight: 400;
   }
@@ -1002,7 +1003,7 @@ table {
   }*/
   th,
   td {
-    padding: 1px 6px 1px;
+    padding: 0px 8px 1px;
     height: 30px;
     text-align: left;
   }

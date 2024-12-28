@@ -3,7 +3,6 @@
   th.mon_hdr {
     width: 135px;
     min-width: 135px;
-    padding: 5px;
   }
   .dat_hdr {
     width: 70px;
@@ -43,7 +42,6 @@
 .row-header {
   box-shadow: 0 0 0 1px var(--def-col-border);
   vertical-align: bottom;
-  padding-bottom: 5px;
 }
 
 .table-header-rotated th.rotate-45 > div {
@@ -105,7 +103,7 @@
     background-color: var(--def-col-bg);
     color: var(--def-col-fg);
     font-size: 15px;
-    padding: 1px 2px 1px 12px;
+    padding-left: 4px;
     border-radius: 4px;
     font-weight: 400;
     cursor: pointer;
@@ -170,7 +168,7 @@
   &::before {
     content: "";
     position: absolute;
-    right: 20px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%) rotate(45deg);
     border: 5px solid;
@@ -191,6 +189,8 @@
     transform: rotate(-135deg);
     top: -3px;
     border-color: var(--men-bg-col);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-left-color: rgba(0, 0, 0, 0);
     box-shadow: 1px 1px 4px -2px rgba(0, 0, 0, 0.4);
   }
 }
