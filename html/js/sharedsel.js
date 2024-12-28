@@ -1,105 +1,168 @@
-monlst=[];
-mongrp=[];
+var shrdGrp=[];
 
 /* =========================================================== */
-function init_monthSel()
+function init_sharedSel()
 {
   // Remove any existing class associations
   // ------------------------------------------------
-  let g=mongrp.length;
+  let g=shrdGrp.length;
   if(g>0)
   {
     for(let i=0; i<g; i++)
     {
-      let oldNode=document.getElementById(mongrp[i].id);
+      let oldNode=document.getElementById(shrdGrp[i].id);
       let newNode=oldNode.cloneNode(true);
       oldNode.parentNode.insertBefore(newNode, oldNode);
       oldNode.parentNode.removeChild(oldNode);
-      mongrp[i]=undefined;
+      shrdGrp[i]=undefined;
     }
     mongrp=[];
   }
 
-  monlst=document.getElementsByClassName("monthsel");
-  let l=monlst.length;
+  let lst=document.getElementsByClassName("sharedSel");
+  let l=lst.length;
   for(let i=0; i<l; i++)
   {
-    monlst[i]=new monthSel(monlst[i]);
+    lst[i]=new sharedSel(lst[i]);
   }
 }
 
-function append_monthSel(el)
+function append_sharedSel(el)
 {
-  let l=mongrp.length;
+  let l=shrdGrp.length;
   for(let i=0; i<l; i++)
   {
-    if(mongrp[i].id===el.id)
+    if(shrdGrp[i].id===el.id)
     {
       return;
     }
   }
-  mongrp[l]=new monthSel(el);
+  shrdGrp[l]=new sharedSel(el);
 }
-
-var monthMenu=undefined;
-class monthSel
+// https://stackoverflow.com/questions/175739/how-can-i-check-if-a-string-is-a-valid-number
+function isNumeric(str)
+{
+  if(typeof str!="string") return false; // we only process strings!
+  return !isNaN(str)&& // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+    !isNaN(parseFloat(str)); // ...and ensure strings of whitespace fail
+}
+class sharedSel
 {
   static #initialised=false;
-  #months={
-    "menu": [
-      {"name": "January", "value": 0, "submenu": null},
-      {"name": "February", "value": 1, "submenu": null},
-      {"name": "March", "value": 2, "submenu": null},
-      {"name": "April", "value": 3, "submenu": null},
-      {"name": "May", "value": 4, "submenu": null},
-      {"name": "June", "value": 5, "submenu": null},
-      {"name": "July", "value": 6, "submenu": null},
-      {"name": "August", "value": 7, "submenu": null},
-      {"name": "September", "value": 8, "submenu": null},
-      {"name": "October", "value": 9, "submenu": null},
-      {"name": "November", "value": 10, "submenu": null},
-      {"name": "December", "value": 11, "submenu": null}
-    ]
-  };
-
+  static #_menus=[null, null];
+  static #options=[
+    {
+      "name": "month",
+      "menu": [
+        {"name": "January", "value": 0, "submenu": null},
+        {"name": "February", "value": 1, "submenu": null},
+        {"name": "March", "value": 2, "submenu": null},
+        {"name": "April", "value": 3, "submenu": null},
+        {"name": "May", "value": 4, "submenu": null},
+        {"name": "June", "value": 5, "submenu": null},
+        {"name": "July", "value": 6, "submenu": null},
+        {"name": "August", "value": 7, "submenu": null},
+        {"name": "September", "value": 8, "submenu": null},
+        {"name": "October", "value": 9, "submenu": null},
+        {"name": "November", "value": 10, "submenu": null},
+        {"name": "December", "value": 11, "submenu": null}
+      ]
+    },
+    {
+      "name": "day",
+      "menu": [
+        {"name": "Monday", "value": 0, "submenu": null},
+        {"name": "Tuesday", "value": 1, "submenu": null},
+        {"name": "Wednesday", "value": 2, "submenu": null},
+        {"name": "Thursday", "value": 3, "submenu": null},
+        {"name": "Friday", "value": 4, "submenu": null},
+        {"name": "Saturday", "value": 5, "submenu": null},
+        {"name": "Sunday", "value": 6, "submenu": null}
+      ]
+    },
+  ];
   constructor(ctarget)
   {
+    this.header='';
     this.target=ctarget;
-    this.value='';
-    this.header=undefined;
-    let mon=0;
+    this.menu=-1;
+    this.val=-1;
+
+    // We need to ensure this is done first
+    if(sharedSel.#initialised===false)
+    {
+      sharedSel.#initialised=true;
+      console.log('creating menus');
+      for(let i=0; i<sharedSel.#options.length; i++)
+      {
+        sharedSel.#_menus[i]=document.createElement('ul');
+        this.parseMenu(sharedSel.#_menus[i], sharedSel.#options[i].menu);
+        sharedSel.#_menus[i].addEventListener("mouseleave", this);
+      }
+    }
+    var x='';
     try
     {
-      mon=ctarget.getAttribute('data-value');
+      x=ctarget.getAttribute('data-value');
+      x=x.split(':');
     }
     catch
     {
-      console.error('could not read data-value');
+      console.error('Error parsing data-value');
+      return false;
     }
+
+    // Check if the user knows which index they want
+    if(isNumeric(x[0]))
+    {
+      this.menu=Number(x[0]);
+      if(this.menu<0||this.menu>=sharedSel.#options.length)
+      {
+        this.menu=-2;
+      }
+    }
+    // Ekse we are looking for our target by name
+    else
+    {
+      for(var i=0; i<sharedSel.#options.length&&this.menu<0; i++)
+      {
+        if(x[0]===sharedSel.#options[i].name)
+        {
+          this.menu=i;
+        }
+      }
+    }
+
+    // Second field should always be a number
+    if(isNumeric(x[1]))
+    {
+      this.val=Number(x[1]);
+    }
+
+    // Check both required values were set
+    if(this.menu<0||this.val<0)
+    {
+      console.error(`Failed to parse menu item: ${this.menu}:${this.val}`);
+      return;
+    }
+    // Sanitize input
+    else if(this.val<0||this.val>(sharedSel.#options[this.menu].menu.length-1))
+    {
+      this.val=0;
+    }
+
     ctarget.classList.add('dropdown-container');
     /*** *** Create toggle switch *** ***/
     this.header=document.createElement('div');
     //this.header.classList.add('dropdown-toggle', 'hover-dropdown');
     this.header.classList.add('dropdown-toggle', 'click-dropdown');
-    this.header.innerHTML=this.#months.menu[mon].name;
+    this.header.innerHTML=sharedSel.#options[this.menu].menu[this.val].name;
     ctarget.appendChild(this.header);
     /*** *** Create dropdown menu *** ***/
     let d=document.createElement('div');
     d.classList.add('dropdown-menu');
     ctarget.appendChild(d);
-    if(monthMenu===undefined)
-    {
-      console.log('creating menu');
-      monthMenu=document.createElement('ul');
-      //monthMenu.classList.add('menuList');
-      this.parseMenu(monthMenu, this.#months.menu);
-    }
-    // Prevent duplicating functions for each element we add
-    if(monthSel.#initialised===false)
-    {
-      monthSel.#initialised=true;
-      monthMenu.addEventListener("mouseleave", this);
-    }
+
     ctarget.addEventListener("click", this);
     // For opening on hover
     //ctarget.addEventListener("mouseover", this);
@@ -131,9 +194,9 @@ class monthSel
     if(event.target.classList.contains('click-dropdown')===true)
     {
       let m=event.target.parentNode.querySelectorAll('.dropdown-menu')[0];
-      if(monthMenu.parentNode!==m)
+      if(sharedSel.#_menus[_this.menu].parentNode!==m)
       {
-        m.appendChild(monthMenu);
+        m.appendChild(sharedSel.#_menus[_this.menu]);
       }
       /**** **** **** ****/
       if(event.target.nextElementSibling.classList.contains('dropdown-active')===true)
@@ -154,7 +217,7 @@ class monthSel
       {
         let tgt=event.target;
         _this.value=tgt.value;
-        _this.header.innerHTML=_this.#months.menu[tgt.value].name;
+        _this.header.innerHTML=sharedSel.#options[_this.menu].menu[tgt.value].name;
       }
       _this.closeDropdown();
     }
@@ -214,3 +277,4 @@ class monthSel
     }
   }
 }
+init_sharedSel();

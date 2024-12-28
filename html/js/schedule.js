@@ -59,10 +59,10 @@ function fillTable(type, jsonData)
     {
       td=document.createElement('td');
       el=document.createElement('div');
-      el.classList.add("monthsel");
-      el.setAttribute('data-value', `${sched.M}`);
+      el.classList.add("sharedsel");
+      el.setAttribute('data-value', `0:${sched.M}`);
       td.appendChild(el);
-      append_monthSel(el);
+      append_sharedSel(el);
       nr.appendChild(td);
 
       td=document.createElement('td');
@@ -83,8 +83,9 @@ function fillTable(type, jsonData)
     {
       td=document.createElement('td');
       el=document.createElement('div');
-      el.classList.add("ts-wday");
-      el.setAttribute('data-value', `${sched.D}`);
+      el.classList.add("sharedsel");
+      el.setAttribute('data-value', `1:${sched.D}`);
+      append_sharedSel(el);
       td.appendChild(el);
       nr.appendChild(td);
     }
