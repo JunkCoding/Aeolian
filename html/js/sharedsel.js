@@ -80,7 +80,42 @@ class sharedSel
         {"name": "Sunday", "value": 6, "submenu": null}
       ]
     },
-  ];
+    {
+      "name": "date",
+      "menu": [
+        {"name": "1st", "value": 0, "submenu": null},
+        {"name": "2nd", "value": 1, "submenu": null},
+        {"name": "3rd", "value": 2, "submenu": null},
+        {"name": "4th", "value": 3, "submenu": null},
+        {"name": "5th", "value": 4, "submenu": null},
+        {"name": "6th", "value": 5, "submenu": null},
+        {"name": "7th", "value": 6, "submenu": null},
+        {"name": "8th", "value": 7, "submenu": null},
+        {"name": "9th", "value": 8, "submenu": null},
+        {"name": "10th", "value": 9, "submenu": null},
+        {"name": "11th", "value": 10, "submenu": null},
+        {"name": "12th", "value": 11, "submenu": null},
+        {"name": "13th", "value": 12, "submenu": null},
+        {"name": "14th", "value": 13, "submenu": null},
+        {"name": "15th", "value": 14, "submenu": null},
+        {"name": "16th", "value": 15, "submenu": null},
+        {"name": "17th", "value": 16, "submenu": null},
+        {"name": "18th", "value": 17, "submenu": null},
+        {"name": "19th", "value": 18, "submenu": null},
+        {"name": "20th", "value": 19, "submenu": null},
+        {"name": "21st", "value": 20, "submenu": null},
+        {"name": "22nd", "value": 21, "submenu": null},
+        {"name": "23rd", "value": 22, "submenu": null},
+        {"name": "24th", "value": 23, "submenu": null},
+        {"name": "25th", "value": 24, "submenu": null},
+        {"name": "26th", "value": 25, "submenu": null},
+        {"name": "27th", "value": 26, "submenu": null},
+        {"name": "28th", "value": 27, "submenu": null},
+        {"name": "29th", "value": 28, "submenu": null},
+        {"name": "30th", "value": 29, "submenu": null},
+        {"name": "31st", "value": 30, "submenu": null},
+      ]
+    }];
   constructor(ctarget)
   {
     this.header='';

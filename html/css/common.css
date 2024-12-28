@@ -1567,6 +1567,7 @@ span#fw-details {
   }
 
   ul {
+    clip-path: inset(0 round 9px);
     max-height: 220px;
     overflow-x: hidden;
     overflow-y: scroll;
@@ -1579,7 +1580,6 @@ span#fw-details {
     background-color: var(--dd-col-lu-bg);
     color: var(--dd-col-lu-fg);
     box-shadow: 0 0 2px 1px var(--dd-col-lu-bo);
-    border-radius: inherit;
     font-weight: normal;
     list-style: none;
     opacity: 0;
@@ -1619,6 +1619,14 @@ span#fw-details {
   clear: both;
   content: "";
   display: table;
+}
+ul::-webkit-scrollbar-thumb {
+  background-color: var(--dd-col-li-fg);
+}
+
+ul::-webkit-scrollbar {
+  background-color: var(--dd-col-li-bg);
+  width: 6px;
 }
 .notes {
   display: block;

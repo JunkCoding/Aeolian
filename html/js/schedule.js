@@ -68,15 +68,17 @@ function fillTable(type, jsonData)
       td=document.createElement('td');
       el=document.createElement('div');
       el.classList.add("ts-date");
-      el.setAttribute('data-value', `${sched.sd}`);
+      el.setAttribute('data-value', `2:${Number(sched.sd)-1}`);
       td.appendChild(el);
+      append_sharedSel(el);
       nr.appendChild(td);
 
       td=document.createElement('td');
       el=document.createElement('div');
       el.classList.add("ts-date");
-      el.setAttribute('data-value', `${sched.ed}`);
+      el.setAttribute('data-value', `2:${Number(sched.ed)-1}`);
       td.appendChild(el);
+      append_sharedSel(el);
       nr.appendChild(td);
     }
     else
