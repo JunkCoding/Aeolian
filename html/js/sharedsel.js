@@ -49,8 +49,8 @@ function isNumeric(str)
 class sharedSel
 {
   static #initialised=false;
-  static #_menus=[null, null];
-  static #options=[
+  static #_menus=[];
+  static options=[
     {
       "name": "month",
       "menu": [
@@ -111,9 +111,9 @@ class sharedSel
         {"name": "26th", "value": 25, "submenu": null},
         {"name": "27th", "value": 26, "submenu": null},
         {"name": "28th", "value": 27, "submenu": null},
-        {"name": "29th", "value": 28, "submenu": null},
-        {"name": "30th", "value": 29, "submenu": null},
-        {"name": "31st", "value": 30, "submenu": null},
+        {"name": "29th", "value": 28, "submenu": null, "classes": ["noleap"]},
+        {"name": "30th", "value": 29, "submenu": null, "classes": ["feb"]},
+        {"name": "31st", "value": 30, "submenu": null, "classes": ["feb", "ajsn"]},
       ]
     }];
   constructor(ctarget)
@@ -128,10 +128,11 @@ class sharedSel
     {
       sharedSel.#initialised=true;
       console.log('creating menus');
-      for(let i=0; i<sharedSel.#options.length; i++)
+      for(let i=0; i<sharedSel.options.length; i++)
       {
         sharedSel.#_menus[i]=document.createElement('ul');
-        this.parseMenu(sharedSel.#_menus[i], sharedSel.#options[i].menu);
+        console.log(`parsing: ${sharedSel.options[i].name}`);
+        this.parseMenu(sharedSel.#_menus[i], sharedSel.options[i].menu);
         sharedSel.#_menus[i].addEventListener("mouseleave", this);
       }
     }
@@ -151,7 +152,7 @@ class sharedSel
     if(isNumeric(x[0]))
     {
       this.menu=Number(x[0]);
-      if(this.menu<0||this.menu>=sharedSel.#options.length)
+      if(this.menu<0||this.menu>=sharedSel.options.length)
       {
         this.menu=-2;
       }
@@ -159,9 +160,9 @@ class sharedSel
     // Ekse we are looking for our target by name
     else
     {
-      for(var i=0; i<sharedSel.#options.length&&this.menu<0; i++)
+      for(var i=0; i<sharedSel.options.length&&this.menu<0; i++)
       {
-        if(x[0]===sharedSel.#options[i].name)
+        if(x[0]===sharedSel.options[i].name)
         {
           this.menu=i;
         }
@@ -177,11 +178,12 @@ class sharedSel
     // Check both required values were set
     if(this.menu<0||this.val<0)
     {
-      console.error(`Failed to parse menu item: ${this.menu}:${this.val}`);
+      //console.error(`Failed to parse menu item: ${this.menu}:${this.val}`);
+      console.error(`Failed to parse menu item: ${ctarget}`);
       return;
     }
     // Sanitize input
-    else if(this.val<0||this.val>(sharedSel.#options[this.menu].menu.length-1))
+    else if(this.val<0||this.val>(sharedSel.options[this.menu].menu.length-1))
     {
       this.val=0;
     }
@@ -191,7 +193,7 @@ class sharedSel
     this.header=document.createElement('div');
     //this.header.classList.add('dropdown-toggle', 'hover-dropdown');
     this.header.classList.add('dropdown-toggle', 'click-dropdown');
-    this.header.innerHTML=sharedSel.#options[this.menu].menu[this.val].name;
+    this.header.innerHTML=sharedSel.options[this.menu].menu[this.val].name;
     ctarget.appendChild(this.header);
     /*** *** Create dropdown menu *** ***/
     let d=document.createElement('div');
@@ -210,6 +212,16 @@ class sharedSel
     {
       var nestedli=document.createElement('li');
       nestedli.classList.add('dropdown-item');
+      if(typeof menu[i].classes!==undefined)
+      {
+        if(menu[i].classes instanceof Array)
+        {
+          for(const _el of menu[i].classes)
+          {
+            nestedli.classList.add(_el);
+          }
+        }
+      }
       nestedli.value=menu[i].value;
       nestedli.appendChild(document.createTextNode(menu[i].name));
 
@@ -252,7 +264,7 @@ class sharedSel
       {
         let tgt=event.target;
         _this.value=tgt.value;
-        _this.header.innerHTML=sharedSel.#options[_this.menu].menu[tgt.value].name;
+        _this.header.innerHTML=sharedSel.options[_this.menu].menu[tgt.value].name;
       }
       _this.closeDropdown();
     }
@@ -312,4 +324,3 @@ class sharedSel
     }
   }
 }
-init_sharedSel();

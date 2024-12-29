@@ -59,7 +59,7 @@ function fillTable(type, jsonData)
     {
       td=document.createElement('td');
       el=document.createElement('div');
-      el.classList.add("sharedsel");
+      el.classList.add("sharedsel", "ts-month");
       el.setAttribute('data-value', `0:${sched.M}`);
       td.appendChild(el);
       append_sharedSel(el);
@@ -67,7 +67,7 @@ function fillTable(type, jsonData)
 
       td=document.createElement('td');
       el=document.createElement('div');
-      el.classList.add("ts-date");
+      el.classList.add("sharedsel", "ts-date");
       el.setAttribute('data-value', `2:${Number(sched.sd)-1}`);
       td.appendChild(el);
       append_sharedSel(el);
@@ -75,7 +75,7 @@ function fillTable(type, jsonData)
 
       td=document.createElement('td');
       el=document.createElement('div');
-      el.classList.add("ts-date");
+      el.classList.add("sharedsel", "ts-date");
       el.setAttribute('data-value', `2:${Number(sched.ed)-1}`);
       td.appendChild(el);
       append_sharedSel(el);
@@ -85,7 +85,7 @@ function fillTable(type, jsonData)
     {
       td=document.createElement('td');
       el=document.createElement('div');
-      el.classList.add("sharedsel");
+      el.classList.add("sharedsel", "ts-day");
       el.setAttribute('data-value', `1:${sched.D}`);
       append_sharedSel(el);
       td.appendChild(el);
@@ -114,15 +114,16 @@ function fillTable(type, jsonData)
     // Attributes
     td=document.createElement('td');
     el=document.createElement('div');
-    el.className="nopadding";
+    el.classList.add("nopadding", "sharedsel", "theme");
     el.setAttribute('data-value', `${sched.Th}`);
     td.appendChild(el);
     nr.appendChild(td);
 
     td=document.createElement('td');
     el=document.createElement('div');
-    el.className="nopadding";
-    el.setAttribute('data-value', `${sched.Br}`);
+    el.classList.add("nopadding", "sharedsel", "dim");
+    el.setAttribute('data-value', `brightness:${sched.Br}`);
+    append_sharedSel(el);
     td.appendChild(el);
     nr.appendChild(td);
 
@@ -182,9 +183,16 @@ function fetchData(JSONSource, start)
   req.send(null);
 }
 
+function extend_sharedSel()
+{
+  var jsonBri='{"name": "brightness","menu":[{"name": "Maximum", "value": 0, "submenu": null},{"name": "High", "value": 1, "submenu": null},{"name": "Medium", "value": 2, "submenu": null},{"name": "Low", "value": 3, "submenu": null},{"name": "Minimum", "value": 4, "submenu": null}]}';
+  sharedSel.options.push(JSON.parse(jsonBri));
+}
+
 function page_onload()
 {
   set_background();
+  extend_sharedSel();
   fetchSchedule("weekly", 0);
   fetchSchedule("annual", 0);
 }

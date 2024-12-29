@@ -213,3 +213,12 @@
     }
   }
 }
+/* For hiding surplus days in requisite months */
+.February * .feb,
+.noleap * .noleap,
+.April * .ajsn,
+.June * .ajsn,
+.September * .ajsn,
+.November * .ajsn {
+  display: none;
+}
