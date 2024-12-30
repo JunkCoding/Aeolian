@@ -213,6 +213,8 @@ class dDropDown
     this.index=-1;
     this.id=el.id;
 
+    el.addEventListener("mouseleave", this);
+    console.log(el);
     var clkr=closest(this.ddgrp, '.dropdown-toggle');
     clkr.addEventListener('click', this);
 
@@ -253,6 +255,10 @@ class dDropDown
       }
       _this.closeDropdown();
     }
+  }
+  onmouseleave(_this, event)
+  {
+    _this.closeDropdown();
   }
   closeDropdown()
   {
@@ -359,41 +365,6 @@ function setControl (xhttp)
     elephant.value = resp.value;
 }
 
-// --------------------------------------------------------------------
-// item helper
-// --------------------------------------------------------------------
-function itemShowHide (_img, _item, op)
-{
-  // search for img
-  var img = document.getElementById(_img);
-  var item = document.getElementById(_item);
-  if (op === "toggle")
-  {
-    if (item.style.display === "none")
-    {
-      item.style.display = "block";
-      img.src = "img/arrow_up.png";
-    }
-    else
-    {
-      item.style.display = "none";
-      img.src = "img/arrow_down.png";
-    }
-  }
-  else if (op === "show")
-  {
-    item.style.display = "block";
-    img.src = "img/arrow_up.png";
-  }
-  else if (op === "hide")
-  {
-    item.style.display = "none";
-    img.src = "img/arrow_down.png";
-  }
-
-  setCookie(_item, item.style.display === "none" ? "hide" : "show", 365);
-}
-
 function select_change (selectID)
 {
   var select = document.getElementById(selectID);
@@ -402,7 +373,6 @@ function select_change (selectID)
 
   updateControl(selectID, option);
 }
-
 // --------------------------------------------------------------------
 // checkbox support
 // --------------------------------------------------------------------
@@ -416,7 +386,6 @@ function checkboxToggle (checkboxID)
 
   updateControl(checkboxID, updateToggle ? 1 : 0);
 }
-
 // --------------------------------------------------------------------
 // navbar function
 // --------------------------------------------------------------------

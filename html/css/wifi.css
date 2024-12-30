@@ -109,7 +109,7 @@
 }
 /* Wifi Scan Results Div */
 #apDiv {
-  border: 2px solid #ff810096;
+  box-shadow: 0 0 16px 2px #ffffffe3;
   background-color: var(--main-col-bg);
   position: absolute;
   border-radius:14px;

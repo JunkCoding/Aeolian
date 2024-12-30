@@ -119,11 +119,7 @@ function fillTable(JSONSource, jsonData)
     var item  = jsonData.items[i];
     var opt   = document.createElement("li");
     opt.value = item.id;
-    opt.text  = item.name;
-    var lnk   = document.createElement("a");
-    lnk.href  = "#";
-    lnk.text  = item.name;
-    opt.appendChild(lnk);
+    opt.innerText  = item.name;
     plist.appendChild(opt);
     if ( item.id == active )
     {

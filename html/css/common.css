@@ -20,9 +20,11 @@
   --dd-col-bo-def: #ff000061;
   --dd-col-bo-sel: #ffffffe5;
   --dd-col-lu-bo: #fff;
-  --dd-col-lu-bg: #5f0231e5;
+  /*--dd-col-lu-bg: #5f0231e5;*/
+  --dd-col-lu-bg: #4d0b05f5;
   --dd-col-lu-fg: #fff;
-  --dd-col-li-bg: #5f0231e5;
+  /*--dd-col-li-bg: #5f0231e5;*/
+  --dd-col-li-bg: #4d0b05f5;
   --dd-col-li-fg: #fff;
 
   --tickbox-col-border-def: #004cffad;
@@ -1604,17 +1606,25 @@ ul::-webkit-scrollbar {
       margin: 0;
       z-index: 10;
     }
-
     li {
       background-color: var(--dd-col-li-bg);
       color: var(--dd-col-li-fg);
       padding: 4px 2px 4px 14px;
     }
-
     li:hover {
       background-color: var(--dd-col-bg-hl);
       color: var(--dd-col-fg-hl);
     }
+  }
+  ul::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #ffffff8a;
   }
 }
 
