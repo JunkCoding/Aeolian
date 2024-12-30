@@ -1,6 +1,4 @@
-
-var dow=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-var ds=["st", "nd", "rd", "th"];
+var jsonBri='{"name": "brightness","menu":[{"name": "Maximum", "value": 0, "submenu": null},{"name": "High", "value": 1, "submenu": null},{"name": "Medium", "value": 2, "submenu": null},{"name": "Low", "value": 3, "submenu": null},{"name": "Minimum", "value": 4, "submenu": null}]}';
 
 const EVENT_NOFLAGS    = 0x00     // Event forces lights to be on during period or whole day
 const EVENT_LIGHTSOFF  = 0x01     // Event forces lights to be off during period or whole day
@@ -115,7 +113,8 @@ function fillTable(type, jsonData)
     td=document.createElement('td');
     el=document.createElement('div');
     el.classList.add("nopadding", "sharedsel", "theme");
-    el.setAttribute('data-value', `${sched.Th}`);
+    el.setAttribute('data-value', `theme:${sched.Th}`);
+    append_sharedSel(el);
     td.appendChild(el);
     nr.appendChild(td);
 
@@ -182,17 +181,54 @@ function fetchData(JSONSource, start)
   };
   req.send(null);
 }
-
-function extend_sharedSel()
+function extend_sharedSel(jsonStr)
 {
-  var jsonBri='{"name": "brightness","menu":[{"name": "Maximum", "value": 0, "submenu": null},{"name": "High", "value": 1, "submenu": null},{"name": "Medium", "value": 2, "submenu": null},{"name": "Low", "value": 3, "submenu": null},{"name": "Minimum", "value": 4, "submenu": null}]}';
-  sharedSel.options.push(JSON.parse(jsonBri));
+
+  sharedSel.options.push(JSON.parse(jsonStr));
+}
+
+async function fetchJSONItems(JSONSource, start)
+{
+  var doLoop=true;
+  var jsonItemsStr='';
+
+  // request options
+  const options={
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+  while(doLoop===true)
+  {
+    const url=JSONSource+".json?terse=1&start="+start;
+    const response=await fetch(url, options).catch(handleError);
+    const data=await response.json();
+    if(Array.isArray(data.items) === true)
+    {
+      for(let it of data.items)
+      {
+        if(jsonItemsStr!=='')
+        {
+          jsonItemsStr+=',';
+        }
+        jsonItemsStr+=`{"name":"${it.name}","value":${it.id},"submenu":null}`;
+      }
+    }
+    if(data.next===0)
+    {
+      doLoop=false;
+    }
+  }
+  extend_sharedSel(`{"name":"theme","menu":[${jsonItemsStr}]}`);
+  return;
 }
 
 function page_onload()
 {
   set_background();
-  extend_sharedSel();
+  extend_sharedSel(jsonBri);
+  fetchJSONItems("theme", 0);
   fetchSchedule("weekly", 0);
   fetchSchedule("annual", 0);
 }

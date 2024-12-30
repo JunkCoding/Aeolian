@@ -367,14 +367,7 @@ function toggleScan ()
     btn.value = "Scan Stop";
   }
 }
-var handleError = function (err)
-{
-  console.warn(err);
-  return new Response(JSON.stringify({
-    code: 400,
-    message: 'Stupid network Error'
-  }));
-};
+
 async function staAwaitResults (el)
 {
   let pwd_el = document.getElementById("sta_password");

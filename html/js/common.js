@@ -149,7 +149,17 @@ function init_dropbox (dd)
   ddlist[ddlist.length] = dd;
   ddgrp[ddgrp.length] = new dDropDown(dd);
 }
-
+/*****************************************************************/
+/* Catch Errors                                                  */
+/*****************************************************************/
+var handleError=function(err)
+{
+  console.warn(err);
+  return new Response(JSON.stringify({
+    code: 400,
+    message: 'Stupid network Error'
+  }));
+};
 /*****************************************************************/
 function getChildrenByTag (el, name)
 {

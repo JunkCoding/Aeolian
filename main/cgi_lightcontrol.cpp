@@ -126,7 +126,7 @@ esp_err_t cgiThemes(httpd_req_t * req)
     }
 
     // More to follow?
-    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"next\":\"%d\",\"items\":[", (pos + MAX_ROWS) >= control_vars.num_themes?0:(pos + MAX_ROWS));
+    bufptr += snprintf(&tmpbuf[bufptr], (BUF_SIZE - bufptr), "\"next\":%d,\"items\":[", (pos + MAX_ROWS) >= control_vars.num_themes?0:(pos + MAX_ROWS));
 
     // Iterate through all themes
     for (uint8_t x = 0; (pos < control_vars.num_themes) && (x < MAX_ROWS); x++, pos++)
