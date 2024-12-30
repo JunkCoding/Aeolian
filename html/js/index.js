@@ -26,7 +26,7 @@ function page_onload()
   fetchData("pattern", 0);
 
   /* Run after all drop boxes have been configured */
-  //init_all_dropboxex();
+  //init_all_dropboxes();
 
   /* Open the websocket */
   wsOpen();
@@ -127,7 +127,7 @@ function fillTable(JSONSource, jsonData)
     plist.appendChild(opt);
     if ( item.id == active )
     {
-      document.getElementById(JSONSource).querySelector("span").textContent = item.name;
+      closest(document.getElementById(JSONSource), '.dropdown-toggle').textContent=item.name;
     }
   }
 
@@ -164,4 +164,41 @@ function fetchData(JSONSource, start)
     }
   };
   req.send(null);
+}
+
+async function fetchMenuItems(JSONSource, start)
+{
+  var doLoop=true;
+  var jsonItemsStr='';
+
+  // request options
+  const options={
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+  while(doLoop===true)
+  {
+    const url=JSONSource+".json?terse=1&start="+start;
+    const response=await fetch(url, options).catch(handleError);
+    const data=await response.json();
+    if(Array.isArray(data.items)===true)
+    {
+      for(let it of data.items)
+      {
+        if(jsonItemsStr!=='')
+        {
+          jsonItemsStr+=',';
+        }
+        jsonItemsStr+=`{"name":"${it.name}","value":${it.id},"submenu":null}`;
+      }
+    }
+    if(data.next===0)
+    {
+      doLoop=false;
+    }
+  }
+  extend_sharedSel(`{"name":"${JSONSource}","menu":[${jsonItemsStr}]}`);
+  return;
 }

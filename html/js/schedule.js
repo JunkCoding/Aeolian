@@ -187,7 +187,7 @@ function extend_sharedSel(jsonStr)
   sharedSel.options.push(JSON.parse(jsonStr));
 }
 
-async function fetchJSONItems(JSONSource, start)
+async function fetchMenuItems(JSONSource, start)
 {
   var doLoop=true;
   var jsonItemsStr='';
@@ -220,15 +220,14 @@ async function fetchJSONItems(JSONSource, start)
       doLoop=false;
     }
   }
-  extend_sharedSel(`{"name":"theme","menu":[${jsonItemsStr}]}`);
-  return;
+  extend_sharedSel(`{"name":"${JSONSource}","menu":[${jsonItemsStr}]}`);
 }
 
 function page_onload()
 {
   set_background();
   extend_sharedSel(jsonBri);
-  fetchJSONItems("theme", 0);
+  fetchMenuItems("theme", 0);
   fetchSchedule("weekly", 0);
   fetchSchedule("annual", 0);
 }

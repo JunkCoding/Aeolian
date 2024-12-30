@@ -7,7 +7,6 @@ function APconfig ()
 var curAP = new APconfig();
 var selAP = new APconfig();
 var fixedAP = false;
-let xhr = new XMLHttpRequest();
 
 let _keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 function utf8Encode (string)
@@ -571,7 +570,7 @@ function stopAndClose()
 function page_onload ()
 {
   set_background();
-  init_all_dropboxex();
+  init_all_dropboxes();
   staTestEnable();
   // Make wifi AP list moveable
   dragElement(document.getElementById("apDiv"));

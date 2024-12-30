@@ -81,9 +81,41 @@ function set_background ()
   document.body.style.backgroundSize = 'cover';
 }
 /*****************************************************************/
+/* Catch Errors                                                  */
+/*****************************************************************/
+var handleError=function(err)
+{
+  console.warn(err);
+  return new Response(JSON.stringify({
+    code: 400,
+    message: 'Stupid network Error'
+  }));
+};
+/*****************************************************************/
+// https://stackoverflow.com/questions/18663941/finding-closest-element-without-jquery
+/*****************************************************************/
+/*
+const closest=(to, selector) =>
+{
+}*/
+function closest(to, selector)
+{
+  //let currentElement=document.querySelector(to);
+  let currentElement=to;
+  let returnElement;
+
+  while(currentElement.parentNode&&!returnElement)
+  {
+    currentElement=currentElement.parentNode;
+    returnElement=currentElement.querySelector(selector);
+  }
+
+  return returnElement;
+}
+/*****************************************************************/
 /* Initialise all dropboxes                                      */
 /*****************************************************************/
-function init_all_dropboxex ()
+function init_all_dropboxes ()
 {
   // Remove any existing dropDown class associations
   // ------------------------------------------------
@@ -108,14 +140,13 @@ function init_all_dropboxex ()
     ddgrp[i] = new dDropDown(ddlist[i]);
   }
 }
-
 /*****************************************************************/
 /* Initialise a single dropbox (more effort than above)          */
 /*****************************************************************/
 function init_dropbox (dd)
 {
   /* Check it is the right class */
-  if (!dd.classList.contains("ddlist"))
+  if (!dd.classList.contains("dropdown-menu"))
   {
     return;
   }
@@ -150,30 +181,6 @@ function init_dropbox (dd)
   ddgrp[ddgrp.length] = new dDropDown(dd);
 }
 /*****************************************************************/
-/* Catch Errors                                                  */
-/*****************************************************************/
-var handleError=function(err)
-{
-  console.warn(err);
-  return new Response(JSON.stringify({
-    code: 400,
-    message: 'Stupid network Error'
-  }));
-};
-/*****************************************************************/
-function getChildrenByTag (el, name)
-{
-  var itmList = [];
-  childs = el.childNodes;
-  childs.forEach(itm =>
-  {
-    if (itm.nodeName === name.toUpperCase())
-    {
-      itmList.push(itm);
-    }
-  });
-  return itmList;
-}
 function getDropdownItems (el)
 {
   var itmList = [];
@@ -196,58 +203,80 @@ function getDropdownItems (el)
   return itmList;
 };
 /*****************************************************************/
-function dDropDown (el)
+class dDropDown
 {
-  this.ddgrp = el;
-  this.placeholder = getChildrenByTag(this.ddgrp, 'span');
-  this.opts = getDropdownItems(this.ddgrp);
-  this.val = '';
-  this.index = -1;
-  this.id = el.id;
-  this.initEvents();
-}
-/*****************************************************************/
-dDropDown.prototype = {
-  initEvents: function ()
+  constructor(el)
   {
-    var obj = this;
+    this.ddgrp=el;
+    this.opts=getDropdownItems(this.ddgrp);
+    this.val='';
+    this.index=-1;
+    this.id=el.id;
 
-    obj.ddgrp.addEventListener('click', function (event)
-    {
-      if (this.classList.contains('active'))
-      {
-        this.classList.remove('active');
-      }
-      else
-      {
-        /* Make sure no boxes are 'activw' */
-        let l = ddlist.length;
-        for (let i = 0; i < l; i++)
-        {
-          if (ddlist[i].classList.contains('active'))
-          {
-            ddlist[i].classList.remove('active');
-          }
-        }
-        /* Make this one active */
-        this.classList.add('active');
-      }
-    });
+    var clkr=closest(this.ddgrp, '.dropdown-toggle');
+    clkr.addEventListener('click', this);
 
-    for (var i = 0; i < obj.opts.length; i++)
+    for(var i=0; i<this.opts.length; i++)
     {
-      obj.opts[i].addEventListener('click', function ()
+      this.opts[i].addEventListener('click', function()
       {
         set_dd(this.parentNode.parentNode.id, (this.value));
         updateControl(this.parentNode.parentNode.id, (this.value));
       });
     }
-  },
-  getValue: function ()
-  {
-    return this.val;
   }
-};
+  onclick(_this, event)
+  {
+    let tgt=event.target.parentNode;
+    if(event.target.classList.contains('click-dropdown')===true)
+    {
+      let m=event.target.parentNode.querySelectorAll('.dropdown-menu')[0];
+      if(event.target.nextElementSibling.classList.contains('dropdown-active')===true)
+      {
+        event.target.parentElement.classList.remove('dropdown-open');
+        event.target.nextElementSibling.classList.remove('dropdown-active');
+      }
+      else
+      {
+        _this.closeDropdown();
+        event.target.parentElement.classList.add('dropdown-open');
+        event.target.nextElementSibling.classList.add('dropdown-active');
+      }
+    }
+    else
+    {
+      if(event.target.classList.contains('dropdown-item'))
+      {
+        let tgt=event.target;
+        _this.value=tgt.value;
+        _this.header.innerHTML=sharedSel.options[_this.menu].menu[tgt.value].name;
+      }
+      _this.closeDropdown();
+    }
+  }
+  closeDropdown()
+  {
+    // remove the open and active class from other opened Dropdown (Closing the opend DropDown)
+    document.querySelectorAll('.dropdown-container').forEach(function(container)
+    {
+      container.classList.remove('dropdown-open');
+    });
+
+    document.querySelectorAll('.dropdown-menu').forEach(function(menu)
+    {
+      menu.classList.remove('dropdown-active');
+    });
+  }
+  handleEvent(event)
+  {
+    event.preventDefault();
+    let obj=this["on"+event.type];
+    if(typeof obj==="function")
+    {
+      obj(this, event);
+    }
+  }
+}
 /*****************************************************************/
 function set_dd (dl, val)
 {
@@ -264,7 +293,7 @@ function set_dd (dl, val)
       {
         if (val === item.value)
         {
-          document.getElementById(dl).querySelector('span').innerHTML = item.textContent;
+          closest(document.getElementById(dl), '.dropdown-toggle').textContent=item.textContent;
           break;
         }
       }
@@ -423,9 +452,9 @@ document.addEventListener("DOMContentLoaded", function (event)
     {
       for (var i = 0; i < ddlist.length; i++)
       {
-        if (ddlist[i].classList.contains('active'))
+        if (ddlist[i].classList.contains('dropdown-open'))
         {
-          ddlist[i].classList.remove('active');
+          ddlist[i].classList.remove('dropdown-open');
         }
       }
     }
