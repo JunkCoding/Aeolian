@@ -133,7 +133,8 @@ function init_all_dropboxes ()
     ddgrp = [];
   }
 
-  ddlist = document.getElementsByClassName("ddlist");
+  ddlist=document.getElementsByClassName("ddlist");
+
   let l = ddlist.length;
   for (let i = 0; i < l; i++)
   {
@@ -220,17 +221,19 @@ class dDropDown
 
     for(var i=0; i<this.opts.length; i++)
     {
-      this.opts[i].addEventListener('click', function()
-      {
-        set_dd(this.parentNode.parentNode.id, (this.value));
-        updateControl(this.parentNode.parentNode.id, (this.value));
-      });
+      this.opts[i].addEventListener('click', this);
     }
   }
   onclick(_this, event)
   {
-    let tgt=event.target.parentNode;
-    if(event.target.classList.contains('click-dropdown')===true)
+    let tgt=event.target;
+    if(tgt.nodeName==='LI')
+    {
+      set_dd(_this.id, (tgt.value));
+      updateControl(_this.id, (tgt.value));
+      _this.closeDropdown();
+    }
+    else if(event.target.classList.contains('click-dropdown')===true)
     {
       let m=event.target.parentNode.querySelectorAll('.dropdown-menu')[0];
       if(event.target.nextElementSibling.classList.contains('dropdown-active')===true)
@@ -240,7 +243,9 @@ class dDropDown
       }
       else
       {
+        /* Close any other open dropdown items */
         _this.closeDropdown();
+        /* Show the dropdown for ths element */
         event.target.parentElement.classList.add('dropdown-open');
         event.target.nextElementSibling.classList.add('dropdown-active');
       }
