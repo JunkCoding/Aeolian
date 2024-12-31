@@ -772,9 +772,9 @@ input[class="off"]:focus+svg {
   right: 0px;
 }
 /* ---------------------------------------------------------- */
-.tickbox input[type=checkbox],
-.tickbox input[type=submit],
-.tickbox input[type=radio] {
+input[type=checkbox],
+input[type=submit],
+input[type=radio] {
   cursor: pointer;
 }
 input#ap_fixed {
@@ -1115,7 +1115,7 @@ table {
     background-color: var(--def-col-bg);
     color: var(--def-col-input);
     border: 0;
-    font-size: 16px;
+    font-size: 15px;
     font-style: italic;
     font-weight: 100;
     width:100%;
