@@ -26,7 +26,6 @@ function init_sharedSel()
     lst[i]=new sharedSel(lst[i]);
   }
 }
-
 function append_sharedSel(el)
 {
   let l=shrdGrp.length;

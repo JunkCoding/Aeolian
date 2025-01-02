@@ -152,6 +152,7 @@ function fillTable(type, jsonData)
     fetchData(jsonData.next);
   }
 }
+// FixMe: Convert to promise...
 function fetchSchedule(type, start)
 {
   var req=new XMLHttpRequest();
@@ -230,13 +231,30 @@ async function fetchMenuItems(JSONSource, start)
   }
   extend_sharedSel(`{"name":"${JSONSource}","menu":[${jsonItemsStr}]}`);
 }
+function setFooter(type)
+{
+  tbl=_(type);
 
+  let foot=tbl.createTFoot(0);
+  let nr=foot.insertRow(0);
+
+  // Add a final row
+  td=document.createElement('td');
+  td.colSpan="12";
+  td.classList.add("icon");
+  el=document.createElement('i');
+  el.classList.add("add");
+  td.appendChild(el);
+  nr.appendChild(td);
+}
 function page_onload()
 {
   set_background();
   extend_sharedSel(jsonBri);
   fetchMenuItems("theme", 0);
   fetchSchedule("weekly", 0);
+  setFooter("weekly");
   fetchSchedule("annual", 0);
+  setFooter("annual");
 }
 
