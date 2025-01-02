@@ -52,6 +52,14 @@ function fillTable(type, jsonData)
 
     var td;
     var el;
+
+    td=document.createElement('td');
+    td.classList.add("icon");
+    el=document.createElement('i');
+    el.classList.add("del");
+    td.appendChild(el);
+    nr.appendChild(td);
+
     // Annual only
     if(type==="annual")
     {

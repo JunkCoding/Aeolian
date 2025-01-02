@@ -36,6 +36,7 @@
       <table class="sched_table table-header-rotated" id="weekly">
         <thead>
           <tr>
+            <th></th>
             <th class="day_hdr row-header"><div><span>Day</span></div></th>
             <th class="tim_hdr row-header"><div><span>Start</span></div></th>
             <th class="tim_hdr row-header"><div><span>End</span></div></th>
@@ -50,11 +51,16 @@
       <tbody id="tbwk"></tbody>
       </table>
     </div>
+    <div class="btn_group">
+      <div class="submit"><input type="submit" class="schedule" id="weekly_save" value="Save" onclick="" disabled /></div>
+      <div class="submit"><input type="submit" class="schedule" id="weekly_reload" value="Reload" onclick="" /></div>
+    </div>
     <div class="schedule" data-title="Annual Events">
       <h2>Annual Events</h2>
       <table class="sched_table table-header-rotated" id="annual">
         <thead>
           <tr>
+            <th></th>
             <th class="mon_hdr row-header"><div><span>Month</span></div></th>
             <th class="dat_hdr row-header"><div><span>First</span></div></th>
             <th class="dat_hdr row-header"><div><span>Last</span></div></th>
@@ -70,6 +76,10 @@
         </thead>
         <tbody id="tban"></tbody>
       </table>
+    </div>
+    <div class="btn_group">
+      <div class="submit"><input type="submit" class="schedule" id="annual_save" value="Save" onclick="" disabled /></div>
+      <div class="submit"><input type="submit" class="schedule" id="annual_reload" value="Reload" onclick="" /></div>
     </div>
   </div>
 </body>
