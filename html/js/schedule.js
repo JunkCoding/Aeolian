@@ -27,7 +27,6 @@ function fillTable(type, jsonData)
   {
     return;
   }
-
   function createFlagEl(id, state)
   {
     let td=document.createElement('td');
@@ -138,9 +137,6 @@ function fillTable(type, jsonData)
     nr.appendChild(createFlagEl(`off_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_LIGHTSOFF)===EVENT_LIGHTSOFF)));
     nr.appendChild(createFlagEl(`aut_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_AUTONOMOUS)===EVENT_AUTONOMOUS)));
     nr.appendChild(createFlagEl(`dis_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_DISABLED)===EVENT_DISABLED)));
-
-    // Append to the tbody
-    ntbdy.appendChild(nr);
   }
 
   // Remove the old and insert the new
@@ -231,19 +227,44 @@ async function fetchMenuItems(JSONSource, start)
   }
   extend_sharedSel(`{"name":"${JSONSource}","menu":[${jsonItemsStr}]}`);
 }
+function eventHandler(event)
+{
+  if(event.type==="click")
+  {
+    tgt=event.target;
+    if(tgt.classList.contains('add')===true)
+    {
+      // Get our parent table, which is the table we are inserting a new row.
+      let tbl=closest(tgt, 'table');
+      let tbdy=tbl.getElementsByTagName('tbody')[0];
+      let nr=tbdy.insertRow();
+      let td=document.createElement('td');
+      td.classList.add("icon");
+      el=document.createElement('i');
+      el.classList.add("del");
+      td.appendChild(el);
+      nr.appendChild(td);
+      td=document.createElement('td');
+      td.colSpan="11";
+      nr.appendChild(td);
+    }
+  }
+  else
+  {
+    console.log(event);
+  }
+}
 function setFooter(type)
 {
   tbl=_(type);
-
   let foot=tbl.createTFoot(0);
   let nr=foot.insertRow(0);
-
-  // Add a final row
   td=document.createElement('td');
-  td.colSpan="12";
+  td.colSpan="11";
   td.classList.add("icon");
   el=document.createElement('i');
   el.classList.add("add");
+  el.addEventListener("click", eventHandler);
   td.appendChild(el);
   nr.appendChild(td);
 }

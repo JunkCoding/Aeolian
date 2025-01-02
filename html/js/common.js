@@ -231,7 +231,7 @@ class dDropDown
     {
       set_dd(_this.id, (tgt.value));
       updateControl(_this.id, (tgt.value));
-      _this.closeDropdown();
+      closeDropdown();
     }
     else if(event.target.classList.contains('click-dropdown')===true)
     {
@@ -244,7 +244,7 @@ class dDropDown
       else
       {
         /* Close any other open dropdown items */
-        _this.closeDropdown();
+        closeDropdown();
         /* Show the dropdown for ths element */
         event.target.parentElement.classList.add('dropdown-open');
         event.target.nextElementSibling.classList.add('dropdown-active');
@@ -258,25 +258,12 @@ class dDropDown
         _this.value=tgt.value;
         _this.header.innerHTML=sharedSel.options[_this.menu].menu[tgt.value].name;
       }
-      _this.closeDropdown();
+      closeDropdown();
     }
   }
   onmouseleave(_this, event)
   {
-    _this.closeDropdown();
-  }
-  closeDropdown()
-  {
-    // remove the open and active class from other opened Dropdown (Closing the opend DropDown)
-    document.querySelectorAll('.dropdown-container').forEach(function(container)
-    {
-      container.classList.remove('dropdown-open');
-    });
-
-    document.querySelectorAll('.dropdown-menu').forEach(function(menu)
-    {
-      menu.classList.remove('dropdown-active');
-    });
+    closeDropdown();
   }
   handleEvent(event)
   {
@@ -411,7 +398,20 @@ function navbar ()
     x.className = "navbar";
   }
 }
-
+/*****************************************************************/
+/* Close any open drop down boxes (shared function)              */
+/*****************************************************************/
+function closeDropdown()
+{
+  [...document.getElementsByClassName('dropdown-open')].forEach(el =>
+  {
+    el.classList.remove("dropdown-open");
+  });
+  [...document.getElementsByClassName('dropdown-active')].forEach(el =>
+  {
+    el.classList.remove("dropdown-active");
+  });
+}
 /*****************************************************************/
 /* Capture clicks outside our area of interest to close lists    */
 /*****************************************************************/
@@ -422,15 +422,9 @@ document.addEventListener("DOMContentLoaded", function (event)
   {
     console.log("e.target.className = " + e.target.className);
 
-    if (!e.target.closest('.ddlist'))
+    if (!e.target.closest('.dropdown-container'))
     {
-      for (var i = 0; i < ddlist.length; i++)
-      {
-        if (ddlist[i].classList.contains('dropdown-open'))
-        {
-          ddlist[i].classList.remove('dropdown-open');
-        }
-      }
+      closeDropdown();
     }
   };
 });

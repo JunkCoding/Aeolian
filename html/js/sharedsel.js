@@ -252,7 +252,7 @@ class sharedSel
       }
       else
       {
-        _this.closeDropdown();
+        closeDropdown();
         event.target.parentElement.classList.add('dropdown-open');
         event.target.nextElementSibling.classList.add('dropdown-active');
       }
@@ -263,9 +263,9 @@ class sharedSel
       {
         let tgt=event.target;
         _this.value=tgt.value;
-        _this.header.innerHTML=sharedSel.options[_this.menu].menu[tgt.value].name;
+        _this.header.innerText=tgt.innerText;
       }
-      _this.closeDropdown();
+      closeDropdown();
     }
     return false;
   }
@@ -279,27 +279,14 @@ class sharedSel
       {
         m.appendChild(monthMenu);
       }
-      _this.closeDropdown();
+      closeDropdown();
       event.target.parentElement.classList.add('dropdown-open');
       event.target.nextElementSibling.classList.add('dropdown-active');
     }
   }
   onmouseleave(_this, event)
   {
-    _this.closeDropdown();
-  }
-  closeDropdown()
-  {
-    // remove the open and active class from other opened Dropdown (Closing the opend DropDown)
-    document.querySelectorAll('.dropdown-container').forEach(function(container)
-    {
-      container.classList.remove('dropdown-open');
-    });
-
-    document.querySelectorAll('.dropdown-menu').forEach(function(menu)
-    {
-      menu.classList.remove('dropdown-active');
-    });
+    closeDropdown();
   }
   onwheel(_this, event)
   {
