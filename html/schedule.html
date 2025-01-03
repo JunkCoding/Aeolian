@@ -16,6 +16,103 @@
 </head>
 
 <body style="user-select: none;" onload="page_onload()">
+  <template id="t_weeklyRow">
+    <tr>
+      <td class="icon">
+        <i class="nil"></i>
+      </td>
+      <td>
+        <div class="sharedsel ts-day dropdown-container" data-value="">
+        </div>
+      </td>
+      <td>
+        <div id="" class="timesel" data-value="">
+        </div>
+      </td>
+      <td>
+        <div class="timesel" data-value="">
+        </div>
+      </td>
+      <td>
+        <div class="nopadding sharedsel theme dropdown-container" data-value=""></div>
+      </td>
+      <td>
+        <div class="nopadding sharedsel dim dropdown-container" data-value=""></div>
+      </td>
+      <td class="fla_td">
+        <div class="tickbox">
+          <input type="checkbox" onchange="toggleFlag(this.id, this.checked)">
+        </div>
+      </td>
+      <td class="fla_td">
+        <div class="tickbox">
+          <input type="checkbox" onchange="toggleFlag(this.id, this.checked)">
+        </div>
+      </td>
+      <td class="fla_td">
+        <div class="tickbox">
+          <input type="checkbox" onchange="toggleFlag(this.id, this.checked)">
+        </div>
+      </td>
+      <td class="fla_td">
+        <div class="tickbox">
+          <input type="checkbox" onchange="toggleFlag(this.id, this.checked)">
+        </div>
+      </td>
+    </tr>
+  </template>
+  <template id="t_annualRow">
+    <tr>
+      <td class="icon">
+        <i class="nil"></i>
+      </td>
+      <td>
+        <div class="sharedsel ts-month dropdown-container"></div>
+      </td>
+      <td>
+        <div class="sharedsel ts-date dropdown-container"></div>
+      </td>
+      <td>
+        <div class="sharedsel ts-date dropdown-container"></div>
+      </td>
+      <td>
+        <div id="" class="timesel" data-value="">
+        </div>
+      </td>
+      <td>
+        <div class="timesel" data-value="">
+        </div>
+      </td>
+      <td>
+        <div class="nopadding sharedsel theme dropdown-container" data-value="">
+        </div>
+      </td>
+      <td>
+        <div class="nopadding sharedsel dim dropdown-container" data-value="">
+        </div>
+      </td>
+      <td class="fla_td">
+        <div class="tickbox">
+          <input type="checkbox" onchange="toggleFlag(this.id, this.checked)">
+        </div>
+      </td>
+      <td class="fla_td">
+        <div class="tickbox">
+          <input type="checkbox" onchange="toggleFlag(this.id, this.checked)">
+        </div>
+      </td>
+      <td class="fla_td">
+        <div class="tickbox">
+          <input type="checkbox" onchange="toggleFlag(this.id, this.checked)">
+        </div>
+      </td>
+      <td class="fla_td">
+        <div class="tickbox">
+          <input type="checkbox" onchange="toggleFlag(this.id, this.checked)">
+        </div>
+      </td>
+    </tr>
+  </template>
   <div class="navbar" id="myTopnav">
     <a href="/index.html">Status</a>
     <a href="/patterns.html">Patterns</a>

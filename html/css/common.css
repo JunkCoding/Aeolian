@@ -368,16 +368,16 @@ pre {
 
 .icon {
   width: 30px;
-  width: 30px;
+  height: 30px;
   position: inherit;
   align-content: center;
   justify-content: center;
   flex-wrap: wrap;
-  padding: 7px;
   i::before {
     content: "";
     width: 16px;
     height: 16px;
+    margin: auto;
     display: block;
     position: relative;
     background-size: contain;
@@ -994,7 +994,7 @@ progress::-moz-progress-bar {
 
 /***** ***** ***** ***** Tables **** **** **** ****/
 table {
-  box-shadow: 0 0 10px var(--def-col-border);
+  box-shadow: 0 0 4px 2px var(--def-col-border);
   color: var(--def-col-fg);
   border-collapse: separate;
   border-spacing: 0px;
@@ -1026,7 +1026,7 @@ table {
   th {
     box-shadow: 0 1px 0 0 var(--def-col-border);
   }*/
-  td {
+  tbody td {
     box-shadow: 0 0 0 1px var(--def-col-border);
   }
   /*
@@ -1185,10 +1185,12 @@ table {
   text-align: center;
 }
 tfoot {
+  box-shadow: 0 0 0 1px var(--def-col-border);
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
   *:last-child > td:first-child {
     border-bottom-left-radius: 10px;
   }
-
   tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
   }

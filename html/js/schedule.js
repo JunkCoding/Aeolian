@@ -18,6 +18,15 @@ var ePos={
   target: null,
   doy: 0,
 };
+function clone_row(tbl)
+{
+  // Get our parent table, which is the table we are inserting a new row.
+  const tbdy=tbl.getElementsByTagName('tbody')[0];
+  const clone=document.querySelector(`#t_${tbl.id}Row`).content.cloneNode(true);
+  const divs=clone.querySelectorAll("td");
+  tbdy.appendChild(clone);
+  return (divs);
+}
 function fillTable(type, jsonData)
 {
   tbl=_(type);
@@ -27,121 +36,65 @@ function fillTable(type, jsonData)
   {
     return;
   }
-  function createFlagEl(id, state)
-  {
-    let td=document.createElement('td');
-    td.className="fla_td";
-    let div=document.createElement("div");
-    div.className="tickbox";
-    let el=document.createElement("input");
-    el.setAttribute("type", "checkbox");
-    el.id=id;
-    el.checked=state;
-    el.setAttribute("onchange", 'toggleFlag(this.id, this.checked)');
-    div.appendChild(el);
-    td.appendChild(div);
-    return td;
-  }
-  let ntbdy=document.createElement('tbody');
+
+  // Remove the old and introduce the new
+  const ntbdy=document.createElement('tbody');
+  const otbdy=document.querySelector(`#${tbl.id} > tbody`);
+  otbdy.parentNode.replaceChild(ntbdy, otbdy);
+
   let l=jsonData.items.length;
   for(var i=0; i < l; i++)
   {
-    let sched=jsonData.items[i];
-    let nr=ntbdy.insertRow();
+    const sched=jsonData.items[i];
 
-    var td;
-    var el;
+    let d=0;
+    let divEls=clone_row(tbl);
+    divEls[d++].querySelector("i").className="del";
 
-    td=document.createElement('td');
-    td.classList.add("icon");
-    el=document.createElement('i');
-    el.classList.add("del");
-    td.appendChild(el);
-    nr.appendChild(td);
-
-    // Annual only
-    if(type==="annual")
+    let el=divEls[d++].querySelector(".sharedsel");
+    if(tbl.id==='annual')
     {
-      td=document.createElement('td');
-      el=document.createElement('div');
-      el.classList.add("sharedsel", "ts-month");
       el.setAttribute('data-value', `0:${sched.M}`);
-      td.appendChild(el);
       append_sharedSel(el);
-      nr.appendChild(td);
 
-      td=document.createElement('td');
-      el=document.createElement('div');
-      el.classList.add("sharedsel", "ts-date");
+      el=divEls[d++].querySelector(".sharedsel");
       el.setAttribute('data-value', `2:${Number(sched.sd)-1}`);
-      td.appendChild(el);
       append_sharedSel(el);
-      nr.appendChild(td);
 
-      td=document.createElement('td');
-      el=document.createElement('div');
-      el.classList.add("sharedsel", "ts-date");
+      el=divEls[d++].querySelector(".sharedsel");
       el.setAttribute('data-value', `2:${Number(sched.ed)-1}`);
-      td.appendChild(el);
       append_sharedSel(el);
-      nr.appendChild(td);
     }
-    else
+    else if(tbl.id==='weekly')
     {
-      td=document.createElement('td');
-      el=document.createElement('div');
-      el.classList.add("sharedsel", "ts-day");
       el.setAttribute('data-value', `1:${sched.D}`);
       append_sharedSel(el);
-      td.appendChild(el);
-      nr.appendChild(td);
     }
-
-    // The rest is shared
-    td=document.createElement('td');
-    el=document.createElement('div');
-    el.id=`stime_${type}_${sched.N}`;
-    el.classList.add("timesel");
+    el=divEls[d++].querySelector(".timesel");
     el.setAttribute('data-value', `${sched.SH}:${sched.SM}`);
-    td.appendChild(el);
-    nr.appendChild(td);
     append_timesel(el);
 
-    td=document.createElement('td');
-    el=document.createElement('div');
-    el.id=`etime_${type}_${sched.N}`;
-    el.classList.add("timesel");
+    el=divEls[d++].querySelector(".timesel");
     el.setAttribute('data-value', `${sched.EH}:${sched.EM}`);
-    td.appendChild(el);
-    nr.appendChild(td);
     append_timesel(el);
 
-    // Attributes
-    td=document.createElement('td');
-    el=document.createElement('div');
-    el.classList.add("nopadding", "sharedsel", "theme");
+    el=divEls[d++].querySelector(".sharedsel");
     el.setAttribute('data-value', `theme:${sched.Th}`);
     append_sharedSel(el);
-    td.appendChild(el);
-    nr.appendChild(td);
 
-    td=document.createElement('td');
-    el=document.createElement('div');
-    el.classList.add("nopadding", "sharedsel", "dim");
+    el=divEls[d++].querySelector(".sharedsel");
     el.setAttribute('data-value', `brightness:${sched.Br}`);
     append_sharedSel(el);
-    td.appendChild(el);
-    nr.appendChild(td);
 
-    nr.appendChild(createFlagEl(`def_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_DEFAULT)===EVENT_DEFAULT)));
-    nr.appendChild(createFlagEl(`off_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_LIGHTSOFF)===EVENT_LIGHTSOFF)));
-    nr.appendChild(createFlagEl(`aut_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_AUTONOMOUS)===EVENT_AUTONOMOUS)));
-    nr.appendChild(createFlagEl(`dis_${type}_${sched.N}`, ((Number(sched.Fl)&EVENT_DISABLED)===EVENT_DISABLED)));
+    el=divEls[d++].querySelector("input[type=checkbox]");
+    el.checked=((Number(sched.Fl)&EVENT_DEFAULT)===EVENT_DEFAULT);
+    el=divEls[d++].querySelector("input[type=checkbox]");
+    el.checked=((Number(sched.Fl)&EVENT_LIGHTSOFF)===EVENT_LIGHTSOFF);
+    el=divEls[d++].querySelector("input[type=checkbox]");
+    el.checked=((Number(sched.Fl)&EVENT_AUTONOMOUS)===EVENT_AUTONOMOUS);
+    el=divEls[d++].querySelector("input[type=checkbox]");
+    el.checked=((Number(sched.Fl)&EVENT_DISABLED)===EVENT_DISABLED);
   }
-
-  // Remove the old and insert the new
-  let otbdy=document.querySelector(`#${tbl.id} > tbody`);
-  otbdy.parentNode.replaceChild(ntbdy, otbdy);
 
   if(jsonData.next>0)
   {
@@ -234,19 +187,12 @@ function eventHandler(event)
     tgt=event.target;
     if(tgt.classList.contains('add')===true)
     {
-      // Get our parent table, which is the table we are inserting a new row.
-      let tbl=closest(tgt, 'table');
-      let tbdy=tbl.getElementsByTagName('tbody')[0];
-      let nr=tbdy.insertRow();
-      let td=document.createElement('td');
-      td.classList.add("icon");
-      el=document.createElement('i');
-      el.classList.add("del");
-      td.appendChild(el);
-      nr.appendChild(td);
-      td=document.createElement('td');
-      td.colSpan="11";
-      nr.appendChild(td);
+      // If we don't have 'template' support we don't get a new row.
+      if("content" in document.createElement("template"))
+      {
+        const tbl=closest(tgt, 'table');
+        clone_row(tbl)
+      }
     }
   }
   else
@@ -260,12 +206,14 @@ function setFooter(type)
   let foot=tbl.createTFoot(0);
   let nr=foot.insertRow(0);
   td=document.createElement('td');
-  td.colSpan="11";
   td.classList.add("icon");
   el=document.createElement('i');
   el.classList.add("add");
   el.addEventListener("click", eventHandler);
   td.appendChild(el);
+  nr.appendChild(td);
+  td=document.createElement('td');
+  td.colSpan="11";
   nr.appendChild(td);
 }
 function page_onload()
