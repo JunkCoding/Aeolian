@@ -182,6 +182,51 @@ async function fetchMenuItems(JSONSource, start)
   }
   extend_sharedSel(`{"name":"${JSONSource}","menu":[${jsonItemsStr}]}`);
 }
+function set_row_defaults(tblId, divEls)
+{
+  let d=0;
+  divEls[d++].querySelector("i").className="del";
+
+  let el=divEls[d++].querySelector(".sharedsel");
+  if(tblId==='annual')
+  {
+    el.setAttribute('data-value', '0:0');
+    append_sharedSel(el);
+
+    el=divEls[d++].querySelector(".sharedsel");
+    el.setAttribute('data-value', '2:0');
+    append_sharedSel(el);
+
+    el=divEls[d++].querySelector(".sharedsel");
+    el.setAttribute('data-value', '2:0');
+    append_sharedSel(el);
+  }
+  else if(tblId==='weekly')
+  {
+    el.setAttribute('data-value', '1:0');
+    append_sharedSel(el);
+  }
+  el=divEls[d++].querySelector(".timesel");
+  el.setAttribute('data-value', '00:00');
+  append_timesel(el);
+
+  el=divEls[d++].querySelector(".timesel");
+  el.setAttribute('data-value', '00:00');
+  append_timesel(el);
+
+  el=divEls[d++].querySelector(".sharedsel");
+  el.setAttribute('data-value', 'theme:0');
+  append_sharedSel(el);
+
+  el=divEls[d++].querySelector(".sharedsel");
+  el.setAttribute('data-value', 'brightness:2');
+  append_sharedSel(el);
+
+  el=divEls[d++].querySelector("input[type=checkbox]");
+  el=divEls[d++].querySelector("input[type=checkbox]");
+  el=divEls[d++].querySelector("input[type=checkbox]");
+  el=divEls[d++].querySelector("input[type=checkbox]");
+}
 function eventHandler(event)
 {
   if(event.type==="click")
@@ -193,7 +238,8 @@ function eventHandler(event)
       if("content" in document.createElement("template"))
       {
         const tbl=closest(tgt, 'table');
-        clone_row(tbl, 0xff);
+        console.log(tbl.id);
+        set_row_defaults(tbl.id,clone_row(tbl, 0xff));
       }
     }
   }
