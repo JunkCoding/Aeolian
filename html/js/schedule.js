@@ -18,13 +18,15 @@ var ePos={
   target: null,
   doy: 0,
 };
-function clone_row(tbl)
+function clone_row(tbl, id)
 {
   // Get our parent table, which is the table we are inserting a new row.
   const tbdy=tbl.getElementsByTagName('tbody')[0];
   const clone=document.querySelector(`#t_${tbl.id}Row`).content.cloneNode(true);
   const divs=clone.querySelectorAll("td");
   tbdy.appendChild(clone);
+  /* Set the row id */
+  divs[0].parentNode.id=`${tbl.id}_${id}`;
   return (divs);
 }
 function fillTable(type, jsonData)
@@ -48,7 +50,7 @@ function fillTable(type, jsonData)
     const sched=jsonData.items[i];
 
     let d=0;
-    let divEls=clone_row(tbl);
+    let divEls=clone_row(tbl, sched.N);
     divEls[d++].querySelector("i").className="del";
 
     let el=divEls[d++].querySelector(".sharedsel");
@@ -191,7 +193,7 @@ function eventHandler(event)
       if("content" in document.createElement("template"))
       {
         const tbl=closest(tgt, 'table');
-        clone_row(tbl)
+        clone_row(tbl, 0xff);
       }
     }
   }
