@@ -25,6 +25,18 @@
     width: auto;
     min-width: 105px;
   }
+  .new {
+    animation: changeBackgroundColor 2.5s ease alternate infinite;
+  }
+}
+@keyframes changeBackgroundColor {
+  0% {
+    background-color: #dd39ae70;
+  }
+  50%,
+  100% {
+    background-color: #dd39ae30;
+  }
 }
 .table-header-rotated th.rotate-45 {
   height: 85px;

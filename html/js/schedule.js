@@ -26,7 +26,15 @@ function clone_row(tbl, id)
   const divs=clone.querySelectorAll("td");
   tbdy.appendChild(clone);
   /* Set the row id */
-  divs[0].parentNode.id=`${tbl.id}_${id}`;
+  if(id!==255)
+  {
+    divs[0].parentNode.id=`${tbl.id}_${id}`;
+  }
+  else
+  {
+    divs[0].parentNode.id=`${tbl.id}_${tbdy.querySelectorAll("tr").length-1}`;/* -1 as we already added a row */
+    divs[0].parentNode.classList.add("new");
+  }
   return (divs);
 }
 function fillTable(type, jsonData)
@@ -51,7 +59,8 @@ function fillTable(type, jsonData)
 
     let d=0;
     let divEls=clone_row(tbl, sched.N);
-    divEls[d++].querySelector("i").className="del";
+    divEls[d].querySelector("i").className="del";
+    divEls[d++].querySelector("i").addEventListener("click", eventHandler);
 
     let el=divEls[d++].querySelector(".sharedsel");
     if(tbl.id==='annual')
@@ -185,7 +194,8 @@ async function fetchMenuItems(JSONSource, start)
 function set_row_defaults(tblId, divEls)
 {
   let d=0;
-  divEls[d++].querySelector("i").className="del";
+  divEls[d].querySelector("i").className="del";
+  divEls[d++].querySelector("i").addEventListener("click", eventHandler);
 
   let el=divEls[d++].querySelector(".sharedsel");
   if(tblId==='annual')
@@ -238,8 +248,18 @@ function eventHandler(event)
       if("content" in document.createElement("template"))
       {
         const tbl=closest(tgt, 'table');
-        console.log(tbl.id);
-        set_row_defaults(tbl.id,clone_row(tbl, 0xff));
+        if(typeof tbl==='object')
+        {
+          set_row_defaults(tbl.id, clone_row(tbl, 0xff));
+        }
+      }
+    }
+    else if(tgt.classList.contains('del')===true)
+    {
+      const tbl=closest(tgt, 'table');
+      if(typeof tbl==='object')
+      {
+        console.log(tbl.id, closest(tgt, 'tr').id);
       }
     }
   }

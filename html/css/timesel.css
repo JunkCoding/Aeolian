@@ -41,7 +41,6 @@ input[type="number"] {
   width: 40px;
   height: 24px; /* needs to be 1px higher than input.time */
 }
-
 input.time {
   background-color: transparent;
   line-height:23px;
@@ -52,22 +51,18 @@ input.time {
   border: 0;
   color: #fff;
 }
-
 input.time:focus,
 input.time:active {
   background-color: #207070;
 }
-
-.sel_hours {
+input[name="hours"] {
   padding-right: 5px;
   text-align: right;
 }
-
-.sel_mins {
+input[name="mins"] {
   padding-left: 5px;
   text-align: left;
 }
-
 .divider {
   line-height: 21px;
   font-weight: bold;

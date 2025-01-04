@@ -66,8 +66,9 @@ class timesel
       return false;
     }
     let t=document.createElement('input');
-    t.classList.add("time", "sel_hours");
-    t.id=`${el.id}_h`;
+    t.classList.add("time");
+    t.name="hours";
+    /*t.id=`${el.id}_h`;*/
     t.value=('00'+tar[0]).slice(-2);
     el.appendChild(t);
 
@@ -77,8 +78,9 @@ class timesel
     el.appendChild(p);
 
     let m=document.createElement('input');
-    m.classList.add("time", "sel_mins");
-    m.id=`${el.id}_m`;
+    m.classList.add("time");
+    m.name="mins";
+    /*m.id=`${el.id}_m`;*/
     m.value=('00'+tar[1]).slice(-2);
     el.appendChild(m);
   }
@@ -88,9 +90,6 @@ class timesel
 
     /* Stotr the current value without leading zeros */
     let tmpStr=el.value.replace(/\b0+/g, '');
-
-    /* Clear the string, so we can just return on invalid input */
-    el.value="00";
 
     /* Are we actually interested in this element? */
     if(!el.classList.contains("time"))
@@ -118,38 +117,73 @@ class timesel
       }
     }
 
-    /* This works for stuff that's pasted */
-    if(tmpStr.length>2)
-    {
-      return;
-    }
-
-    let tmpNum=Number(tmpStr);
-    if(tmpNum<0)
-    {
-      return;
-    }
-
     /* Deal with individual needs of hours/minutes */
-    if(el.classList.contains("sel_hours"))
+    /*
+    if(el.name==="hours")
     {
       if(tmpNum>23)
       {
         el.value="23";
-        return;
       }
     }
-    else if(el.classList.contains("sel_mins"))
+    else if(el.name==="mins")
     {
       if(tmpNum>59)
       {
         el.value="59";
-        return;
       }
+    }
+    else
+    {
+      el.value=('00'+tmpStr).slice(-2);
+    }*/
+
+    /* Check if we are a start or emd time */
+    const ts=closest(el, '.timeStart');
+    const te=closest(el, '.timeEnd');
+
+    /* If both are not null, we need to constrain ourselves */
+    if(ts!==null&&te!==null)
+    {
+      let tsm=(Number(ts.querySelector('input[name=hours]').value)*60)+Number(ts.querySelector('input[name=mins]').value);
+      let tem=(Number(te.querySelector('input[name=hours]').value)*60)+Number(te.querySelector('input[name=mins]').value);
+
+      /* Check our start time is not in the past */
+      if(tsm<0)
+      {
+        tsm=0;
+      }
+
+      /* Check our end time doesn't overflow */
+      if(tem>=1440)
+      {
+        tem=1439;
+      }
+
+      /* Now check our times are in the correct order */
+      if(tsm>=tem)
+      {
+        /* Check if 'ts' is the current element */
+        if(ts===el.parentNode)
+        {
+          tsm=tem-1;
+        }
+        /* 'te' is our current element, so modify its value */
+        else
+        {
+          tem=tsm+1;
+        }
+      }
+
+      ts.querySelector('input[name=hours]').value=String(Math.floor(tsm/60)).padStart(2, '0');
+      ts.querySelector('input[name=mins]').value=String(Math.floor(tsm%60)).padStart(2, '0');
+
+      te.querySelector('input[name=hours]').value=String(Math.floor(tem/60)).padStart(2, '0');
+      te.querySelector('input[name=mins]').value=String(Math.floor(tem%60)).padStart(2, '0');
     }
 
     /* Return with whatever, it seems okay */
-    el.value=('00'+tmpStr).slice(-2);
+    //el.value=('00'+tmpStr).slice(-2);
   }
   onclick(tgt, event)
   {
@@ -162,7 +196,7 @@ class timesel
     let el=event.target;
     if(el.classList.contains('time'))
     {
-      if(el.classList.contains('sel_hours')||el.classList.contains('sel_mins'))
+      if(el.name==='hours'||el.name==='mins')
       {
         el.value=String(Number(el.value)-delta);
         tgt.validate_time(event);

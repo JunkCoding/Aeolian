@@ -471,14 +471,15 @@ pre {
 .navbar a {
   float: left;
   display: block;
-  color: var(--navbar-col-fg);
+  font-size: 16px;
   text-align: center;
-  width: 5.6em;
-  padding: 0.1em;
+  color: var(--navbar-col-fg);
+  -webkit-text-decoration: none;
   background-color: var(--navbar-col-bg);
   border: 1px solid var(--navbar-col-border);
   text-decoration: none;
-  -webkit-text-decoration: none;
+  padding: 0.1em;
+  width: 5.6em;
 }
 
 .navbar a:hover:not(.active) {
@@ -995,6 +996,7 @@ progress::-moz-progress-bar {
 /***** ***** ***** ***** Tables **** **** **** ****/
 table {
   box-shadow: 0 0 4px 2px var(--def-col-border);
+  background-color: var(--def-col-bg);
   color: var(--def-col-fg);
   border-collapse: separate;
   border-spacing: 0px;
@@ -1047,7 +1049,7 @@ table {
     border-top-right-radius: 10px;
   }
   th, td {
-    background-color: var(--def-col-bg);
+    background-color: transparent;/*var(--def-col-bg);*/
     color: var(--def-col-fg);
   }
 }
@@ -1211,7 +1213,7 @@ table > tfoot:not(:empty) ~ :last-child > tr:last-of-type {
 }
 .btn_group {
   display: inline-flex;
-  margin: 10px 0px 0px 0px;
+  margin: 12px 0px 0px 0px;
 }
 input.sta_test {
   background-color: #1c70a9;
@@ -1350,6 +1352,7 @@ input[type=submit]:focus,
 input[type=submit]:active {
   border: 1px solid var(--submit-col-border);
   box-shadow: 0 0px 0px 1px var(--submit-col-border);
+  margin: 0 5px 0 5px;
   border-radius: 10px;
   min-width: 120px;
   font-size: 14px;
@@ -1386,7 +1389,7 @@ div#fw-selector {
   background: #104dab;
   box-shadow: 0 0px 0px 1px var(--submit-col-border);
   /*border: 1px solid var(--submit-col-border);*/
-  margin: 0px 14px 8px 8px;
+  margin: 0px 14px 10px 8px;
   position: relative;
   color: var(--def-col-fg);;
   border-radius: 22px;
@@ -1614,8 +1617,8 @@ ul::-webkit-scrollbar {
 
   .dropdown-toggle {
     box-shadow: 0px 0px 4px -2px rgba(0, 0, 0, 0.5);
+    background-color: transparent; /*var(--def-col-bg);*/
     border-radius: 5px;
-    background-color: var(--def-col-bg);
     color: var(--def-col-fg);
     font-size: 15px;
     padding-left: 4px;
@@ -1759,6 +1762,7 @@ span.help {
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: center;
+  margin: 8px 2px 0px 0px;
 }
 
 .pref_label {

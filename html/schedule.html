@@ -22,41 +22,38 @@
         <i class="nil"></i>
       </td>
       <td>
-        <div class="sharedsel ts-day dropdown-container" data-value="">
-        </div>
+        <div class="sharedsel dropdown-container" name="day"></div>
       </td>
       <td>
-        <div id="" class="timesel tStart" data-value="">
-        </div>
+        <div class="timesel timeStart"></div>
       </td>
       <td>
-        <div class="timesel tEnd" data-value="">
-        </div>
+        <div class="timesel timeEnd"></div>
       </td>
       <td>
-        <div class="nopadding sharedsel theme dropdown-container" data-value=""></div>
+        <div class="nopadding sharedsel dropdown-container" name="theme"></div>
       </td>
       <td>
-        <div class="nopadding sharedsel dim dropdown-container" data-value=""></div>
+        <div class="nopadding sharedsel dropdown-container" name="dim"></div>
       </td>
       <td class="fla_td">
         <div class="tickbox">
-          <input type="checkbox" class="flag fDef" onchange="toggleFlag(this.id, this.checked)">
+          <input type="checkbox" name="default" onchange="toggleFlag(this)">
         </div>
       </td>
       <td class="fla_td">
         <div class="tickbox">
-          <input type="checkbox" class="flag fOff" onchange="toggleFlag(this.id, this.checked)">
+          <input type="checkbox" name="off" onchange="toggleFlag(this)">
         </div>
       </td>
       <td class="fla_td">
         <div class="tickbox">
-          <input type="checkbox" class="flag fAut" onchange="toggleFlag(this.id, this.checked)">
+          <input type="checkbox" name="auto" onchange="toggleFlag(this)">
         </div>
       </td>
       <td class="fla_td">
         <div class="tickbox">
-          <input type="checkbox" class="flag fDis" onchange="toggleFlag(this.id, this.checked)">
+          <input type="checkbox" name="disable" onchange="toggleFlag(this)">
         </div>
       </td>
     </tr>
@@ -67,48 +64,48 @@
         <i class="nil"></i>
       </td>
       <td>
-        <div class="sharedsel ts-month dropdown-container"></div>
+        <div class="sharedsel dropdown-container" name="month"></div>
       </td>
       <td>
-        <div class="sharedsel ts-date dStart dropdown-container"></div>
+        <div class="sharedsel dropdown-container" name="dayStart"></div>
       </td>
       <td>
-        <div class="sharedsel ts-date dEnd dropdown-container"></div>
+        <div class="sharedsel dropdown-container" name="dayEnd"></div>
       </td>
       <td>
-        <div id="" class="timesel" data-value="">
+        <div class="timesel timeStart">
         </div>
       </td>
       <td>
-        <div class="timesel" data-value="">
+        <div class="timesel timeEnd">
         </div>
       </td>
       <td>
-        <div class="nopadding sharedsel theme dropdown-container" data-value="">
+        <div class="nopadding sharedsel dropdown-container" name="theme">
         </div>
       </td>
       <td>
-        <div class="nopadding sharedsel dim dropdown-container" data-value="">
+        <div class="nopadding sharedsel dropdown-container" name="dim">
         </div>
       </td>
       <td class="fla_td">
         <div class="tickbox">
-          <input type="checkbox" class="flag fDef" onchange="toggleFlag(this.id, this.checked)">
+          <input type="checkbox" name="default" onchange="toggleFlag(this)">
         </div>
       </td>
       <td class="fla_td">
         <div class="tickbox">
-          <input type="checkbox" class="flag fOff" onchange="toggleFlag(this.id, this.checked)">
+          <input type="checkbox" name="off" onchange="toggleFlag(this)">
         </div>
       </td>
       <td class="fla_td">
         <div class="tickbox">
-          <input type="checkbox" class="flag fAut" onchange="toggleFlag(this.id, this.checked)">
+          <input type="checkbox" name="auto" onchange="toggleFlag(this)">
         </div>
       </td>
       <td class="fla_td">
         <div class="tickbox">
-          <input type="checkbox" class="flag fDis" onchange="toggleFlag(this.id, this.checked)">
+          <input type="checkbox" name="disable" onchange="toggleFlag(this)">
         </div>
       </td>
     </tr>
@@ -175,7 +172,7 @@
       </table>
     </div>
     <div class="btn_group">
-      <div class="submit"><input type="submit" class="schedule" id="annual_save" value="Save" onclick="" disabled /></div>
+      <div class="submit"><input type="submit" class="schedule" id="annual_save" value="Save" onclick="" /></div>
       <div class="submit"><input type="submit" class="schedule" id="annual_reload" value="Reload" onclick="" /></div>
     </div>
   </div>
