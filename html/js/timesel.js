@@ -115,28 +115,8 @@ class timesel
       {
         tmpStr=event.key;
       }
+      el.value=tmpStr;
     }
-
-    /* Deal with individual needs of hours/minutes */
-    /*
-    if(el.name==="hours")
-    {
-      if(tmpNum>23)
-      {
-        el.value="23";
-      }
-    }
-    else if(el.name==="mins")
-    {
-      if(tmpNum>59)
-      {
-        el.value="59";
-      }
-    }
-    else
-    {
-      el.value=('00'+tmpStr).slice(-2);
-    }*/
 
     /* Check if we are a start or emd time */
     const ts=closest(el, '.timeStart');
@@ -148,30 +128,48 @@ class timesel
       let tsm=(Number(ts.querySelector('input[name=hours]').value)*60)+Number(ts.querySelector('input[name=mins]').value);
       let tem=(Number(te.querySelector('input[name=hours]').value)*60)+Number(te.querySelector('input[name=mins]').value);
 
-      /* Check our start time is not in the past */
-      if(tsm<0)
+      /* Check our start time is within bounds */
+      if(tsm<0||tsm>1439)
       {
         tsm=0;
       }
 
       /* Check our end time doesn't overflow */
-      if(tem>=1440)
+      if(tem>=1439)
       {
-        tem=1439;
+        tem=0;
       }
 
-      /* Now check our times are in the correct order */
-      if(tsm>=tem)
+      /* Only process further if one our times is *not* zero */
+      if(!(!tsm&&!tem))
       {
-        /* Check if 'ts' is the current element */
-        if(ts===el.parentNode)
+        /* Now check our times are in the correct order */
+        if((tsm>=tem) && tem)
         {
-          tsm=tem-1;
-        }
-        /* 'te' is our current element, so modify its value */
-        else
-        {
-          tem=tsm+1;
+          /* Check if 'ts' is the current element */
+          if(ts===el.parentNode)
+          {
+            if(tem>0)
+            {
+              tsm=tem-1;
+            }
+            else
+            {
+              tsm=0;
+            }
+          }
+          /* 'te' is our current element, so modify its value */
+          else
+          {
+            if(tem<0)
+            {
+              tem=1439;
+            }
+            else if(tem<1439)
+            {
+              tem=tsm+1;
+            }
+          }
         }
       }
 
@@ -181,9 +179,28 @@ class timesel
       te.querySelector('input[name=hours]').value=String(Math.floor(tem/60)).padStart(2, '0');
       te.querySelector('input[name=mins]').value=String(Math.floor(tem%60)).padStart(2, '0');
     }
-
-    /* Return with whatever, it seems okay */
-    //el.value=('00'+tmpStr).slice(-2);
+    else
+    {
+      /* Deal with individual needs of hours/minutes */
+      if(el.name==="hours")
+      {
+        if(tmpNum>23)
+        {
+          el.value="23";
+        }
+      }
+      else if(el.name==="mins")
+      {
+        if(tmpNum>59)
+        {
+          el.value="59";
+        }
+      }
+      else
+      {
+        el.value=('00'+tmpStr).slice(-2);
+      }
+    }
   }
   onclick(tgt, event)
   {
