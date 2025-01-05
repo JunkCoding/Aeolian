@@ -1,3 +1,5 @@
+/* jshint esversion: 8 */
+
 var retries;
 
 function createRowForTask(row, task)

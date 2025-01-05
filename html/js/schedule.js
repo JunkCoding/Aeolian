@@ -1,11 +1,13 @@
+/* jshint esversion: 8 */
+
 var jsonBri='{"name": "brightness","menu":[{"name": "Maximum", "value": 0, "submenu": null},{"name": "High", "value": 1, "submenu": null},{"name": "Medium", "value": 2, "submenu": null},{"name": "Low", "value": 3, "submenu": null},{"name": "Minimum", "value": 4, "submenu": null}]}';
 
-const EVENT_NOFLAGS    = 0x00     // Event forces lights to be on during period or whole day
-const EVENT_LIGHTSOFF  = 0x01     // Event forces lights to be off during period or whole day
-const EVENT_AUTONOMOUS = 0x10     // Event will display with sunset/sunrise switching
-const EVENT_DEFAULT    = 0x20     // Default event to be run when no other event is matched
-const EVENT_IMMUTABLE  = 0x40     // Event cannot be removed/altered
-const EVENT_DISABLED   = 0x80     // Event is not active (don't run)
+const EVENT_NOFLAGS      = 0x00;     // Event forces lights to be on during period or whole day
+const EVENT_LIGHTSOFF    = 0x01;     // Event forces lights to be off during period or whole day
+const EVENT_AUTONOMOUS   = 0x10;     // Event will display with sunset/sunrise switching
+const EVENT_DEFAULT      = 0x20;     // Default event to be run when no other event is matched
+const EVENT_IMMUTABLE    = 0x40;     // Event cannot be removed/altered
+const EVENT_DISABLED     = 0x80;     // Event is not active (don't run)
 
 var mousedown=false;
 var hasMoved=false;
@@ -66,14 +68,17 @@ function fillTable(type, jsonData)
     if(tbl.id==='annual')
     {
       el.setAttribute('data-value', `0:${sched.M}`);
+      el.addEventListener('click', eventHandler);
       append_sharedSel(el);
 
       el=divEls[d++].querySelector(".sharedsel");
       el.setAttribute('data-value', `2:${Number(sched.sd)-1}`);
+      el.addEventListener('click', eventHandler);
       append_sharedSel(el);
 
       el=divEls[d++].querySelector(".sharedsel");
       el.setAttribute('data-value', `2:${Number(sched.ed)-1}`);
+      el.addEventListener('click', eventHandler);
       append_sharedSel(el);
     }
     else if(tbl.id==='weekly')
@@ -201,14 +206,17 @@ function set_row_defaults(tblId, divEls)
   if(tblId==='annual')
   {
     el.setAttribute('data-value', '0:0');
+    el.addEventListener('click', eventHandler);
     append_sharedSel(el);
 
     el=divEls[d++].querySelector(".sharedsel");
     el.setAttribute('data-value', '2:0');
+    el.addEventListener('click', eventHandler);
     append_sharedSel(el);
 
     el=divEls[d++].querySelector(".sharedsel");
     el.setAttribute('data-value', '2:0');
+    el.addEventListener('click', eventHandler);
     append_sharedSel(el);
   }
   else if(tblId==='weekly')
@@ -262,10 +270,18 @@ function eventHandler(event)
         console.log(tbl.id, closest(tgt, 'tr').id);
       }
     }
+    else if(tgt.classList.contains('dropdown-item')===true)
+    {
+      let ddl=tgt.parentNode.parentNode.parentNode;
+    }
+  }
+  else if(event.type==="change")
+  {
+    console.log("change");
   }
   else
   {
-    console.log(event);
+    console.log(event.type);
   }
 }
 function setFooter(type)

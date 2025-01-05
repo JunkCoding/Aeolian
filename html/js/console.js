@@ -1,10 +1,12 @@
 
+/* jshint esversion: 8 */
+
 var retries;
 
 function wsOpen()
 {
   var ws;
-  var ansi_up = new AnsiUp;
+  var ansi_up = new AnsiUp();
   var rcvd = document.getElementById("received");
 
   if ( ws === undefined || ws.readyState != 0 )
@@ -19,7 +21,7 @@ function wsOpen()
     }
     var uri = "/websocket/log";
     ws = new WebSocket("ws://" + location.host + uri);
-    ws.binaryType = 'arraybuffer';
+    ws.binaryType = "arraybuffer";
     ws.onopen = function(evt)
     {
       retries = 0;
@@ -42,10 +44,10 @@ function wsOpen()
       {
         // Save the current position
         var preTop = rcvd.scrollTop;
-        var as = (preTop == (rcvd.scrollHeight - rcvd.offsetHeight))
+        var as=(preTop==(rcvd.scrollHeight-rcvd.offsetHeight));
 
         var tmpStr = ansi_up.ansi_to_html(evt.data);
-        rcvd.innerHTML += tmpStr.replace(new RegExp('\r?\n','g'), '<br />');
+        rcvd.innerHTML += tmpStr.replace(new RegExp("\r?\n","g"), "<br />");
 
         // Autoscroll if we were at the bottom of the log output
         if ( as == true )

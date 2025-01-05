@@ -1,3 +1,5 @@
+/* jshint esversion: 8 */
+
 // https://www.w3schools.com/howto/howto_js_draggable.asp
 // https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_draggable
 function dragElement(elmnt)
@@ -34,7 +36,7 @@ function dragElement(elmnt)
     pos2=pos4-e.clientY;
     pos3=e.clientX;
     pos4=e.clientY;
-    // set the element's new position:
+    // set the element"s new position:
     elmnt.style.top=(elmnt.offsetTop-pos2)+"px";
     elmnt.style.left=(elmnt.offsetLeft-pos1)+"px";
   }
@@ -53,13 +55,13 @@ function Dragger(element)
   this.element=element;
   this.x=0;
   this.y=0;
-  this.element.addEventListener('mousedown', this);
+  this.element.addEventListener("mousedown", this);
 }
 
 // trigger .ontype from event.type, like onmousedown
 Dragger.prototype.handleEvent=function(event)
 {
-  var method='on'+event.type;
+  var method="on"+event.type;
   // call method if there
   if(this[method])
   {
@@ -74,8 +76,8 @@ Dragger.prototype.onmousedown=function(event)
   this.pointerDownX=event.pageX;
   this.pointerDownY=event.pageY;
 
-  window.addEventListener('mousemove', this);
-  window.addEventListener('mouseup', this);
+  window.addEventListener("mousemove", this);
+  window.addEventListener("mouseup", this);
 };
 
 Dragger.prototype.onmousemove=function(event)
@@ -84,19 +86,19 @@ Dragger.prototype.onmousemove=function(event)
   var moveY=event.pageY-this.pointerDownY;
   this.x=this.dragStartX+moveX;
   this.y=this.dragStartY+moveY;
-  this.element.style.left=this.x+'px';
-  this.element.style.top=this.y+'px';
+  this.element.style.left=this.x+"px";
+  this.element.style.top=this.y+"px";
 };
 
 Dragger.prototype.onmouseup=function()
 {
-  window.removeEventListener('mousemove', this);
-  window.removeEventListener('mouseup', this);
+  window.removeEventListener("mousemove", this);
+  window.removeEventListener("mouseup", this);
 };
 
 // --------------- //
 
-var dragElems=document.querySelectorAll('.draggable');
+var dragElems=document.querySelectorAll(".draggable");
 for(var i=0; i<dragElems.length; i++)
 {
   var dragElem=dragElems[i];

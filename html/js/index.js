@@ -1,7 +1,9 @@
+/* jshint esversion: 8 */
+
 var retries;
 function set_switch(switchID, state)
 {
-  document.getElementById(switchID).checked = state == 1 ? true : false;
+  document.getElementById(switchID).checked = (state == 1 ? true : false);
 
   if( document.getElementById(switchID).checked )
   {
@@ -12,7 +14,7 @@ function switchLeds(switchID)
 {
   if ( switchID.checked == true )
   {
-    updateControl('led_switch', document.leds.state.value);
+    updateControl("led_switch", document.leds.state.value);
   }
 }
 function page_onload()
@@ -48,7 +50,7 @@ function wsOpen()
     }
     var uri = "/websocket/status";
     ws = new WebSocket("ws://" + location.host + uri);
-    ws.binaryType = 'arraybuffer';
+    ws.binaryType = "arraybuffer";
     ws.onopen = function(evt)
     {
       retries = 0;
@@ -68,29 +70,29 @@ function wsOpen()
     ws.onmessage = function(evt)
     {
       var stats = JSON.parse(evt.data);
-      document.getElementById('date_time').innerHTML = stats.dt;
-      document.getElementById('uptime').innerHTML = stats.ut;
-      document.getElementById('memory').innerHTML = stats.me;
-      document.getElementById('led_status').innerHTML = ((stats.pa == 0) ? 'On' : 'Off');
-      document.getElementById('zone0').innerHTML = ((stats.z0 == 1) ? 'On' : 'Off');
-      document.getElementById('zone1').innerHTML = ((stats.z1 == 1) ? 'On' : 'Off');
-      document.getElementById('zone2').innerHTML = ((stats.z2 == 1) ? 'On' : 'Off');
-      document.getElementById('zone3').innerHTML = ((stats.z3 == 1) ? 'On' : 'Off');
+      document.getElementById("date_time").innerHTML = stats.dt;
+      document.getElementById("uptime").innerHTML = stats.ut;
+      document.getElementById("memory").innerHTML = stats.me;
+      document.getElementById("led_status").innerHTML = ((stats.pa == 0) ? "On" : "Off");
+      document.getElementById("zone0").innerHTML = ((stats.z0 == 1) ? "On" : "Off");
+      document.getElementById("zone1").innerHTML = ((stats.z1 == 1) ? "On" : "Off");
+      document.getElementById("zone2").innerHTML = ((stats.z2 == 1) ? "On" : "Off");
+      document.getElementById("zone3").innerHTML = ((stats.z3 == 1) ? "On" : "Off");
 
       // See if we have a dim setting and whether our form can handle it
       if ( (stats.di >= 0) && (stats.di < document.getElementById("dim").querySelectorAll("li").length) )
       {
-        document.getElementById('selDim').textContent = document.getElementById("dim").querySelectorAll("li")[stats.di].textContent;
+        document.getElementById("selDim").textContent = document.getElementById("dim").querySelectorAll("li")[stats.di].textContent;
       }
 
-      patlist = document.getElementById("pattern").querySelectorAll("li");
-      if ( (stats.cp) && patlist.length > 0 )
+      pathlist = document.getElementById("pattern").querySelectorAll("li");
+      if ( (stats.cp) && pathlist.length > 0 )
       {
-        for ( var item of patlist )
+        for ( var item of pathlist )
         {
           if ( stats.cp == item.value )
           {
-            document.getElementById('selPattern').textContent = item.textContent;
+            document.getElementById("selPattern").textContent = item.textContent;
             break;
           }
         }
@@ -106,7 +108,7 @@ function fillTable(JSONSource, jsonData)
 {
   var active = -1;
 
-  if ( jsonData.hasOwnProperty('active') )
+  if ( jsonData.hasOwnProperty("active") )
   {
     active = jsonData.active;
   }
@@ -123,7 +125,7 @@ function fillTable(JSONSource, jsonData)
     plist.appendChild(opt);
     if ( item.id == active )
     {
-      closest(document.getElementById(JSONSource), '.dropdown-toggle').textContent=item.name;
+      closest(document.getElementById(JSONSource), ".dropdown-toggle").textContent=item.name;
     }
   }
 
@@ -154,7 +156,7 @@ function fetchData(JSONSource, start)
     {
       console.error(error);
     }
-    if ( typeof jsonResponse === 'object' )
+    if ( typeof jsonResponse === "object" )
     {
       fillTable(JSONSource, jsonResponse);
     }
@@ -165,13 +167,13 @@ function fetchData(JSONSource, start)
 async function fetchMenuItems(JSONSource, start)
 {
   var doLoop=true;
-  var jsonItemsStr='';
+  var jsonItemsStr="";
 
   // request options
   const options={
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json"
     }
   };
   while(doLoop===true)
@@ -183,9 +185,9 @@ async function fetchMenuItems(JSONSource, start)
     {
       for(let it of data.items)
       {
-        if(jsonItemsStr!=='')
+        if(jsonItemsStr!=="")
         {
-          jsonItemsStr+=',';
+          jsonItemsStr+=",";
         }
         jsonItemsStr+=`{"name":"${it.name}","value":${it.id},"submenu":null}`;
       }

@@ -102,3 +102,12 @@
   background-color: #a91616b8;
 }
 
+/* For hiding surplus days in requisite months */
+.February * .feb,
+.noleap * .noleap,
+.April * .ajsn,
+.June * .ajsn,
+.September * .ajsn,
+.November * .ajsn {
+  display: none;
+}

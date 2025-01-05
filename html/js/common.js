@@ -1,4 +1,5 @@
-// test
+/* jshint esversion: 8 */
+
 // --------------------------------------------------------------------
 // Fancy Drop Down Box
 // --------------------------------------------------------------------
@@ -6,7 +7,7 @@ var ddlist = [];
 var ddgrp = [];
 /*****************************************************************/
 /*****************************************************************/
-function _ (el)
+function _(el)
 {
   return document.getElementById(el);
 }
@@ -15,36 +16,34 @@ function _ (el)
 function get_view_dimensions()
 {
   // the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
-  if (typeof window.innerWidth != 'undefined')
+  if (typeof window.innerWidth != "undefined")
   {
-    viewportwidth = window.innerWidth,
-      viewportheight = window.innerHeight;
+    viewportwidth=window.innerWidth;
+    viewportheight = window.innerHeight;
   }
   // IE6 in standards compliant mode (i.e. with a valid doctype as the first line in the document)
-  else if (typeof document.documentElement != 'undefined'
-    && typeof document.documentElement.clientWidth !=
-    'undefined' && document.documentElement.clientWidth != 0)
+  else if (typeof document.documentElement != "undefined" && typeof document.documentElement.clientWidth != "undefined" && document.documentElement.clientWidth != 0)
   {
-    viewportwidth = document.documentElement.clientWidth,
-      viewportheight = document.documentElement.clientHeight;
+    viewportwidth=document.documentElement.clientWidth;
+    viewportheight = document.documentElement.clientHeight;
   }
   // older versions of IE
   else
   {
-    viewportwidth = document.getElementsByTagName('body')[0].clientWidth,
-      viewportheight = document.getElementsByTagName('body')[0].clientHeight;
+    viewportwidth=document.getElementsByTagName("body")[0].clientWidth;
+    viewportheight = document.getElementsByTagName("body")[0].clientHeight;
   }
-  console.log('viewport size is ' + viewportwidth + 'x' + viewportheight);
+  console.log("viewport size is " + viewportwidth + "x" + viewportheight);
   return (viewportwidth, viewportheight);
 }
 /*****************************************************************/
 /*****************************************************************/
 function set_background ()
 {
-  var c = document.createElement('canvas');
+  var c = document.createElement("canvas");
   c.width = 1440;
   c.height = 2560;
-  ctx = c.getContext('2d');
+  ctx = c.getContext("2d");
 
   const grad = ctx.createLinearGradient(0, 0, c.width / 2, c.height / 2);
   grad.addColorStop(0, "#000000");
@@ -76,9 +75,9 @@ function set_background ()
   grd.addColorStop(1, "rgba(10,10,10,0.5");
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, c.width, c.height);
-  document.body.style.background = 'url(' + c.toDataURL() + ')';
-  document.body.style.backgroundRepeat = 'no-repeat';
-  document.body.style.backgroundSize = 'cover';
+  document.body.style.background = "url(" + c.toDataURL() + ")";
+  document.body.style.backgroundRepeat = "no-repeat";
+  document.body.style.backgroundSize = "cover";
 }
 /*****************************************************************/
 /* Catch Errors                                                  */
@@ -88,7 +87,7 @@ var handleError=function(err)
   console.warn(err);
   return new Response(JSON.stringify({
     code: 400,
-    message: 'Stupid network Error'
+    message: "Stupid network Error"
   }));
 };
 /*****************************************************************/
@@ -202,7 +201,7 @@ function getDropdownItems (el)
     }
   });
   return itmList;
-};
+}
 /*****************************************************************/
 class dDropDown
 {
@@ -210,49 +209,49 @@ class dDropDown
   {
     this.ddgrp=el;
     this.opts=getDropdownItems(this.ddgrp);
-    this.val='';
+    this.val="";
     this.index=-1;
     this.id=el.id;
 
     el.addEventListener("mouseleave", this);
     console.log(el);
-    var clkr=closest(this.ddgrp, '.dropdown-toggle');
-    clkr.addEventListener('click', this);
+    var clkr=closest(this.ddgrp, ".dropdown-toggle");
+    clkr.addEventListener("click", this);
 
     for(var i=0; i<this.opts.length; i++)
     {
-      this.opts[i].addEventListener('click', this);
+      this.opts[i].addEventListener("click", this);
     }
   }
   onclick(_this, event)
   {
     let tgt=event.target;
-    if(tgt.nodeName==='LI')
+    if(tgt.nodeName==="LI")
     {
       set_dd(_this.id, (tgt.value));
       updateControl(_this.id, (tgt.value));
       closeDropdown();
     }
-    else if(event.target.classList.contains('click-dropdown')===true)
+    else if(event.target.classList.contains("click-dropdown")===true)
     {
-      let m=event.target.parentNode.querySelectorAll('.dropdown-menu')[0];
-      if(event.target.nextElementSibling.classList.contains('dropdown-active')===true)
+      let m=event.target.parentNode.querySelectorAll(".dropdown-menu")[0];
+      if(event.target.nextElementSibling.classList.contains("dropdown-active")===true)
       {
-        event.target.parentElement.classList.remove('dropdown-open');
-        event.target.nextElementSibling.classList.remove('dropdown-active');
+        event.target.parentElement.classList.remove("dropdown-open");
+        event.target.nextElementSibling.classList.remove("dropdown-active");
       }
       else
       {
         /* Close any other open dropdown items */
         closeDropdown();
         /* Show the dropdown for ths element */
-        event.target.parentElement.classList.add('dropdown-open');
-        event.target.nextElementSibling.classList.add('dropdown-active');
+        event.target.parentElement.classList.add("dropdown-open");
+        event.target.nextElementSibling.classList.add("dropdown-active");
       }
     }
     else
     {
-      if(event.target.classList.contains('dropdown-item'))
+      if(event.target.classList.contains("dropdown-item"))
       {
         let tgt=event.target;
         _this.value=tgt.value;
@@ -291,7 +290,7 @@ function set_dd (dl, val)
       {
         if (val === item.value)
         {
-          closest(document.getElementById(dl), '.dropdown-toggle').textContent=item.textContent;
+          closest(document.getElementById(dl), ".dropdown-toggle").textContent=item.textContent;
           break;
         }
       }
@@ -300,7 +299,7 @@ function set_dd (dl, val)
 }
 function setMsg (cls, text)
 {
-  sbox = document.getElementById('status_box');
+  sbox = document.getElementById("status_box");
   if (sbox !== null)
   {
     sbox.className = "alert alert-" + cls;
@@ -353,7 +352,7 @@ function setControl (xhttp)
   /*console.log(resp.count);*/
 
   var elephant = document.getElementById(resp.param);
-  if (typeof (elephant) != 'undefined' && elephant != null)
+  if (typeof (elephant) != "undefined" && elephant != null)
     elephant.value = resp.value;
 }
 
@@ -403,11 +402,11 @@ function navbar ()
 /*****************************************************************/
 function closeDropdown()
 {
-  [...document.getElementsByClassName('dropdown-open')].forEach(el =>
+  [...document.getElementsByClassName("dropdown-open")].forEach(el =>
   {
     el.classList.remove("dropdown-open");
   });
-  [...document.getElementsByClassName('dropdown-active')].forEach(el =>
+  [...document.getElementsByClassName("dropdown-active")].forEach(el =>
   {
     el.classList.remove("dropdown-active");
   });
@@ -422,10 +421,18 @@ document.addEventListener("DOMContentLoaded", function (event)
   {
     console.log("e.target.className = " + e.target.className);
 
-    if (!e.target.closest('.dropdown-container'))
+    if (!e.target.closest(".dropdown-container"))
     {
       closeDropdown();
     }
+
+    /* Check if we have a function to call. Fairly sure this a *huge* security risk */
+    /*
+    let obj=window["on"+e.type];
+    if(typeof obj==='function')
+    {
+      obj(e);
+    }*/
   };
 });
 /*****************************************************************/
@@ -438,10 +445,10 @@ function sleep (ms)
 /*****************************************************************/
 function openBusyMesg (mesg)
 {
-  _("busy-wrapper").style.display = 'block';
-  _("busy-message").innerText = mesg
+  _("busy-wrapper").style.display = "block";
+  _("busy-message").innerText=mesg;
 }
 function closeBusyMesg ()
 {
-  _("busy-wrapper").style.display = 'none';
+  _("busy-wrapper").style.display = "none";
 }

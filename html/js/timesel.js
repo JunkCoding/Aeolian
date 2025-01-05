@@ -1,3 +1,4 @@
+/* jshint esversion: 10 */
 
 clklst=[];
 clkgrp=[];
@@ -48,40 +49,41 @@ class timesel
   {
     this.ctarget=ctarget;
     this.init();
-    ctarget.addEventListener('click', this);
-    ctarget.addEventListener('change', this);
-    ctarget.addEventListener('input', this);
-    ctarget.addEventListener('keypress', this);
-    ctarget.addEventListener('wheel', this);
+    ctarget.addEventListener("click", this);
+    ctarget.addEventListener("change", this);
+    ctarget.addEventListener("input", this);
+    ctarget.addEventListener("keypress", this);
+    ctarget.addEventListener("wheel", this);
   }
   init()
   {
+    var tar;
     let el=this.ctarget;
     try
     {
-      var tar=el.getAttribute('data-value').split(":");
+      tar=el.getAttribute("data-value").split(":");
     }
     catch
     {
       return false;
     }
-    let t=document.createElement('input');
+    let t=document.createElement("input");
     t.classList.add("time");
     t.name="hours";
     /*t.id=`${el.id}_h`;*/
-    t.value=('00'+tar[0]).slice(-2);
+    t.value=("00"+tar[0]).slice(-2);
     el.appendChild(t);
 
-    let p=document.createElement('div');
+    let p=document.createElement("div");
     p.classList.add("time", "divider", "no-select");
     p.innerHTML=":";
     el.appendChild(p);
 
-    let m=document.createElement('input');
+    let m=document.createElement("input");
     m.classList.add("time");
     m.name="mins";
     /*m.id=`${el.id}_m`;*/
-    m.value=('00'+tar[1]).slice(-2);
+    m.value=("00"+tar[1]).slice(-2);
     el.appendChild(m);
   }
   validate_time(event)
@@ -89,7 +91,7 @@ class timesel
     let el=event.target;
 
     /* Stotr the current value without leading zeros */
-    let tmpStr=el.value.replace(/\b0+/g, '');
+    let tmpStr=el.value.replace(/\b0+/g, "");
 
     /* Are we actually interested in this element? */
     if(!el.classList.contains("time"))
@@ -101,7 +103,7 @@ class timesel
     let isNum=tmpStr.match(/^[0-9]+$/)!=null;
 
     /* Check for keypress */
-    if(typeof event.keyCode!=='undefined')
+    if(typeof event.keyCode!=="undefined")
     {
       if(event.keyCode<48||event.keyCode>57)
       {
@@ -119,14 +121,14 @@ class timesel
     }
 
     /* Check if we are a start or emd time */
-    const ts=closest(el, '.timeStart');
-    const te=closest(el, '.timeEnd');
+    const ts=closest(el, ".timeStart");
+    const te=closest(el, ".timeEnd");
 
     /* If both are not null, we need to constrain ourselves */
     if(ts!==null&&te!==null)
     {
-      let tsm=(Number(ts.querySelector('input[name=hours]').value)*60)+Number(ts.querySelector('input[name=mins]').value);
-      let tem=(Number(te.querySelector('input[name=hours]').value)*60)+Number(te.querySelector('input[name=mins]').value);
+      let tsm=(Number(ts.querySelector("input[name=hours]").value)*60)+Number(ts.querySelector("input[name=mins]").value);
+      let tem=(Number(te.querySelector("input[name=hours]").value)*60)+Number(te.querySelector("input[name=mins]").value);
 
       /* Check our start time is within bounds */
       if(tsm<0||tsm>1439)
@@ -134,7 +136,7 @@ class timesel
         tsm=0;
       }
 
-      /* Check our end time doesn't overflow */
+      /* Check our end time doesn"t overflow */
       if(tem>=1439)
       {
         tem=0;
@@ -144,9 +146,9 @@ class timesel
       if(!(!tsm&&!tem))
       {
         /* Now check our times are in the correct order */
-        if((tsm>=tem) && tem)
+        if((tsm>=tem)&&tem)
         {
-          /* Check if 'ts' is the current element */
+          /* Check if "ts" is the current element */
           if(ts===el.parentNode)
           {
             if(tem>0)
@@ -158,7 +160,7 @@ class timesel
               tsm=0;
             }
           }
-          /* 'te' is our current element, so modify its value */
+          /* "te" is our current element, so modify its value */
           else
           {
             if(tem<0)
@@ -173,11 +175,11 @@ class timesel
         }
       }
 
-      ts.querySelector('input[name=hours]').value=String(Math.floor(tsm/60)).padStart(2, '0');
-      ts.querySelector('input[name=mins]').value=String(Math.floor(tsm%60)).padStart(2, '0');
+      ts.querySelector("input[name=hours]").value=String(Math.floor(tsm/60)).padStart(2, "0");
+      ts.querySelector("input[name=mins]").value=String(Math.floor(tsm%60)).padStart(2, "0");
 
-      te.querySelector('input[name=hours]').value=String(Math.floor(tem/60)).padStart(2, '0');
-      te.querySelector('input[name=mins]').value=String(Math.floor(tem%60)).padStart(2, '0');
+      te.querySelector("input[name=hours]").value=String(Math.floor(tem/60)).padStart(2, "0");
+      te.querySelector("input[name=mins]").value=String(Math.floor(tem%60)).padStart(2, "0");
     }
     else
     {
@@ -198,7 +200,7 @@ class timesel
       }
       else
       {
-        el.value=('00'+tmpStr).slice(-2);
+        el.value=("00"+tmpStr).slice(-2);
       }
     }
   }
@@ -211,9 +213,9 @@ class timesel
   {
     const delta=Math.sign(event.deltaY);
     let el=event.target;
-    if(el.classList.contains('time'))
+    if(el.classList.contains("time"))
     {
-      if(el.name==='hours'||el.name==='mins')
+      if(el.name==="hours"||el.name==="mins")
       {
         el.value=String(Number(el.value)-delta);
         tgt.validate_time(event);
@@ -223,10 +225,10 @@ class timesel
   handleEvent(event)
   {
     event.preventDefault();
-    let obj=this['on'+event.type];
-    if(typeof obj==='function')
+    let obj=this["on"+event.type];
+    if(typeof obj==="function")
     {
-      //console.log('Function exists for "'+event.type+'" ('+event.target.id+')');
+      //console.log("Function exists for ""+event.type+"" ("+event.target.id+")");
       obj(this, event);
     }
     else

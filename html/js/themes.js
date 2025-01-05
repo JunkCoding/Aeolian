@@ -1,3 +1,4 @@
+/* jshint esversion: 8 */
 
 function fillTable(jsonData)
 {
@@ -5,30 +6,30 @@ function fillTable(jsonData)
   {
     var theme = jsonData.items[i];
 
-    var tbl = document.createElement('Table');
+    var tbl = document.createElement("Table");
     tbl.id = theme.name; tbl.className = "hdr_table";
 
     var hdr = tbl.createTHead();
     var row = hdr.insertRow(0);
-    var cell = document.createElement('th');
+    var cell = document.createElement("th");
     cell.innerHTML = `<b>${theme.name}</b>`;
     row.appendChild(cell);
 
-    var tbd = document.createElement('tbody');
+    var tbd = document.createElement("tbody");
     tbl.appendChild(tbd);
 
-    var row = document.createElement('tr');
+    row = document.createElement("tr");
 
-    var cell = document.createElement('td');
+    cell = document.createElement("td");
     row.appendChild(cell);
 
-    var div = document.createElement('div');
+    var div = document.createElement("div");
     div.id = "gridcontainer";
     cell.appendChild(div);
 
-    var sect = document.createElement('section');
+    var sect = document.createElement("section");
     sect.className = "mainGrid";
-    sect.style = `grid-template-rows:repeat(${theme.items.length}, 1fr);`
+    sect.style=`grid-template-rows:repeat(${theme.items.length}, 1fr);`;
 
     let l = theme.items.length;
     for (var p = 0; p < l; p++)
@@ -38,10 +39,10 @@ function fillTable(jsonData)
       for (var c = 0; c < m; c++)
       {
         var col = palette[p][c];
-        var box = document.createElement('div');
+        var box = document.createElement("div");
         box.className = `colbox`;
         box.id = `t${i}p${p}c${c}`;
-        box.style = `background-color: ${col}`
+        box.style=`background-color: ${col}`;
         sect.appendChild(box);
       }
     }
@@ -49,8 +50,8 @@ function fillTable(jsonData)
     tbd.appendChild(row);
     themediv.appendChild(tbl);
 
-    div = document.createElement('div');
-    div.className = 'spacer';
+    div = document.createElement("div");
+    div.className = "spacer";
     themediv.appendChild(div);
   }
 
@@ -83,14 +84,14 @@ function page_onload()
 
 function colourChooser()
 {
-  var preInput = '';
+  var preInput = "";
   var paletteHTML = generateHTML();
   var selPalette = 0;
   var colbox = false;
 
   function fetchPalette()
   {
-    var palettes = new Array();
+    var palettes = [];
 
     palettes[0] = [
               ["000000","FFFFFF","EA80FC","B388FF","8C9EFF","82B1FF","80D8FF","84FFFF"],
@@ -104,11 +105,11 @@ function colourChooser()
             ];
 
     return palettes;
-  };
+  }
   function generateHTML()
   {
     var palettes = fetchPalette();
-    var html = new Array();
+    var html = [];
 
     for ( var palette in palettes )
     {
@@ -122,18 +123,18 @@ function colourChooser()
         }
       }
 
-      html[palette] += '</section>';
+      html[palette] += "</section>";
     }
 
     return html;
-  };
+  }
 
-  function hex(x) {return ("0" + parseInt(x).toString(16)).slice(-2);};
+  function hex(x) {return ("0" + parseInt(x).toString(16)).slice(-2);}
 
   function displayPicker(selCol)
   {
     selCol.classList.add("colPicker-wrapper");
-    let div = document.createElement('div');
+    let div = document.createElement("div");
     div.id = "colPicker";
     div.innerHTML = paletteHTML[selPalette];
     selCol.appendChild(div);
@@ -148,9 +149,9 @@ function colourChooser()
 
     inp.oninput = function (ev)
     {
-      if ( ev.target.value.substr(0,1) != '#' )
+      if ( ev.target.value.substr(0,1) != "#" )
       {
-        ev.target.value = '#' + ev.target.value;
+        ev.target.value = "#" + ev.target.value;
       }
 
       var check = /^#[0-9A-Fa-f]*$/;
@@ -183,14 +184,14 @@ function colourChooser()
         if ( ev.target.value.length == 7 )
         {
           selCol.style.backgroundColor = ev.target.value;
-          updateControl('set_palette', `${colbox.id}:${ev.target.value.substr(1,7)}`);
+          updateControl("set_palette", `${colbox.id}:${ev.target.value.substr(1,7)}`);
           removePicker();
         }
       }
       preInput = ev.target.value; //catch this value for comparison in keyup
       return true;
     };
-  };
+  }
 
   function removePicker()
   {
@@ -202,7 +203,7 @@ function colourChooser()
     }
     // Allow another instance to run
     colbox = false;
-  };
+  }
 
   document.body.onclick = function(e)
   {
@@ -225,7 +226,7 @@ function colourChooser()
           // Update our device
           var hex_rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
           var color = hex(hex_rgb[1]) + hex(hex_rgb[2]) + hex(hex_rgb[3]);
-          updateControl('set_palette', `${colbox.id}:${color}`);
+          updateControl("set_palette", `${colbox.id}:${color}`);
 
           // Remove the picker from view
           removePicker();
@@ -246,7 +247,7 @@ function colourChooser()
       displayPicker(colbox);
     }
   };
-};
+}
 
 document.addEventListener("DOMContentLoaded", function(event)
 {

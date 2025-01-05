@@ -1,6 +1,8 @@
-function APconfig ()
+/* jshint esversion: 8 */
+
+function APconfig()
 {
-  ssid = null
+  ssid=null;
   bssid = null;
 }
 
@@ -8,12 +10,12 @@ var curAP = new APconfig();
 var selAP = new APconfig();
 var fixedAP = false;
 
-let _keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+let _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 function utf8Encode (string)
 {
   //base64编码
-  string = string.replace(/\r\n/g, '\n');
-  var utftext = '';
+  string = string.replace(/\r\n/g, "\n");
+  var utftext = "";
   for (var n = 0; n < string.length; n++)
   {
     var c = string.charCodeAt(n);
@@ -68,7 +70,7 @@ function utf8decode (utftext)
 function baseEncode (input)
 {
   //base64编码
-  var output = '';
+  var output = "";
   var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
   var i = 0;
   input = utf8Encode(input);
@@ -143,16 +145,16 @@ function createRowForAp (row, ap, hasFocus)
 {
   row.id = ap.bssid;
 
-  var radio = document.createElement('td');
+  var radio = document.createElement("td");
   radio.className = "radio_tick";
-  radio.style.width = '22px';
+  radio.style.width = "22px";
   /*radio.id = "radio_tick";*/
   var input = document.createElement("input");
-  input.style.width = '22px';
+  input.style.width = "22px";
   input.type = "radio";
   input.name = "ssid";
   input.value = ap.ssid;
-  input.addEventListener('change', function () { updateSelAP(ap.bssid, ap.ssid); });
+  input.addEventListener("change", function () { updateSelAP(ap.bssid, ap.ssid); });
   /*if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";*/
   if (hasFocus)
   {
@@ -162,11 +164,11 @@ function createRowForAp (row, ap, hasFocus)
   radio.appendChild(input);
   row.appendChild(radio);
 
-  var rssi = document.createElement('td');
+  var rssi = document.createElement("td");
   rssi.className = "nopadding";
-  rssi.style.width = '32px';
+  rssi.style.width = "32px";
 
-  var rssi_img = document.createElement('div');
+  var rssi_img = document.createElement("div");
   if (ap.rssi > -30)
     rssi_img.className = "signal-bars sizing-box good five-bars";
   else if (ap.rssi > -67)
@@ -178,54 +180,54 @@ function createRowForAp (row, ap, hasFocus)
   else
     rssi_img.className = "signal-bars sizing-box bad one-bar";
 
-  var bar1 = document.createElement('div');
+  var bar1 = document.createElement("div");
   bar1.className = "first-bar bar";
   rssi_img.appendChild(bar1);
-  var bar2 = document.createElement('div');
+  var bar2 = document.createElement("div");
   bar2.className = "second-bar bar";
   rssi_img.appendChild(bar2);
-  var bar3 = document.createElement('div');
+  var bar3 = document.createElement("div");
   bar3.className = "third-bar bar";
   rssi_img.appendChild(bar3);
-  var bar4 = document.createElement('div');
+  var bar4 = document.createElement("div");
   bar4.className = "fourth-bar bar";
   rssi_img.appendChild(bar4);
-  var bar5 = document.createElement('div');
+  var bar5 = document.createElement("div");
   bar5.className = "fifth-bar bar";
   rssi_img.appendChild(bar5);
 
   /*
   rssi_img.className = "nopadding";
-  rssi_img.style.width = '32px';
+  rssi_img.style.width = "32px";
   var rssiVal = -Math.floor( ap.rssi / 51 ) * 32;
   rssi_img.className = "wifi_icon";
   rssi_img.style.backgroundPosition = "0px " + rssiVal + "px";
-  rssi_img.style.height = '26px';
+  rssi_img.style.height = "26px";
   */
 
   rssi.appendChild(rssi_img);
   row.appendChild(rssi);
 
-  var rssi_val = document.createElement('td');
+  var rssi_val = document.createElement("td");
   rssi_val.className = "nopadding";
-  rssi_val.style.width = '85px';
+  rssi_val.style.width = "85px";
   rssi_val.appendChild(document.createTextNode(ap.rssi));
   row.appendChild(rssi_val);
 
-  var channel = document.createElement('td');
+  var channel = document.createElement("td");
   channel.className = "nopadding";
-  channel.style.width = '85px';
+  channel.style.width = "85px";
   channel.appendChild(document.createTextNode(ap.chan));
   row.appendChild(channel);
 
-  var name = document.createElement('td');
+  var name = document.createElement("td");
   name.className = "nopadding";
   name.appendChild(document.createTextNode(ap.ssid));
   row.appendChild(name);
 
-  var enc = document.createElement('td');
+  var enc = document.createElement("td");
   enc.className = "nopadding";
-  enc.style.width = '125px';
+  enc.style.width = "125px";
   enc.appendChild(document.createTextNode(ap.enc));
   row.appendChild(enc);
 
@@ -252,7 +254,7 @@ var scan = (function ()
 
       let uri = "/websocket/apscan";
       _ws = new WebSocket("ws://" + location.host + uri);
-      _ws.binaryType = 'arraybuffer';
+      _ws.binaryType = "arraybuffer";
       _ws.onopen = function (evt)
       {
         _retries = 0;
@@ -282,8 +284,8 @@ var scan = (function ()
             /* Update the details of the AP we are connected to, if necessary */
             if (curAP.bssid != apList.bssid)
             {
-              curAP.bssid = apList.bssid;
-              curAP.ssid = apList.ssid
+              curAP.bssid=apList.bssid;
+              curAP.ssid=apList.ssid;
             }
           }
 
@@ -306,7 +308,7 @@ var scan = (function ()
 
           if (apList.APs && apList.APs.length > 0)
           {
-            let ntbdy = document.createElement('tbody');
+            let ntbdy = document.createElement("tbody");
             let l = apList.APs.length;
             for (var i = 0; i < l; i++)
             {
@@ -382,13 +384,13 @@ async function staAwaitResults (el)
   };
   // request options
   const options = {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(json),
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json"
     }
   };
-  const url = '/wifi/cfgsta';
+  const url = "/wifi/cfgsta";
   const response = await fetch(url, options).catch(handleError);
   const data = await response.json();
   if (data.noerr === true)
@@ -427,13 +429,13 @@ async function staTestConfig (el)
   };
   // request options
   const options = {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(json),
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json"
     }
   };
-  const url = '/wifi/cfgsta';
+  const url = "/wifi/cfgsta";
   const response = await fetch(url, options).catch(handleError);
   const data = await response.json();
   if (data.noerr === true)
@@ -461,13 +463,13 @@ async function staSaveConfig (el)
   };
   // request options
   const options = {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(json),
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json"
     }
   };
-  const url = '/wifi/cfgsta';
+  const url = "/wifi/cfgsta";
   const response = await fetch(url, options).catch(handleError);
   const data = await response.json();
   if (data.noerr === true)
@@ -484,9 +486,9 @@ function pwdShowHide (_this)
   for (var i = 0; i < parent.childNodes.length; i++)
   {
     let tmp_el = parent.childNodes[i];
-    if ((tmp_el.tagName != undefined) && tmp_el.tagName.toLowerCase() === 'input')
+    if ((tmp_el.tagName != undefined) && tmp_el.tagName.toLowerCase() === "input")
     {
-      if (tmp_el.classList.contains('password'))
+      if (tmp_el.classList.contains("password"))
       {
         pwd_el = tmp_el;
         break;
@@ -499,16 +501,16 @@ function pwdShowHide (_this)
     return;
   }
 
-  if (_this.classList.contains('icon-yincang'))
+  if (_this.classList.contains("icon-yincang"))
   {
-    _this.classList.remove('icon-yincang');
-    _this.classList.add('icon-xianshimima');
-    pwd_el.type = 'text';
+    _this.classList.remove("icon-yincang");
+    _this.classList.add("icon-xianshimima");
+    pwd_el.type = "text";
   } else
   {
-    _this.classList.add('icon-yincang');
-    _this.classList.remove('icon-xianshimima');
-    pwd_el.type = 'password';
+    _this.classList.add("icon-yincang");
+    _this.classList.remove("icon-xianshimima");
+    pwd_el.type = "password";
   }
 }
 function staTestEnable()
@@ -530,11 +532,11 @@ function validatePassword (el)
   // Fuck WPS, but not open?
   if (el.value.length === 0 || el.value.length >= 8)
   {
-    el.classList.remove('error');
+    el.classList.remove("error");
   }
   else
   {
-    el.classList.add('error');
+    el.classList.add("error");
   }
   staTestEnable();
 }
@@ -565,7 +567,7 @@ function stopAndClose()
   {
     toggleScan();
   }
-  _("apDiv").style.visibility='hidden';
+  _("apDiv").style.visibility="hidden";
 }
 function page_onload ()
 {
