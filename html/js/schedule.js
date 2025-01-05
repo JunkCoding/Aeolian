@@ -245,6 +245,19 @@ function set_row_defaults(tblId, divEls)
   el=divEls[d++].querySelector("input[type=checkbox]");
   el=divEls[d++].querySelector("input[type=checkbox]");
 }
+function replace_month(el, month)
+{
+  let cl=el.classList;
+  for(let cssClass of cl)
+  {
+    console.log(cssClass);
+    if(cssClass.search(/sharedsel|dropdown/) < 0)
+    {
+      el.classList.remove(cssClass);
+    }
+  }
+  el.classList.add(month);
+}
 function eventHandler(event)
 {
   if(event.type==="click")
@@ -272,7 +285,30 @@ function eventHandler(event)
     }
     else if(tgt.classList.contains('dropdown-item')===true)
     {
-      let ddl=tgt.parentNode.parentNode.parentNode;
+      let type=tgt.parentElement.parentElement.parentElement.dataset.type;
+      if(typeof type==="string")
+      {
+        if(type==="month")
+        {
+          let dsEl=closest(tgt, "[data-type='dayStart']");//.querySelector(".dropdown-toggle");
+          replace_month(dsEl, tgt.innerText);
+          let ds=dsEl.dataset.value;
+
+          let deEl=closest(tgt, "[data-type='dayEnd']");//.querySelector(".dropdown-toggle");
+          replace_month(deEl, tgt.innerText);
+          let de = dsEl.dataset.value;
+        }
+        else if(type==="dayStart")
+        {
+          closest(tgt, "dayEnd");
+        }
+        else if(type==="dayEnd")
+        {
+          closest(tgt, "dayStart");
+        }
+        let ddl=tgt.parentNode.parentNode.parentNode;
+
+      }
     }
   }
   else if(event.type==="change")

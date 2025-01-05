@@ -33,7 +33,7 @@ compressors:
 filters:
     'espfs.paths': discard
     'espfs.yaml': discard
-    '*.css': heatshrink
+    '*.css': no-compression
     '*.html': heatshrink
     '*.js': no-compression
     '*': [cache, heatshrink]

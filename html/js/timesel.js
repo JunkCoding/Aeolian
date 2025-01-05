@@ -70,7 +70,6 @@ class timesel
     let t=document.createElement("input");
     t.classList.add("time");
     t.name="hours";
-    /*t.id=`${el.id}_h`;*/
     t.value=("00"+tar[0]).slice(-2);
     el.appendChild(t);
 
@@ -82,7 +81,6 @@ class timesel
     let m=document.createElement("input");
     m.classList.add("time");
     m.name="mins";
-    /*m.id=`${el.id}_m`;*/
     m.value=("00"+tar[1]).slice(-2);
     el.appendChild(m);
   }
@@ -121,8 +119,8 @@ class timesel
     }
 
     /* Check if we are a start or emd time */
-    const ts=closest(el, ".timeStart");
-    const te=closest(el, ".timeEnd");
+    const ts=closest(el, "[data-type='timeStart']");
+    const te=closest(el, "[data-type='timeEnd']");
 
     /* If both are not null, we need to constrain ourselves */
     if(ts!==null&&te!==null)

@@ -194,7 +194,8 @@ class sharedSel
     this.header=document.createElement('div');
     //this.header.classList.add('dropdown-toggle', 'hover-dropdown');
     this.header.classList.add('dropdown-toggle', 'click-dropdown');
-    this.header.innerHTML=sharedSel.options[this.menu].menu[this.val].name;
+    this.header.dataset.value=this.val;
+    this.header.innerText=sharedSel.options[this.menu].menu[this.val].name;
     ctarget.appendChild(this.header);
     /*** *** Create dropdown menu *** ***/
     let d=document.createElement('div');
@@ -264,7 +265,8 @@ class sharedSel
       if(event.target.classList.contains('dropdown-item'))
       {
         let tgt=event.target;
-        _this.value=tgt.value;
+        _this.val=tgt.value;
+        _this.header.dataset.value=_this.val;
         _this.header.innerText=tgt.innerText;
       }
       closeDropdown();
