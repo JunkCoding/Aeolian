@@ -5,11 +5,12 @@
   <title>Wifi Configuration</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, user-scalable=no">
-  <link rel="stylesheet" type="text/css" href="/css/style.css">
-  <link rel="stylesheet" type="text/css" href="/css/signalbars.css">
+  <link rel="stylesheet" type="text/css" href="/css/common.css">
+  <link rel="stylesheet" type="text/css" href="/css/wifi.css">
   <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
   <script type="text/javascript" src="/js/common.js"></script>
   <script type="text/javascript" src="/js/wifi.js"></script>
+  <script type="text/javascript" src="/js/dragable.js"></script>
   <script language="javascript">
     document.addEventListener("DOMContentLoaded", function (event)
     {
@@ -43,19 +44,19 @@
       <div id="ring"><text id="busy-message"></text><span id="gfx" style="display:inline;">&nbsp;</span></div>
     </div>
     <div>
-      <h1>WiFi Mode</h1>
+      <h2>WiFi Mode</h2>
       <table class="status_table">
         <tbody>
           <tr>
             <th>WiFi Mode:</th>
             <td>
-              <div class="dd-wrapper">
-                <div id="wifi_mode" class="ddlist" tabindex="1">
-                  <span id="sel_wmode">WiFi Mode...</span>
-                  <ul class="dropdown">
-                    <li value="1"><a href="#">STA</a></li>
-                    <li value="2"><a href="#">AP</a></li>
-                    <li value="3"><a href="#">APSTA</a></li>
+              <div class="dd-wrapper dropdown-container">
+                <div id="sel_wmode" class="dropdown-toggle click-dropdown">WiFi Mode...</div>
+                <div id="wifi_mode" class="ddlist dropdown-menu" tabindex="1">
+                  <ul>
+                    <li value="1">STA</li>
+                    <li value="2">AP</li>
+                    <li value="3">APSTA</li>
                   </ul>
                 </div>
               </div>
@@ -64,13 +65,13 @@
           <tr>
             <th>Power Saving:</th>
             <td>
-              <div class="dd-wrapper">
-                <div id="wifi_powersave" class="ddlist" tabindex="1">
-                  <span id="sel_psave">Power Save...</span>
-                  <ul class="dropdown">
-                    <li value="0"><a href="#">None</a></li>
-                    <li value="1"><a href="#">Minimum</a></li>
-                    <li value="2"><a href="#">Maximum</a></li>
+              <div class="dd-wrapper dropdown-container">
+                <div id="sel_psave" class="dropdown-toggle click-dropdown">Power Save...</div>
+                <div id="wifi_powersave" class="ddlist dropdown-menu" tabindex="2">
+                  <ul>
+                    <li value="0">None</li>
+                    <li value="1">Minimum</li>
+                    <li value="2">Maximum</li>
                   </ul>
                 </div>
               </div>
@@ -81,8 +82,27 @@
     </div>
     <hr class="dashed">
     <div>
-      <h1>WiFi Server (AP Mode)</h1>
-      <!--<form id="f_ap" class="wifi">-->
+      <h2>WiFi Server (AP Mode)</h2>
+      <!-- We want the AP list to appear at this initial location. -->
+      <div id="apDiv" style="position:absolute;visibility:hidden;z-index:20;">
+        <div id="mydivheader">
+          <span class="close-button" onclick="stopAndClose()"></span>
+        </div>
+        <table id="apList" class="hdr_table">
+          <thead id="aphdr">
+            <tr>
+              <th id="sel"></th>
+              <th id="str">Str</th>
+              <th id="rssi">RSSI</th>
+              <th id="chan">Chan #</th>
+              <th id="name" style="width:250px;min-width:250px">Name</th>
+              <th id="enc">Security</th>
+            </tr>
+          </thead>
+          <tbody id="aps"></tbody>
+        </table>
+      </div>
+      <!-- End of moveable div -->
       <table class="status_table">
         <tbody>
           <tr>
@@ -101,23 +121,23 @@
           <tr>
             <th>Channel:</th>
             <td>
-              <div class="dd-wrapper">
-                <div id="ap_primary" class="ddlist" tabindex="2">
-                  <span id="sel_achan">Channel...</span>
-                  <ul class="dropdown">
-                    <li value="1"><a href="#">#1 - 2412MHz</a></li>
-                    <li value="2"><a href="#">#2 - 2417MHz</a></li>
-                    <li value="3"><a href="#">#3 - 2422MHz</a></li>
-                    <li value="4"><a href="#">#4 - 2427MHz</a></li>
-                    <li value="5"><a href="#">#5 - 2432MHz</a></li>
-                    <li value="6"><a href="#">#6 - 2437MHz</a></li>
-                    <li value="7"><a href="#">#7 - 2442MHz</a></li>
-                    <li value="8"><a href="#">#8 - 2447MHz</a></li>
-                    <li value="9"><a href="#">#9 - 2452MHz</a></li>
-                    <li value="10"><a href="#">#10 - 2457MHz</a></li>
-                    <li value="11"><a href="#">#11 - 2462MHz</a></li>
-                    <li value="12"><a href="#">#12 - 2467MHz</a></li>
-                    <li value="13"><a href="#">#13 - 2472MHz</a></li>
+              <div class="dd-wrapper dropdown-container">
+                <div id="sel_achan" class="dropdown-toggle click-dropdown">Channel...</div>
+                <div id="ap_primary" class="ddlist dropdown-menu" tabindex="3">
+                  <ul>
+                    <li value="1">#1 - 2412MHz</li>
+                    <li value="2">#2 - 2417MHz</li>
+                    <li value="3">#3 - 2422MHz</li>
+                    <li value="4">#4 - 2427MHz</li>
+                    <li value="5">#5 - 2432MHz</li>
+                    <li value="6">#6 - 2437MHz</li>
+                    <li value="7">#7 - 2442MHz</li>
+                    <li value="8">#8 - 2447MHz</li>
+                    <li value="9">#9 - 2452MHz</li>
+                    <li value="10">#10 - 2457MHz</li>
+                    <li value="11">#11 - 2462MHz</li>
+                    <li value="12">#12 - 2467MHz</li>
+                    <li value="13">#13 - 2472MHz</li>
                   </ul>
                 </div>
               </div>
@@ -126,16 +146,16 @@
           <tr>
             <th>Auth Mode:</th>
             <td>
-              <div class="dd-wrapper">
-                <div id="ap_authmode" class="ddlist" tabindex="2">
-                  <span id="sel_amode">Auth Mode...</span>
-                  <ul class="dropdown">
-                    <li value="0"><a href="#">Open</a></li>
-                    <li value="1"><a href="#">WEP</a></li>
-                    <li value="2"><a href="#">WPA_PSK</a></li>
-                    <li value="3"><a href="#">WPA2_PSK</a></li>
-                    <li value="4"><a href="#">WPA_WPA2_PSK</a></li>
-                    <li value="5"><a href="#">WPA2_ENTERPRISE</a></li>
+              <div class="dd-wrapper dropdown-container">
+                <div id="sel_amode" class="dropdown-toggle click-dropdown">Auth Mode...</div>
+                <div id="ap_authmode" class="ddlist dropdown-menu" tabindex="4">
+                  <ul>
+                    <li value="0">Open</li>
+                    <li value="1">WEP</li>
+                    <li value="2">WPA_PSK</li>
+                    <li value="3">WPA2_PSK</li>
+                    <li value="4">WPA_WPA2_PSK</li>
+                    <li value="5">WPA2_ENTERPRISE</li>
                   </ul>
                 </div>
               </div>
@@ -144,22 +164,22 @@
           <tr>
             <th>Cypher:</th>
             <td>
-              <div class="dd-wrapper">
-                <div id="ap_cypher" class="ddlist" tabindex="2">
-                  <span id="sel_amode">Cypher...</span>
-                  <ul class="dropdown">
-                    <li value="0"><a href="#">NONE</a></li>
-                    <li value="1"><a href="#">WEP40</a></li>
-                    <li value="2"><a href="#">WEP104</a></li>
-                    <li value="3"><a href="#">TKIP</a></li>
-                    <li value="4"><a href="#">CCMP</a></li>
-                    <li value="5"><a href="#">TKIP CCMP</a></li>
-                    <li value="6"><a href="#">AES CMAC128</a></li>
-                    <li value="7"><a href="#">SMS4</a></li>
-                    <li value="8"><a href="#">GCMP</a></li>
-                    <li value="9"><a href="#">GCMP256</a></li>
-                    <li value="10"><a href="#">AES GMAC128</a></li>
-                    <li value="11"><a href="#">AES GMAC256</a></li>
+              <div class="dd-wrapper dropdown-container">
+                <div id="sel_amode" class="dropdown-toggle click-dropdown">Cypher...</div>
+                <div id="ap_cypher" class="ddlist dropdown-menu" tabindex="5">
+                  <ul>
+                    <li value="0">NONE</li>
+                    <li value="1">WEP40</li>
+                    <li value="2">WEP104</li>
+                    <li value="3">TKIP</li>
+                    <li value="4">CCMP</li>
+                    <li value="5">TKIP CCMP</li>
+                    <li value="6">AES CMAC128</li>
+                    <li value="7">SMS4</li>
+                    <li value="8">GCMP</li>
+                    <li value="9">GCMP256</li>
+                    <li value="10">AES GMAC128</li>
+                    <li value="11">AES GMAC256</li>
                   </ul>
                 </div>
               </div>
@@ -168,12 +188,12 @@
           <tr>
             <th>SSID Hidden:</th>
             <td>
-              <div class="dd-wrapper">
-                <div id="ap_hidden" class="ddlist" tabindex="3">
-                  <span id="sel_ahidden">Hidden AP</span>
-                  <ul class="dropdown">
-                    <li value="0"><a href="#">No</a></li>
-                    <li value="1"><a href="#">Yes</a></li>
+              <div class="dd-wrapper dropdown-container">
+                <div id="sel_ahidden" class="dropdown-toggle click-dropdown">Hidden AP</div>
+                <div id="ap_hidden" class="ddlist dropdown-menu" tabindex="6">
+                  <ul>
+                    <li value="0">No</li>
+                    <li value="1">Yes</li>
                   </ul>
                 </div>
               </div>
@@ -182,12 +202,12 @@
           <tr>
             <th>AP Bandwidth:</th>
             <td>
-              <div class="dd-wrapper">
-                <div id="ap_bandwidth" class="ddlist" tabindex="4">
-                  <span id="sel_abandwidth">Bandwidth</span>
-                  <ul class="dropdown">
-                    <li value="0"><a href="#">20MHz</a></li>
-                    <li value="1"><a href="#">40MHz</a></li>
+              <div class="dd-wrapper dropdown-container">
+                <div id="sel_abandwidth" class="dropdown-toggle click-dropdown">Bandwidth</div>
+                <div id="ap_bandwidth" class="ddlist dropdown-menu" tabindex="7">
+                  <ul>
+                    <li value="0">20MHz</li>
+                    <li value="1">40MHz</li>
                   </ul>
                 </div>
               </div>
@@ -204,13 +224,10 @@
         </div>
         <label for="ap_autooff" class="pref_label">Disable AP when the device has a valid STA connection.</label>
       </div>
-      <!--<div class="submit"><input type="submit" name="configure" value="Configure!" class="wifi" id="config" onclick="onClickHandler(this.id)" /></div>-->
-      <!--</form>-->
     </div>
     <hr class="dashed">
     <div>
-      <h1>WiFi Client (STA Mode)</h1>
-      <!--<form id="f_sta" class="wifi">-->
+      <h2>WiFi Client (STA Mode)</h2>
       <table class="status_table">
         <tbody>
           <tr>
@@ -237,30 +254,16 @@
         </div>
         <label for="ap_fixed" class="pref_label">Lock to the specific AP using the BSSID.</label>
       </div>
-      <!--</form>-->
       <div class="btn_group">
-        <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan(this)" /></div>
+        <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan()" /></div>
         <div class="submit"><input type="submit" name="sta_test" class="sta_test" id="sta_test" value="Test" onclick="staTestConfig(this)" disabled/></div>
         <div class="submit"><input type="submit" name="sta_save" class="sta_save" id="sta_save" value="Save" onclick="staSaveConfig(this)" disabled /></div>
       </div>
     </div>
-    <div>
-      <h5>&nbsp;To connect to a WiFi network, please select one of the detected networks...</h5>
-      <table id="apList" class="hdr_table">
-        <thead id="aphdr">
-          <tr>
-            <th id="sel"></th>
-            <th id="str">Str</th>
-            <th id="rssi">RSSI</th>
-            <th id="chan">Chan #</th>
-            <th id="name">Name</th>
-            <th id="enc">Security</th>
-          </tr>
-        </thead>
-        <tbody id="aps"></tbody>
-      </table>
+    <div class="notes">
+      <span class="help">Enter your WiFi settings and click 'test'. If you are already connected to a network, the device will disconnect and test the settings before reconnecting back to the current network.
+        If your settings are correct, the save button will become available. Once you have clicked 'save', the settings will replace those stored in the device and will become active when rebooted.</span>
     </div>
   </div>
 </body>
-
 </html>

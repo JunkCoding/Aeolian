@@ -18,9 +18,9 @@ preprocessors:
         npm: uglifycss
         npx_command: uglifycss
 
-    uglifyjs:
-        npm: uglifyjs
-        npx_command: uglifyjs
+    uglify-js:
+        npm: uglify-js
+        npx_command: uglify-js
 
 compressors:
     gzip:
@@ -33,8 +33,8 @@ compressors:
 filters:
     'espfs.paths': discard
     'espfs.yaml': discard
-    '*.css': heatshrink
+    '*.css': no-compression
     '*.html': heatshrink
-    '*.js': heatshrink
+    '*.js': no-compression
     '*': [cache, heatshrink]
 

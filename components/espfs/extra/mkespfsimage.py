@@ -9,7 +9,7 @@
 # npm install -g babel-cli
 # npm install -g html-minifier
 # npm install -g uglifycss
-# npm install -g uglifyjs
+# npm install -g uglify-js
 # ------------------------------
 
 import bisect

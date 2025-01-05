@@ -1,0 +1,113 @@
+.sched_table {
+  th.day_hdr,
+  th.mon_hdr {
+    width: 135px;
+    min-width: 135px;
+  }
+  .dat_hdr {
+    width: 70px;
+  }
+  .tim_hdr {
+    width: 85px;
+    min-width: 85px;
+    max-width: 85px;
+  }
+  .fla_hdr,
+  .fla_td {
+    width: 30px;
+  }
+  .the_hdr {
+    width: auto;
+    min-width: 120px;
+    max-width: 120px;
+  }
+  .bri_hdr {
+    width: auto;
+    min-width: 105px;
+  }
+  .new {
+    animation: changeBackgroundColor 2.5s ease alternate infinite;
+  }
+}
+@keyframes changeBackgroundColor {
+  0% {
+    background-color: #dd39ae70;
+  }
+  50%,
+  100% {
+    background-color: #dd39ae30;
+  }
+}
+.table-header-rotated th.rotate-45 {
+  height: 85px;
+  width: 30px;
+  min-width: 30px;
+  max-width: 30px;
+  position: static;
+  vertical-align: bottom;
+  padding: 0;
+  font-size: 1em;
+  line-height: 0.8;
+}
+
+.row-header {
+  box-shadow: 0 0 0 1px var(--def-col-border);
+  vertical-align: bottom;
+}
+
+.table-header-rotated th.rotate-45 > div {
+  background-color: var(--def-col-bg);
+  position: relative;
+  top: -1px;
+  left: -31px;
+  height: 84px;
+  width: 28px;
+  box-shadow: inset 2px 0px 0 var(--def-col-border);
+  -ms-transform: skew(35deg, 0deg);
+  -moz-transform: skew(35deg, 0deg);
+  -webkit-transform: skew(35deg, 0deg);
+  -o-transform: skew(35deg, 0deg);
+  transform: skew(35deg, 0deg);
+  overflow: hidden;
+}
+
+.table-header-rotated th.rotate-45 span {
+  -ms-transform: skew(-40deg, 0deg) rotate(50deg);
+  -moz-transform: skew(-40deg, 0deg) rotate(50deg);
+  -webkit-transform: skew(-40deg, 0deg) rotate(50deg);
+  -o-transform: skew(-40deg, 0deg) rotate(50deg);
+  transform: skew(-40deg, 0deg) rotate(50deg);
+  position: absolute;
+  bottom: 32px;
+  /* 40 cos(45) = 28 with an additional 2px margin*/
+  left: -28px;
+  /*Because it looked good, but there is probably a mathematical link here as well*/
+  display: inline-block;
+  width: 85px;
+  /* 80 / cos(45) - 40 cos (45) = 85 where 80 is the height of the cell, 40 the width of the cell and 45 the transform angle*/
+  /*text-align: right;*/
+  white-space: nowrap;
+  /*whether to display in one line or not*/
+}
+
+.table-striped-column > thead > tr th:nth-of-type(even) div {
+  background-color: #eee;
+}
+
+.table-striped-column > tbody > tr td:nth-of-type(even) {
+  background-color: #eee;
+}
+
+.table-striped-row > tbody > tr:nth-of-type(even) {
+  background-color: #a91616b8;
+}
+
+/* For hiding surplus days in requisite months */
+.February * .feb,
+.noleap * .noleap,
+.April * .ajsn,
+.June * .ajsn,
+.September * .ajsn,
+.November * .ajsn {
+  display: none;
+}

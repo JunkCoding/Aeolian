@@ -1,4 +1,5 @@
-// test
+/* jshint esversion: 8 */
+
 // --------------------------------------------------------------------
 // Fancy Drop Down Box
 // --------------------------------------------------------------------
@@ -6,7 +7,7 @@ var ddlist = [];
 var ddgrp = [];
 /*****************************************************************/
 /*****************************************************************/
-function _ (el)
+function _(el)
 {
   return document.getElementById(el);
 }
@@ -15,36 +16,34 @@ function _ (el)
 function get_view_dimensions()
 {
   // the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
-  if (typeof window.innerWidth != 'undefined')
+  if (typeof window.innerWidth != "undefined")
   {
-    viewportwidth = window.innerWidth,
-      viewportheight = window.innerHeight;
+    viewportwidth=window.innerWidth;
+    viewportheight = window.innerHeight;
   }
   // IE6 in standards compliant mode (i.e. with a valid doctype as the first line in the document)
-  else if (typeof document.documentElement != 'undefined'
-    && typeof document.documentElement.clientWidth !=
-    'undefined' && document.documentElement.clientWidth != 0)
+  else if (typeof document.documentElement != "undefined" && typeof document.documentElement.clientWidth != "undefined" && document.documentElement.clientWidth != 0)
   {
-    viewportwidth = document.documentElement.clientWidth,
-      viewportheight = document.documentElement.clientHeight;
+    viewportwidth=document.documentElement.clientWidth;
+    viewportheight = document.documentElement.clientHeight;
   }
   // older versions of IE
   else
   {
-    viewportwidth = document.getElementsByTagName('body')[0].clientWidth,
-      viewportheight = document.getElementsByTagName('body')[0].clientHeight;
+    viewportwidth=document.getElementsByTagName("body")[0].clientWidth;
+    viewportheight = document.getElementsByTagName("body")[0].clientHeight;
   }
-  console.log('viewport size is ' + viewportwidth + 'x' + viewportheight);
+  console.log("viewport size is " + viewportwidth + "x" + viewportheight);
   return (viewportwidth, viewportheight);
 }
 /*****************************************************************/
 /*****************************************************************/
 function set_background ()
 {
-  var c = document.createElement('canvas');
+  var c = document.createElement("canvas");
   c.width = 1440;
   c.height = 2560;
-  ctx = c.getContext('2d');
+  ctx = c.getContext("2d");
 
   const grad = ctx.createLinearGradient(0, 0, c.width / 2, c.height / 2);
   grad.addColorStop(0, "#000000");
@@ -76,14 +75,46 @@ function set_background ()
   grd.addColorStop(1, "rgba(10,10,10,0.5");
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, c.width, c.height);
-  document.body.style.background = 'url(' + c.toDataURL() + ')';
-  document.body.style.backgroundRepeat = 'no-repeat';
-  document.body.style.backgroundSize = 'cover';
+  document.body.style.background = "url(" + c.toDataURL() + ")";
+  document.body.style.backgroundRepeat = "no-repeat";
+  document.body.style.backgroundSize = "cover";
+}
+/*****************************************************************/
+/* Catch Errors                                                  */
+/*****************************************************************/
+var handleError=function(err)
+{
+  console.warn(err);
+  return new Response(JSON.stringify({
+    code: 400,
+    message: "Stupid network Error"
+  }));
+};
+/*****************************************************************/
+// https://stackoverflow.com/questions/18663941/finding-closest-element-without-jquery
+/*****************************************************************/
+/*
+const closest=(to, selector) =>
+{
+}*/
+function closest(to, selector)
+{
+  //let currentElement=document.querySelector(to);
+  let currentElement=to;
+  let returnElement;
+
+  while(currentElement.parentNode&&!returnElement)
+  {
+    currentElement=currentElement.parentNode;
+    returnElement=currentElement.querySelector(selector);
+  }
+
+  return returnElement;
 }
 /*****************************************************************/
 /* Initialise all dropboxes                                      */
 /*****************************************************************/
-function init_all_dropboxex ()
+function init_all_dropboxes ()
 {
   // Remove any existing dropDown class associations
   // ------------------------------------------------
@@ -101,21 +132,21 @@ function init_all_dropboxex ()
     ddgrp = [];
   }
 
-  ddlist = document.getElementsByClassName("ddlist");
+  ddlist=document.getElementsByClassName("ddlist");
+
   let l = ddlist.length;
   for (let i = 0; i < l; i++)
   {
     ddgrp[i] = new dDropDown(ddlist[i]);
   }
 }
-
 /*****************************************************************/
 /* Initialise a single dropbox (more effort than above)          */
 /*****************************************************************/
 function init_dropbox (dd)
 {
   /* Check it is the right class */
-  if (!dd.classList.contains("ddlist"))
+  if (!dd.classList.contains("dropdown-menu"))
   {
     return;
   }
@@ -149,21 +180,7 @@ function init_dropbox (dd)
   ddlist[ddlist.length] = dd;
   ddgrp[ddgrp.length] = new dDropDown(dd);
 }
-
 /*****************************************************************/
-function getChildrenByTag (el, name)
-{
-  var itmList = [];
-  childs = el.childNodes;
-  childs.forEach(itm =>
-  {
-    if (itm.nodeName === name.toUpperCase())
-    {
-      itmList.push(itm);
-    }
-  });
-  return itmList;
-}
 function getDropdownItems (el)
 {
   var itmList = [];
@@ -184,60 +201,79 @@ function getDropdownItems (el)
     }
   });
   return itmList;
-};
-/*****************************************************************/
-function dDropDown (el)
-{
-  this.ddgrp = el;
-  this.placeholder = getChildrenByTag(this.ddgrp, 'span');
-  this.opts = getDropdownItems(this.ddgrp);
-  this.val = '';
-  this.index = -1;
-  this.id = el.id;
-  this.initEvents();
 }
 /*****************************************************************/
-dDropDown.prototype = {
-  initEvents: function ()
+class dDropDown
+{
+  constructor(el)
   {
-    var obj = this;
+    this.ddgrp=el;
+    this.opts=getDropdownItems(this.ddgrp);
+    this.val="";
+    this.index=-1;
+    this.id=el.id;
 
-    obj.ddgrp.addEventListener('click', function (event)
+    el.addEventListener("mouseleave", this);
+    console.log(el);
+    var clkr=closest(this.ddgrp, ".dropdown-toggle");
+    clkr.addEventListener("click", this);
+
+    for(var i=0; i<this.opts.length; i++)
     {
-      if (this.classList.contains('active'))
+      this.opts[i].addEventListener("click", this);
+    }
+  }
+  onclick(_this, event)
+  {
+    let tgt=event.target;
+    if(tgt.nodeName==="LI")
+    {
+      set_dd(_this.id, (tgt.value));
+      updateControl(_this.id, (tgt.value));
+      closeDropdown();
+    }
+    else if(event.target.classList.contains("click-dropdown")===true)
+    {
+      let m=event.target.parentNode.querySelectorAll(".dropdown-menu")[0];
+      if(event.target.nextElementSibling.classList.contains("dropdown-active")===true)
       {
-        this.classList.remove('active');
+        event.target.parentElement.classList.remove("dropdown-open");
+        event.target.nextElementSibling.classList.remove("dropdown-active");
       }
       else
       {
-        /* Make sure no boxes are 'activw' */
-        let l = ddlist.length;
-        for (let i = 0; i < l; i++)
-        {
-          if (ddlist[i].classList.contains('active'))
-          {
-            ddlist[i].classList.remove('active');
-          }
-        }
-        /* Make this one active */
-        this.classList.add('active');
+        /* Close any other open dropdown items */
+        closeDropdown();
+        /* Show the dropdown for ths element */
+        event.target.parentElement.classList.add("dropdown-open");
+        event.target.nextElementSibling.classList.add("dropdown-active");
       }
-    });
-
-    for (var i = 0; i < obj.opts.length; i++)
-    {
-      obj.opts[i].addEventListener('click', function ()
-      {
-        set_dd(this.parentNode.parentNode.id, (this.value));
-        updateControl(this.parentNode.parentNode.id, (this.value));
-      });
     }
-  },
-  getValue: function ()
-  {
-    return this.val;
+    else
+    {
+      if(event.target.classList.contains("dropdown-item"))
+      {
+        let tgt=event.target;
+        _this.value=tgt.value;
+        _this.header.innerHTML=sharedSel.options[_this.menu].menu[tgt.value].name;
+      }
+      closeDropdown();
+    }
   }
-};
+  onmouseleave(_this, event)
+  {
+    closeDropdown();
+  }
+  handleEvent(event)
+  {
+    event.preventDefault();
+    let obj=this["on"+event.type];
+    if(typeof obj==="function")
+    {
+      obj(this, event);
+    }
+  }
+}
 /*****************************************************************/
 function set_dd (dl, val)
 {
@@ -254,7 +290,7 @@ function set_dd (dl, val)
       {
         if (val === item.value)
         {
-          document.getElementById(dl).querySelector('span').innerHTML = item.textContent;
+          closest(document.getElementById(dl), ".dropdown-toggle").textContent=item.textContent;
           break;
         }
       }
@@ -263,7 +299,7 @@ function set_dd (dl, val)
 }
 function setMsg (cls, text)
 {
-  sbox = document.getElementById('status_box');
+  sbox = document.getElementById("status_box");
   if (sbox !== null)
   {
     sbox.className = "alert alert-" + cls;
@@ -316,43 +352,8 @@ function setControl (xhttp)
   /*console.log(resp.count);*/
 
   var elephant = document.getElementById(resp.param);
-  if (typeof (elephant) != 'undefined' && elephant != null)
+  if (typeof (elephant) != "undefined" && elephant != null)
     elephant.value = resp.value;
-}
-
-// --------------------------------------------------------------------
-// item helper
-// --------------------------------------------------------------------
-function itemShowHide (_img, _item, op)
-{
-  // search for img
-  var img = document.getElementById(_img);
-  var item = document.getElementById(_item);
-  if (op === "toggle")
-  {
-    if (item.style.display === "none")
-    {
-      item.style.display = "block";
-      img.src = "img/arrow_up.png";
-    }
-    else
-    {
-      item.style.display = "none";
-      img.src = "img/arrow_down.png";
-    }
-  }
-  else if (op === "show")
-  {
-    item.style.display = "block";
-    img.src = "img/arrow_up.png";
-  }
-  else if (op === "hide")
-  {
-    item.style.display = "none";
-    img.src = "img/arrow_down.png";
-  }
-
-  setCookie(_item, item.style.display === "none" ? "hide" : "show", 365);
 }
 
 function select_change (selectID)
@@ -363,7 +364,6 @@ function select_change (selectID)
 
   updateControl(selectID, option);
 }
-
 // --------------------------------------------------------------------
 // checkbox support
 // --------------------------------------------------------------------
@@ -377,7 +377,6 @@ function checkboxToggle (checkboxID)
 
   updateControl(checkboxID, updateToggle ? 1 : 0);
 }
-
 // --------------------------------------------------------------------
 // navbar function
 // --------------------------------------------------------------------
@@ -398,7 +397,20 @@ function navbar ()
     x.className = "navbar";
   }
 }
-
+/*****************************************************************/
+/* Close any open drop down boxes (shared function)              */
+/*****************************************************************/
+function closeDropdown()
+{
+  [...document.getElementsByClassName("dropdown-open")].forEach(el =>
+  {
+    el.classList.remove("dropdown-open");
+  });
+  [...document.getElementsByClassName("dropdown-active")].forEach(el =>
+  {
+    el.classList.remove("dropdown-active");
+  });
+}
 /*****************************************************************/
 /* Capture clicks outside our area of interest to close lists    */
 /*****************************************************************/
@@ -409,16 +421,18 @@ document.addEventListener("DOMContentLoaded", function (event)
   {
     console.log("e.target.className = " + e.target.className);
 
-    if (!e.target.closest('.ddlist'))
+    if (!e.target.closest(".dropdown-container"))
     {
-      for (var i = 0; i < ddlist.length; i++)
-      {
-        if (ddlist[i].classList.contains('active'))
-        {
-          ddlist[i].classList.remove('active');
-        }
-      }
+      closeDropdown();
     }
+
+    /* Check if we have a function to call. Fairly sure this a *huge* security risk */
+    /*
+    let obj=window["on"+e.type];
+    if(typeof obj==='function')
+    {
+      obj(e);
+    }*/
   };
 });
 /*****************************************************************/
@@ -431,10 +445,10 @@ function sleep (ms)
 /*****************************************************************/
 function openBusyMesg (mesg)
 {
-  _("busy-wrapper").style.display = 'block';
-  _("busy-message").innerText = mesg
+  _("busy-wrapper").style.display = "block";
+  _("busy-message").innerText=mesg;
 }
 function closeBusyMesg ()
 {
-  _("busy-wrapper").style.display = 'none';
+  _("busy-wrapper").style.display = "none";
 }

@@ -1,5 +1,6 @@
 
 
+// ToDo: Make this a fucking class
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +43,7 @@
 
 const char *dayNames[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 const char *monNames[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+const int daysInMon[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 // ***********************************************************
 // *  Default weekly events                                  *
@@ -49,8 +51,8 @@ const char *monNames[] = {"January", "February", "March", "April", "May", "June"
 weekly_event_t _initial_weekly_events[] = {
 //     Start    |      End     |
 //  Hour   Min  |  Hour   Min  |  Day  |  Theme          |  Brightness      |  Flags
-  {{20,    00},   {20,    30},    1,      THEME_DEFAULT,    DIM_HIGH,          EVENT_LIGHTSON | EVENT_INACTIVE},
-  {{20,    00},   {20,    30},    4,      THEME_DEFAULT,    DIM_HIGH,          EVENT_LIGHTSON | EVENT_INACTIVE},
+  {{20,    00},   {20,    30},    1,      THEME_DEFAULT,    DIM_HIGH,          EVENT_INACTIVE},
+  {{20,    00},   {20,    30},    4,      THEME_DEFAULT,    DIM_HIGH,          EVENT_INACTIVE},
 };
 #define NUM_WEEKLY_EVENTS (sizeof(_initial_weekly_events) / sizeof(weekly_event_t))
 
@@ -66,7 +68,7 @@ annual_event_t _initial_annual_events[] = {
 //{{07,    00},   {21,    30},     10,     10,    4,      THEME_JESS,         DIM_MED,       EVENT_AUTONOMOUS},                    // Jess commemorative
   {{07,    00},   {22,    00},     31,     31,    9,      THEME_HALLOWEEN,    DIM_MED,       EVENT_AUTONOMOUS},                    // All-Hallows Eve
   {{07,    00},   {22,    00},     01,     31,    11,     THEME_CHRISTMAS,    DIM_MED,       EVENT_AUTONOMOUS},                    // Christmas (normal Christmas schedule)
-  {{07,    00},   {22,    30},     24,     26,    11,     THEME_CHRISTMAS,    DIM_MAX,       EVENT_LIGHTSON}                       // Christmas (on all day for Eve, Day & Box. Day)
+  {{07,    00},   {22,    30},     24,     26,    11,     THEME_CHRISTMAS,    DIM_MAX,       EVENT_NOFLAGS}                        // Christmas (on all day for Eve, Day & Box. Day)
 };
 #define NUM_ANNUAL_EVENTS (sizeof(_initial_annual_events) / sizeof(annual_event_t))
 
@@ -418,6 +420,44 @@ esp_err_t init_scheduler ( void )
 }
 
 // ***********************************************************
+// * Dirty, and needs to be wrapped in a class
+// ***********************************************************
+uint16_t _get_num_a_events (void)
+{
+  return num_annual_events;
+}
+uint16_t _get_num_w_events(void)
+{
+  return num_weekly_events;
+}
+uint16_t _get_weekly_event (char *stor, size_t size, uint16_t i)
+{
+  uint16_t len = 0;
+
+  if (i < num_weekly_events)
+  {
+    len = snprintf (stor, size, "{\"N\":%d,\"D\":%d,\"SH\":%d,\"SM\":%d,\"EH\":%d,\"EM\":%d,\"Th\":%d,\"Br\":%d,\"Fl\":%d}", i,
+            weekly_events[i].day, weekly_events[i].start.hour, weekly_events[i].start.minute, weekly_events[i].end.hour,
+            weekly_events[i].end.minute, weekly_events[i].theme, weekly_events[i].dim, weekly_events[i].flags);
+  }
+
+  return len;
+}
+uint16_t _get_annual_event (char *stor, size_t size, uint16_t i)
+{
+  uint16_t len = 0;
+
+  if (i < num_annual_events)
+  {
+    len = snprintf (stor, size, "{\"N\":%d,\"M\":%d,\"sd\":%d,\"ed\":%d,\"SH\":%d,\"SM\":%d,\"EH\":%d,\"EM\":%d,\"Th\":%d,\"Br\":%d,\"Fl\":%d}", i,
+              annual_events[i].month, annual_events[i].dayStart, annual_events[i].dayEnd, annual_events[i].start.hour, annual_events[i].start.minute,
+              annual_events[i].end.hour, annual_events[i].end.minute, annual_events[i].theme, annual_events[i].dim, annual_events[i].flags);
+  }
+
+  return len;
+}
+
+// ***********************************************************
 // * This controls weekly theme changes (run once a minute)  *
 // ***********************************************************
 #if defined (CONFIG_APPTRACE_SV_ENABLE)
@@ -433,12 +473,12 @@ static bool check_weekly_event (struct tm tm)
   bool match = false;
 
   // Only process if we are not a slave controller
-  if ( !BTST(control_vars.bitflags, DISP_BF_SLAVE) )
+  if (!BTST (control_vars.bitflags, DISP_BF_SLAVE))
   {
     uint16_t tod = (tm.tm_hour * 60) + tm.tm_min;
 
     // Reset index at the beginning of the week
-    if ( cur_weekly_event < num_weekly_events )
+    if (cur_weekly_event < num_weekly_events)
     {
       eval_pos = cur_weekly_event;
     }
@@ -748,7 +788,7 @@ void process_annual(struct tm tmz, uint16_t ae)
     }
     // Lights will be forced on during this period
     // ---------------------------------------------------------------------------
-    else  // if ( BTST (annual_events[ae].flags, EVENT_LIGHTSON) )
+    else
     {
       F_LOGV(true, true, LC_WHITE, "fixed hours: on");
       lightsUnpause(PAUSE_SCHEDULE, false);

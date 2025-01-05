@@ -70,18 +70,6 @@ user_settings_t user_settings = {NULL, 0, 0};
 
 static settings_t* config_list;
 
-// --------------------------------------------------------------------------
-//
-// --------------------------------------------------------------------------
-
-int str2int (const char* str)
-{
-  int value = 0;
-
-  value = strtol (str, NULL, 0);
-
-  return value;
-}
 
 // --------------------------------------------------------------------------
 //
@@ -209,6 +197,7 @@ void _config_build_list (Configuration_List_t* cfg_list, int num_cfgs)
     F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'config_list' (%d bytes)", (sizeof (settings_t) * ID_MAX));
     return;
   }
+  //F_LOGI (true, true, LC_BRIGHT_CYAN, "t) Allocated %d bytes of memory at location 0x%08X", sizeof (settings_t) * ID_MAX, config_list);
   Configuration_List = cfg_list;
   Num_Configurations = num_cfgs;
 
@@ -305,7 +294,9 @@ static int _config_get_defaults (const_settings_t* defaults)
           }
           else
           {
-            if ( ((uint32_t)defaults[i].text & 3) != 0 )
+            //F_LOGI (true, true, LC_BRIGHT_CYAN, "u) Allocated %d bytes of memory at location 0x%08X", len4, buf);
+
+            if (((uint32_t)defaults[i].text & 3) != 0)
             {
               F_LOGE(true, true, LC_BRIGHT_RED, "Src isn't 32bit aligned");
             }
@@ -344,6 +335,10 @@ static int _config_get_defaults (const_settings_t* defaults)
                   if ( val_array == NULL )
                   {
                     F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'val_array' (%d bytes)", (sizeof (int) * cnt));
+                  }
+                  else
+                  {
+                    //F_LOGI (true, true, LC_BRIGHT_CYAN, "s) Allocated %d bytes of memory at location 0x%08X", len4, buf);
                   }
                 }
 
@@ -644,6 +639,10 @@ static int _config_get_user (void)
     if ( user_settings.buf == NULL )
     {
       F_LOGW(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'user_settings.buf' (%d bytes)", SPI_FLASH_SEC_SIZE);
+    }
+    else
+    {
+      //F_LOGI (true, true, LC_BRIGHT_CYAN, "r) Allocated %d bytes of memory at location 0x%08X", SPI_FLASH_SEC_SIZE, user_settings.buf);
     }
   }
 
@@ -1390,6 +1389,10 @@ int user_config_print (void)
     if ( user_settings.buf == NULL )
     {
       F_LOGE(true, true, LC_RED, "pvPortMalloc failed allocating 'user_settings.buf' (%d bytes)", SPI_FLASH_SEC_SIZE);
+    }
+    else
+    {
+      //F_LOGI (true, true, LC_BRIGHT_CYAN, "q) Allocated %d bytes of memory at location 0x%08X", SPI_FLASH_SEC_SIZE, user_settings.buf);
     }
   }
 

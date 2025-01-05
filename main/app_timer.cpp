@@ -99,7 +99,7 @@ timer_info_t *_timer_init ( timer_group_t group, timer_idx_t timer_idx, uint16_t
   /* Configure the alarm value and the interrupt on alarm. */
   timer_set_alarm_value ( group, timer_idx, (divider == TIMER_DIVIDER_MS) ? interval * 10 : interval );
 
-  timer_info_t *timer_info = (timer_info_t *)calloc(1, sizeof(timer_info_t));
+  timer_info_t *timer_info = (timer_info_t *)pvPortMalloc(sizeof(timer_info_t));
   timer_info->timer_group  = group;
   timer_info->timer_idx    = timer_idx;
   timer_info->auto_reload  = TIMER_AUTORELOAD_EN;

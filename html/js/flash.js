@@ -1,5 +1,7 @@
-let xhr = new XMLHttpRequest();
-var valid_apps = {};
+/* jshint esversion: 8 */
+
+let xhr=new XMLHttpRequest();
+let valid_apps = {};
 function doCommonXHR(donecallback, successcallback)
 {
   xhr.onreadystatechange=function()
@@ -8,7 +10,7 @@ function doCommonXHR(donecallback, successcallback)
     {
       if ( xhr.status >= 200 && xhr.status <= 400 )
       {
-        var json_response = JSON.parse(xhr.responseText);
+        let json_response = JSON.parse(xhr.responseText);
         if ( json_response.noerr == false )
         {
           _("status").innerHTML="<strong style=\"color: red;\">Error: "+xhr.responseText+"</strong>";
@@ -59,7 +61,7 @@ function doVerify(partition, callback)
   doCommonXHR(callback, function(flinfo)
   {
     let l = flinfo.app.length;
-    for(var i=0;i<l;i++)
+    for(let i=0;i<l;i++)
     {
       if ( typeof flinfo.app[i].valid !== "undefined" )
       {
@@ -125,7 +127,7 @@ function doUpgrade(partition, callback)
   _("status").innerHTML="Uploading App to partition: " + partition;
 
   _("progressBar").value = 0;
-  _("progbar").style.display = 'block';
+  _("progbar").style.display = "block";
   _("main").style.pointerEvents = "none";
 
   // Override the global xhr
@@ -140,14 +142,14 @@ function doUpgrade(partition, callback)
   xhr.open("POST", "/flash/upload" + ((partition)?("?partition=" + partition):("")));
 
   //let data = new FormData();
-  //data.append('file', firmware);
+  //data.append("file", firmware);
   //xhr.send(data);
-  xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+  xhr.setRequestHeader("Content-Type", "application/octet-stream");
   xhr.send(firmware);
 }
 function progressHandler(event)
 {
-  var percent = (event.loaded / event.total) * 100;
+  let percent = (event.loaded / event.total) * 100;
   _("progressBar").value = Math.round(percent);
   _("status").innerHTML = "Uploaded " + event.loaded + " bytes of " + event.total + " (" + Math.round(percent) + "%)";
 }
@@ -157,7 +159,7 @@ function loadHandler(event)
   {
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong>Success: Reboot to run new firmware</strong>";
-    _("progbar").style.display = 'none';
+    _("progbar").style.display = "none";
     _("main").style.pointerEvents = "";
   });
 }
@@ -167,7 +169,7 @@ function errorHandler(event)
   {
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong style=\"color: red;\">Error: An unknown error ocurred during upload</strong>";
-    _("progbar").style.display = 'none';
+    _("progbar").style.display = "none";
     _("main").style.pointerEvents = "";
   });
 }
@@ -177,7 +179,7 @@ function abortHandler(event)
   {
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="<strong style=\"color: amber;\">Aborted: Firmware upload aborted</strong>";
-    _("progbar").style.display = 'none';
+    _("progbar").style.display = "none";
     _("main").style.pointerEvents = "";
   });
 }
@@ -187,14 +189,14 @@ function timeoutHandler(event)
   {
     /*_("status").innerHTML = event.target.responseText;*/
     _("status").innerHTML="Upload timed out";
-    _("progbar").style.display = 'none';
+    _("progbar").style.display = "none";
     _("main").style.pointerEvents = "";
   });
 }
 function humanFileSize(B,i)
 {
-  var e=i?1e3:1024;if(Math.abs(B)<e)return B+" B";
-  var a=i?["kB","MB","GB","TB","PB","EB","ZB","YB"]:["KiB","MiB","GiB","TiB","PiB","EiB","ZiB","YiB"],t=-1;
+  let e=i?1e3:1024;if(Math.abs(B)<e)return B+" B";
+  let a=i?["kB","MB","GB","TB","PB","EB","ZB","YB"]:["KiB","MiB","GiB","TiB","PiB","EiB","ZiB","YiB"],t=-1;
   do B/=e,++t;while(Math.abs(B)>=e&&t<a.length-1);
   return B.toFixed(3)+" "+a[t]
 }
@@ -203,17 +205,17 @@ function doInfo(callback)
   xhr.open("GET", "/flash/info");
   doCommonXHR(callback, function(flinfo)
   {
-    var dataformats = {0: "ota_data", 1: "phy_init", 2: "nvs", 3: "coredump", 0x81: "fat", 0x82: "spiffs"};
+    let dataformats = {0: "ota_data", 1: "phy_init", 2: "nvs", 3: "coredump", 0x81: "fat", 0x82: "spiffs"};
 
     let l = flinfo.app.length;
-    let ntbdy = document.createElement('tbody');
-    for(var i=0;i<l;i++)
+    let ntbdy = document.createElement("tbody");
+    for(let i=0;i<l;i++)
     {
       if (typeof flinfo.app[i].valid !== "undefined")
       {
         valid_apps[flinfo.app[i].name] = flinfo.app[i].valid;
       }
-      var tr = "<tr>"
+      let tr = "<tr>"
                 + "<td>" + flinfo.app[i].name + "</td>"
                 + "<td>" + humanFileSize(flinfo.app[i].size,0) + "</td>"
                 + "<td>" + flinfo.app[i].version + "</td>"
@@ -222,23 +224,23 @@ function doInfo(callback)
                 + '<td>' + ((flinfo.app[i].bootset)?("&#10004;"):('<input type="submit" class="setboot" value="Set Boot ' + flinfo.app[i].name + '!" onclick="doSetBoot( \'' + flinfo.app[i].name + '\')" />')) + '</td>'
                 + '<td>' + (((flinfo.app[i].ota) && !(flinfo.app[i].running))?('<input type="submit" class="upload" value="Upload to ' + flinfo.app[i].name + '!" onclick="doUpgrade(\'' + flinfo.app[i].name + '\')" disabled />'):('')) + '</td>'
                 + "</tr>";
-      var nr = ntbdy.insertRow();
+      let nr = ntbdy.insertRow();
       nr.innerHTML = tr;
     };
     let otbdy = document.querySelector("#tblApp > tbody");
     otbdy.parentNode.replaceChild(ntbdy, otbdy);
 
     l = flinfo.data.length;
-    ntbdy = document.createElement('tbody');
-    for(var i=0;i<l;i++)
+    ntbdy = document.createElement("tbody");
+    for(let i=0;i<l;i++)
     {
-      var tr = "<tr>"
+      let tr = "<tr>"
                 + `<td>${flinfo.data[i].name}</td>`
                 + `<td>${humanFileSize(flinfo.data[i].size,0)}</td>`
                 + `<td>${dataformats[flinfo.data[i].format]}</td>`
                 + `<td><input type="submit" class="erase" value="Erase ${flinfo.data[i].name}!" onclick="doEraseFlash('${flinfo.data[i].name}')" /></td>`
                 + "</tr>";
-      var nr = ntbdy.insertRow();
+      let nr = ntbdy.insertRow();
       nr.innerHTML = tr;
     };
     otbdy = document.querySelector("#tblData > tbody");
@@ -250,7 +252,7 @@ function doInfo(callback)
 function enable_fw_upload(set_enabled)
 {
   let el = document.getElementsByClassName("upload");
-  for(var i=0;i < el.length;i ++)
+  for(let i=0;i < el.length;i ++)
   {
     el[i].disabled = !set_enabled;
   }
@@ -287,7 +289,7 @@ function page_onload()
         {
           fileSize = (fileSize / 1024).toFixed(1);
           suffix = "MB";
-        } 
+        }
         enable_fw_upload(true);
         dis_fw.innerHTML = `<p>${firmware.name}</p>&nbsp;<p>(${fileSize}${suffix})</p>`;
         _("status").innerHTML="Ready.";

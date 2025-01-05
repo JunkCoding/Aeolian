@@ -5,7 +5,7 @@
   <title>%hostname% LEDs</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, user-scalable=no">
-  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="stylesheet" type="text/css" href="/css/common.css">
   <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
   <script type="text/javascript" src="/js/common.js"></script>
   <script type="text/javascript" src="/js/index.js"></script>
@@ -92,15 +92,15 @@
         <tr>
           <th>Brightness:</th>
           <td style="padding:0px 0px 0px 15px">
-            <div class="dd-wrapper">
-              <div id="dim" class="ddlist" tabindex="1">
-                <span id="selDim">Brightness...</span>
-                <ul class="dropdown">
-                  <li value="0"><a href="#">Max</a></li>
-                  <li value="1"><a href="#">High</a></li>
-                  <li value="2"><a href="#">Medium</a></li>
-                  <li value="3"><a href="#">Low</a></li>
-                  <li value="4"><a href="#">Minimum</a></li>
+            <div class="dd-wrapper dropdown-container">
+              <div id="selDim" class="dropdown-toggle click-dropdown">Brightness...</div>
+              <div id="dim" class="ddlist dropdown-menu" tabindex="1">
+                <ul>
+                  <li value="0">Max</li>
+                  <li value="1">High</li>
+                  <li value="2">Medium</li>
+                  <li value="3">Low</li>
+                  <li value="4">Minimum</li>
                 </ul>
               </div>
             </div>
@@ -109,10 +109,10 @@
         <tr>
           <th>Current Theme:</th>
           <td style="padding:0px 0px 0px 15px">
-            <div class="dd-wrapper">
-              <div id="theme" class="ddlist" tabindex="2">
-                <span id="selTheme">Theme...</span>
-                <ul id="tdropdown" class="dropdown">
+            <div class="dd-wrapper dropdown-container">
+              <div id="selTheme" class="dropdown-toggle click-dropdown">Theme...</div>
+              <div id="theme" class="ddlist dropdown-menu" tabindex="2">
+                <ul id="tdropdown">
                 </ul>
               </div>
             </div>
@@ -121,10 +121,10 @@
         <tr>
           <th>Current Pattern:</th>
           <td style="padding:0px 0px 0px 15px">
-            <div class="dd-wrapper">
-              <div id="pattern" class="ddlist" tabindex="3">
-                <span id="selPattern">Pattern...</span>
-                <ul id="pdropdown" class="dropdown">
+            <div class="dd-wrapper dropdown-container">
+              <div id="selPattern" class="dropdown-toggle click-dropdown">Pattern...</div>
+              <div id="pattern" class="ddlist dropdown-menu" tabindex="3">
+                <ul id="pdropdown">
                 </ul>
               </div>
             </div>
@@ -195,7 +195,7 @@
       </tbody>
     </table>
     <br>
-    <h1>Server/Client Status</h1>
+    <h2>Network Information</h2>
     <table class="status_table">
       <tbody>
         <tr>

@@ -37,20 +37,24 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/themes.html"
   "${PROJECT_DIR}/html/wifi.html"
   "${PROJECT_DIR}/html/wsa.html"
-  "${PROJECT_DIR}/html/css/signalbars.css"
-  "${PROJECT_DIR}/html/css/style.css"
+  "${PROJECT_DIR}/html/css/common.css"
+  "${PROJECT_DIR}/html/css/schedule.css"
   "${PROJECT_DIR}/html/css/themes.css"
-  "${PROJECT_DIR}/html/js/140medley.js"
+  "${PROJECT_DIR}/html/css/timesel.css"
+  "${PROJECT_DIR}/html/css/wifi.css"
   "${PROJECT_DIR}/html/js/ansi_up.js"
   "${PROJECT_DIR}/html/js/common.js"
   "${PROJECT_DIR}/html/js/console.js"
+  "${PROJECT_DIR}/html/js/dragable.js"
   "${PROJECT_DIR}/html/js/flash.js"
   "${PROJECT_DIR}/html/js/graphs.js"
   "${PROJECT_DIR}/html/js/index.js"
   "${PROJECT_DIR}/html/js/schedule.js"
+  "${PROJECT_DIR}/html/js/sharedsel.js"
   "${PROJECT_DIR}/html/js/smoothie.js"
   "${PROJECT_DIR}/html/js/tasks.js"
   "${PROJECT_DIR}/html/js/themes.js"
+  "${PROJECT_DIR}/html/js/timesel.js"
   "${PROJECT_DIR}/html/js/wifi.js"
   "${PROJECT_DIR}/html/img/arrow_down.png"
   "${PROJECT_DIR}/html/img/arrow_up.png"
@@ -65,11 +69,11 @@ if(AEOLIAN_DEV_ROCKET)
 endif()
 # ---------------------------------------------------------
 
-if (CONFIG_AEOLIAN_DEBUG_DEV)
+if (CONFIG_COMPRESS_ESPFS)
+  set(ESPFS_CONFIG "espfs_defaults.yaml")
+else()
   message(AUTHOR_WARNING "** Using debug espfs configuration **")
   set(ESPFS_CONFIG "espfs_debug.yaml")
-else()
-  set(ESPFS_CONFIG "espfs_defaults.yaml")
 endif()
 
 # A list of things we require to work

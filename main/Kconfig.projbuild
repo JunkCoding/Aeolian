@@ -13,6 +13,12 @@ menu "Aeolian Configuration"
     help
       Use watchdog timer to monitor tasks
 
+  config COMPRESS_ESPFS
+    bool "Compress and minify HTML files"
+    default true
+    help
+      Disabled copressing and minifying HTML files to aid in debugging/development.
+
   choice LOG_LEVEL
     prompt "Application log level"
     default APP_LOG_WARN

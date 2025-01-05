@@ -69,7 +69,7 @@ const char *err_prefix[] = {
 * See README for more details.
 */
 
-// 2016-12-12 - Gaspard Petit : Slightly modified to return a std::string 
+// 2016-12-12 - Gaspard Petit : Slightly modified to return a std::string
 // instead of a buffer allocated with malloc.
 
 #include <string>
@@ -174,7 +174,18 @@ std::string b64decode (const void *data, const size_t len)
   }
   return str;
 }
+
 // **************************************************************************************************
+// * Should add some error checking here, maybe?
+// **************************************************************************************************
+int str2int (const char *str)
+{
+  int value = 0;
+
+  value = strtol (str, NULL, 0);
+
+  return value;
+}
 
 // **************************************************************************************************
 // * Use memcpy and return a ptr to the next character after the last byte copied.
@@ -344,6 +355,8 @@ uint32_t get_log_messages(char **buf, uint32_t *logstart)
     }
     else
     {
+      //F_LOGI (true, true, LC_BRIGHT_CYAN, "Allocated %d bytes of memory at location 0x%08X", buflen, tmpbuf);
+
       // Pass the allocated memory address back to the caller.
       (*buf) = tmpbuf;
 
