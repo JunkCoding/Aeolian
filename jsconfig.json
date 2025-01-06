@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "CommonJS",
+    "target": "ES2017",
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "checkJs": true
+  },
+  "paths": {
+    "@/*": ["html/js/*"]
+  },
+  "exclude": ["node_modules"],
+  "include": ["html/js/*"]
+}

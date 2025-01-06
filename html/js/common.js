@@ -3,8 +3,11 @@
 // --------------------------------------------------------------------
 // Fancy Drop Down Box
 // --------------------------------------------------------------------
-var ddlist = [];
-var ddgrp = [];
+
+/** @type{Object.<object, Node>} */
+let ddlist = [];
+/** @type{Object.<object, Node>} */
+let ddgrp = [];
 /*****************************************************************/
 /*****************************************************************/
 function _(el)
@@ -15,6 +18,8 @@ function _(el)
 /*****************************************************************/
 function get_view_dimensions()
 {
+  let viewportwidth=0;
+  let viewportheight=0;
   // the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
   if (typeof window.innerWidth != "undefined")
   {
@@ -34,7 +39,7 @@ function get_view_dimensions()
     viewportheight = document.getElementsByTagName("body")[0].clientHeight;
   }
   console.log("viewport size is " + viewportwidth + "x" + viewportheight);
-  return (viewportwidth, viewportheight);
+  return ({x: viewportwidth, y: viewportheight});
 }
 /*****************************************************************/
 /*****************************************************************/
@@ -43,41 +48,44 @@ function set_background ()
   var c = document.createElement("canvas");
   c.width = 1440;
   c.height = 2560;
-  ctx = c.getContext("2d");
-
-  const grad = ctx.createLinearGradient(0, 0, c.width / 2, c.height / 2);
-  grad.addColorStop(0, "#000000");
-  grad.addColorStop(1, "#000000");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, c.width, c.height);
-  for (var x = 17; x < c.width; x = x + 38)
+  let ctx = c.getContext("2d");
+  if(ctx!==null)
   {
-    for (var y = 17; y < c.height; y = y + 38)
+    const grad=ctx.createLinearGradient(0, 0, c.width/2, c.height/2);
+
+    grad.addColorStop(0, "#000000");
+    grad.addColorStop(1, "#000000");
+    ctx.fillStyle=grad;
+    ctx.fillRect(0, 0, c.width, c.height);
+    for(var x=17; x<c.width; x=x+38)
     {
-      ctx.beginPath();
-      ctx.arc(x, y, 14, 0, 2 * Math.PI);
-      let i = (x + y) % 1400;
-      if (i < 350)
-        ctx.fillStyle = "#056DAA";
-      else if (i < 700)
-        ctx.fillStyle = "#C20772";
-      else if (i < 1050)
-        ctx.fillStyle = "#FEFE06";
-      else if (i < 1400)
-        ctx.fillStyle = "#554A50";
-      else
-        ctx.fillStyle = "#056DAA";
-      ctx.fill();
+      for(var y=17; y<c.height; y=y+38)
+      {
+        ctx.beginPath();
+        ctx.arc(x, y, 14, 0, 2*Math.PI);
+        let i=(x+y)%1400;
+        if(i<350)
+          ctx.fillStyle="#056DAA";
+        else if(i<700)
+          ctx.fillStyle="#C20772";
+        else if(i<1050)
+          ctx.fillStyle="#FEFE06";
+        else if(i<1400)
+          ctx.fillStyle="#554A50";
+        else
+          ctx.fillStyle="#056DAA";
+        ctx.fill();
+      }
     }
+    const grd=ctx.createRadialGradient(c.width/2, 200, 450, 900, 0, 800);
+    grd.addColorStop(0, "rgba(10,10,10,0.01)");
+    grd.addColorStop(1, "rgba(10,10,10,0.5");
+    ctx.fillStyle=grd;
+    ctx.fillRect(0, 0, c.width, c.height);
+    document.body.style.background="url("+c.toDataURL()+")";
+    document.body.style.backgroundRepeat="no-repeat";
+    document.body.style.backgroundSize="cover";
   }
-  const grd = ctx.createRadialGradient(c.width / 2, 200, 450, 900, 0, 800);
-  grd.addColorStop(0, "rgba(10,10,10,0.01)");
-  grd.addColorStop(1, "rgba(10,10,10,0.5");
-  ctx.fillStyle = grd;
-  ctx.fillRect(0, 0, c.width, c.height);
-  document.body.style.background = "url(" + c.toDataURL() + ")";
-  document.body.style.backgroundRepeat = "no-repeat";
-  document.body.style.backgroundSize = "cover";
 }
 /*****************************************************************/
 /* Catch Errors                                                  */
@@ -123,11 +131,14 @@ function init_all_dropboxes ()
   {
     for (let i = 0; i < g; i++)
     {
-      let oldNode = document.getElementById(ddgrp[i].id);
-      let newNode = oldNode.cloneNode(true);
-      oldNode.parentNode.insertBefore(newNode, oldNode);
-      oldNode.parentNode.removeChild(oldNode);
-      ddgrp[i] = undefined;
+      let oldNode=document.getElementById(ddgrp[i].id);
+      if((oldNode!==null)&&oldNode.parentNode)
+      {
+        let newNode=oldNode.cloneNode(true);
+        oldNode.parentNode.insertBefore(newNode, oldNode);
+        oldNode.parentNode.removeChild(oldNode);
+        ddgrp[i]=undefined;
+      }
     }
     ddgrp = [];
   }
@@ -184,13 +195,13 @@ function init_dropbox (dd)
 function getDropdownItems (el)
 {
   var itmList = [];
-  childs = el.childNodes;
+  let childs = el.childNodes;
   childs.forEach(itm =>
   {
     if (itm.nodeName && itm.nodeName === "UL")
     {
       //itmList = itm.children;
-      linodes = itm.childNodes;
+      let linodes = itm.childNodes;
       linodes.forEach(itz =>
       {
         if (itz.nodeName && itz.nodeName === "LI")
@@ -279,11 +290,15 @@ function set_dd (dl, val)
 {
   if (isNaN(val))
   {
-    console.log("'val' is not a number");
+    console.error("'val' is not a number");
+  }
+  else if(dl===null)
+  {
+    console.error("'dl' is 'null'");
   }
   else
   {
-    list = document.getElementById(dl).querySelectorAll("li");
+    let list = document.getElementById(dl).querySelectorAll("li");
     if (list.length > 0)
     {
       for (var item of list)
@@ -299,7 +314,7 @@ function set_dd (dl, val)
 }
 function setMsg (cls, text)
 {
-  sbox = document.getElementById("status_box");
+  let sbox = document.getElementById("status_box");
   if (sbox !== null)
   {
     sbox.className = "alert alert-" + cls;
@@ -311,7 +326,8 @@ function setMsg (cls, text)
 // --------------------------------------------------------------------
 function onClickHandler (id)
 {
-  var xmlhttp = new XMLHttpRequest();
+  let xmlhttp = new XMLHttpRequest();
+  let val=0;
 
   xmlhttp.onreadystatechange = function ()
   {
@@ -320,11 +336,14 @@ function onClickHandler (id)
       setControl(this);
     }
   };
+  /** @type{Object} */
+  let checkBox=document.getElementById(id);
+  if(checkBox)
+  {
+    val=checkBox.checked? 1:0;
+  }
 
-  var checkBox = document.getElementById(id);
-  var val = checkBox.checked ? 1 : 0;
-
-  var request = "config.cgi?" + encodeURI(id + "=" + val);
+  let request = "config.cgi?" + encodeURI(id + "=" + val);
   xmlhttp.open("GET", request, true);
   xmlhttp.send();
 }
@@ -387,14 +406,17 @@ function checkboxToggle (checkboxID)
 
 function navbar ()
 {
-  var x = document.getElementById("myTopnav");
-  if (x.className === "navbar")
+  let x=document.getElementById("myTopnav");
+  if(x!==null)
   {
-    x.className += " responsive";
-  }
-  else
-  {
-    x.className = "navbar";
+    if(x.className==="navbar")
+    {
+      x.className+=" responsive";
+    }
+    else
+    {
+      x.className="navbar";
+    }
   }
 }
 /*****************************************************************/
@@ -425,14 +447,6 @@ document.addEventListener("DOMContentLoaded", function (event)
     {
       closeDropdown();
     }
-
-    /* Check if we have a function to call. Fairly sure this a *huge* security risk */
-    /*
-    let obj=window["on"+e.type];
-    if(typeof obj==='function')
-    {
-      obj(e);
-    }*/
   };
 });
 /*****************************************************************/

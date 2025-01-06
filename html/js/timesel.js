@@ -1,7 +1,7 @@
 /* jshint esversion: 10 */
 
-clklst=[];
-clkgrp=[];
+var clklst=[];
+var clkgrp=[];
 
 /* =========================================================== */
 function init_timesel()
@@ -22,11 +22,11 @@ function init_timesel()
     clkgrp=[];
   }
 
-  clklist=document.getElementsByClassName("timesel");
-  let l=clklist.length;
+  clklst=document.getElementsByClassName("timesel");
+  let l=clklst.length;
   for(let i=0; i<l; i++)
   {
-    clklist[i]=new timesel(clklist[i]);
+    clklst[i]=new timesel(clklst[i]);
   }
 }
 
@@ -184,17 +184,11 @@ class timesel
       /* Deal with individual needs of hours/minutes */
       if(el.name==="hours")
       {
-        if(tmpNum>23)
-        {
-          el.value="23";
-        }
+        /* ToDo */
       }
       else if(el.name==="mins")
       {
-        if(tmpNum>59)
-        {
-          el.value="59";
-        }
+        /* ToDo */
       }
       else
       {

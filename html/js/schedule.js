@@ -41,16 +41,19 @@ function clone_row(tbl, id)
 }
 function fillTable(type, jsonData)
 {
-  tbl=_(type);
+  /** @type  {Object} tbl */
+  let tbl=_(type);
 
   /* Check it is the right data */
-  if(jsonData.sched!==type&&!dd.classList.contains(items))
+  if(jsonData.sched!==type)
   {
     return;
   }
 
   // Remove the old and introduce the new
+  /** @type  {Object} ntbdy */
   const ntbdy=document.createElement('tbody');
+  /** @type  {Object} otbdy */
   const otbdy=document.querySelector(`#${tbl.id} > tbody`);
   otbdy.parentNode.replaceChild(ntbdy, otbdy);
 
@@ -260,6 +263,7 @@ function replace_month(el, month)
 }
 function eventHandler(event)
 {
+  let tgt;
   if(event.type==="click")
   {
     tgt=event.target;
@@ -290,11 +294,11 @@ function eventHandler(event)
       {
         if(type==="month")
         {
-          let dsEl=closest(tgt, "[data-type='dayStart']");//.querySelector(".dropdown-toggle");
+          let dsEl=closest(tgt, "[data-type='dayStart']");
           replace_month(dsEl, tgt.innerText);
           let ds=dsEl.dataset.value;
 
-          let deEl=closest(tgt, "[data-type='dayEnd']");//.querySelector(".dropdown-toggle");
+          let deEl=closest(tgt, "[data-type='dayEnd']");
           replace_month(deEl, tgt.innerText);
           let de = dsEl.dataset.value;
         }
@@ -320,21 +324,28 @@ function eventHandler(event)
     console.log(event.type);
   }
 }
+/**
+ * @param {string} type
+ */
 function setFooter(type)
 {
-  tbl=_(type);
-  let foot=tbl.createTFoot(0);
-  let nr=foot.insertRow(0);
-  td=document.createElement('td');
-  td.classList.add("icon");
-  el=document.createElement('i');
-  el.classList.add("add");
-  el.addEventListener("click", eventHandler);
-  td.appendChild(el);
-  nr.appendChild(td);
-  td=document.createElement('td');
-  td.colSpan="11";
-  nr.appendChild(td);
+  /** @type  {Object} tbl */
+  let tbl=_(type);
+  if(tbl!==null)
+  {
+    let foot=tbl.createTFoot(0);
+    let nr=foot.insertRow(0);
+    let td=document.createElement('td');
+    td.classList.add("icon");
+    let el=document.createElement('i');
+    el.classList.add("add");
+    el.addEventListener("click", eventHandler);
+    td.appendChild(el);
+    nr.appendChild(td);
+    td=document.createElement('td');
+    td.colSpan=11;
+    nr.appendChild(td);
+  }
 }
 function page_onload()
 {
