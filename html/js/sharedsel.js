@@ -3,7 +3,22 @@
 var shrdGrp=[];
 
 /* =========================================================== */
-function init_sharedSel()
+/**
+ * Note: This callback is triggered when a dropdown 'li' item is selected.
+ * The callback should return 'false' if it wants to cancel the item being
+ * selected or 'true' if the selection is permitted.
+ *
+ * @typedef {Function} fnCallback
+ * @param {*} _this
+ * @param {*} event
+ * @returns {boolean}
+ */
+/**
+ *
+ * @param {fnCallback|null} callback
+ * @returns
+ */
+function init_sharedSel(callback=null)
 {
   // Remove any existing class associations
   // ------------------------------------------------
@@ -27,10 +42,16 @@ function init_sharedSel()
   let l=lst.length;
   for(let i=0; i<l; i++)
   {
-    shrdGrp[i]=new sharedSel(lst[i]);
+    shrdGrp[i]=new sharedSel(lst[i], callback);
   }
 }
-function append_sharedSel(el)
+/**
+ *
+ * @param {Object} el
+ * @param {fnCallback|null} callback
+ * @returns
+ */
+function append_sharedSel(el, callback = null)
 {
   let l=shrdGrp.length;
   for(let i=0; i<l; i++)
@@ -40,7 +61,7 @@ function append_sharedSel(el)
       return;
     }
   }
-  shrdGrp[l]=new sharedSel(el);
+  shrdGrp[l]=new sharedSel(el, callback);
 }
 // https://stackoverflow.com/questions/175739/how-can-i-check-if-a-string-is-a-valid-number
 /** @param {string} str */
@@ -120,10 +141,14 @@ class sharedSel
         {"name": "31st", "value": 30, "submenu": null, "classes": ["feb", "ajsn"]},
       ]
     }];
-  constructor(ctarget)
+  /**
+   * @param {Object} ctarget
+   * @param {fnCallback|null} callback
+   */
+  constructor(ctarget, callback=null)
   {
-    this.header='';
     this.target=ctarget;
+    this.callback=callback;
     this.menu=-1;
     this.val=-1;
 
@@ -131,10 +156,10 @@ class sharedSel
     if(sharedSel.#initialised===false)
     {
       sharedSel.#initialised=true;
-      console.log('creating menus');
+      console.log("creating menus");
       for(let i=0; i<sharedSel.options.length; i++)
       {
-        sharedSel.#_menus[i]=document.createElement('ul');
+        sharedSel.#_menus[i]=document.createElement("ul");
         console.log(`parsing: ${sharedSel.options[i].name}`);
         this.parseMenu(sharedSel.#_menus[i], sharedSel.options[i].menu);
         sharedSel.#_menus[i].addEventListener("mouseleave", this);
@@ -143,12 +168,12 @@ class sharedSel
     let x=[];
     try
     {
-      x=ctarget.getAttribute('data-value');
-      x=x.split(':');
+      x=ctarget.getAttribute("data-value");
+      x=x.split(":");
     }
     catch
     {
-      console.error('Error parsing data-value');
+      console.error("Error parsing data-value");
       return;
     }
 
@@ -192,29 +217,31 @@ class sharedSel
       this.val=0;
     }
 
-    ctarget.classList.add('dropdown-container');
+    /* Ensure we have the right class for the container */
+    ctarget.classList.add("dropdown-container");
+
     /*** *** Create toggle switch *** ***/
-    this.header=ctarget;
-    this.header.classList.add('dropdown-toggle', 'click-dropdown');
-    this.header.dataset.value=String(this.val);
-    this.header.innerText=sharedSel.options[this.menu].menu[this.val].name;
+    this.target=ctarget;
+    this.target.classList.add("dropdown-toggle", "click-dropdown");
+    this.target.dataset.value=String(this.val);
+    this.target.appendChild(document.createTextNode(sharedSel.options[this.menu].menu[this.val].name));
     /*** *** Create dropdown menu *** ***/
-    let d=document.createElement('div');
-    d.classList.add('dropdown-menu');
+    let d=document.createElement("div");
+    d.classList.add("dropdown-menu");
     ctarget.appendChild(d);
 
     ctarget.addEventListener("click", this);
     // For opening on hover
     //ctarget.addEventListener("mouseover", this);
-    //this.header.addEventListener("mouseleave", this);
+    //this.target.addEventListener("mouseleave", this);
   }
   /**** **** Menu Control **** ****/
   parseMenu(element, menu)
   {
     for(var i=0; i<menu.length; i++)
     {
-      var nestedli=document.createElement('li');
-      nestedli.classList.add('dropdown-item');
+      var nestedli=document.createElement("li");
+      nestedli.classList.add("dropdown-item");
       if(typeof menu[i].classes!==undefined)
       {
         if(menu[i].classes instanceof Array)
@@ -230,7 +257,7 @@ class sharedSel
 
       if(menu[i].submenu!=null)
       {
-        var subul=document.createElement('ul');
+        var subul=document.createElement("ul");
         nestedli.appendChild(subul);
         this.parseMenu(subul, menu[i].submenu);
       }
@@ -238,11 +265,17 @@ class sharedSel
     }
   }
   /**** **** Shared control **** ****/
+  /**
+   *
+   * @param {*} _this
+   * @param {*} event
+   * @returns
+   */
   onclick(_this, event)
   {
     let tgt=event.target;
     let tgtMenu=tgt.children[0];
-    if(tgt.classList.contains('click-dropdown')===true)
+    if(tgt.classList.contains("click-dropdown")===true)
     {
       let m=event.target.querySelector("div");
       if(sharedSel.#_menus[_this.menu].parentNode!==m)
@@ -250,38 +283,53 @@ class sharedSel
         m.appendChild(sharedSel.#_menus[_this.menu]);
       }
       /**** **** **** ****/
-      if(tgtMenu.classList.contains('dropdown-active')===true)
+      if(tgtMenu.classList.contains("dropdown-active")===true)
       {
-        tgt.parentElement.classList.remove('dropdown-open');
-        tgtMenu.classList.remove('dropdown-active');
+        tgt.parentNode.classList.remove("dropdown-open");
+        tgtMenu.classList.remove("dropdown-active");
       }
       else
       {
         closeDropdown();
-        tgt.parentElement.classList.add('dropdown-open');
-        tgtMenu.classList.add('dropdown-active');
+        tgt.parentNode.classList.add("dropdown-open");
+        tgtMenu.classList.add("dropdown-active");
       }
     }
     else
     {
-      if(tgt.classList.contains('dropdown-item'))
+      if(tgt.classList.contains("dropdown-item"))
       {
-        let tgt=event.target;
-        _this.val=tgt.value;
-        _this.header.dataset.value=_this.val;
-        /* Change text content node, but not the HTML */
-        _this.header.childNodes.forEach(el =>
+        let chng=true;
+        /* If we have a callback, call it to check if can proceed with the change */
+        if(_this.callback!==null)
         {
-          if(el.nodeType===Node.TEXT_NODE)
+          chng = _this.callback(_this.target, event);
+        }
+
+        if(chng===true)
+        {
+          let tgt=event.target;
+          _this.val=tgt.value;
+          _this.target.dataset.value=_this.val;
+          /* Change text content node, but not the HTML */
+          _this.target.childNodes.forEach(el =>
           {
-            el.textContent=tgt.innerText;
-          }
-        });
+            if(el.nodeType===Node.TEXT_NODE)
+            {
+              el.nodeValue=tgt.textContent;
+            }
+          });
+        }
       }
       closeDropdown();
     }
     return false;
   }
+  /**
+   *
+   * @param {*} _this
+   * @param {*} event
+   */
   onmouseleave(_this, event)
   {
     closeDropdown();
@@ -298,6 +346,10 @@ class sharedSel
       }
     }
   }
+  /**
+   *
+   * @param {*} event
+   */
   handleEvent(event)
   {
     event.preventDefault();

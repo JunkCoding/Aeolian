@@ -35,6 +35,6 @@ filters:
     'espfs.yaml': discard
     '*.css': no-compression
     '*.html': heatshrink
-    '*.js': no-compression
+    '*.js': heatshrink
     '*': [cache, heatshrink]
 

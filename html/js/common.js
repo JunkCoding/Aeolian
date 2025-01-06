@@ -248,7 +248,7 @@ class dDropDown
       let m=event.target.parentNode.querySelectorAll(".dropdown-menu")[0];
       if(event.target.nextElementSibling.classList.contains("dropdown-active")===true)
       {
-        event.target.parentElement.classList.remove("dropdown-open");
+        event.target.parentNode.classList.remove("dropdown-open");
         event.target.nextElementSibling.classList.remove("dropdown-active");
       }
       else
@@ -256,7 +256,7 @@ class dDropDown
         /* Close any other open dropdown items */
         closeDropdown();
         /* Show the dropdown for ths element */
-        event.target.parentElement.classList.add("dropdown-open");
+        event.target.parentNode.classList.add("dropdown-open");
         event.target.nextElementSibling.classList.add("dropdown-active");
       }
     }

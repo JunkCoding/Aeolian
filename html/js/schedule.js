@@ -60,18 +60,15 @@ function fillTable(type, jsonData)
     if(tbl.id==='annual')
     {
       el.setAttribute('data-value', `0:${sched.M}`);
-      el.addEventListener('click', eventHandler);
-      append_sharedSel(el);
+      append_sharedSel(el, changeHandler);
 
       el=divEls[d++].querySelector(".sharedsel");
       el.setAttribute('data-value', `2:${Number(sched.sd)-1}`);
-      el.addEventListener('click', eventHandler);
-      append_sharedSel(el);
+      append_sharedSel(el, changeHandler);
 
       el=divEls[d++].querySelector(".sharedsel");
       el.setAttribute('data-value', `2:${Number(sched.ed)-1}`);
-      el.addEventListener('click', eventHandler);
-      append_sharedSel(el);
+      append_sharedSel(el, changeHandler);
     }
     else if(tbl.id==='weekly')
     {
@@ -198,18 +195,15 @@ function set_row_defaults(tblId, divEls)
   if(tblId==='annual')
   {
     el.setAttribute('data-value', '0:0');
-    el.addEventListener('click', eventHandler);
-    append_sharedSel(el);
+    append_sharedSel(el, changeHandler);
 
     el=divEls[d++].querySelector(".sharedsel");
     el.setAttribute('data-value', '2:0');
-    el.addEventListener('click', eventHandler);
-    append_sharedSel(el);
+    append_sharedSel(el, changeHandler);
 
     el=divEls[d++].querySelector(".sharedsel");
     el.setAttribute('data-value', '2:0');
-    el.addEventListener('click', eventHandler);
-    append_sharedSel(el);
+    append_sharedSel(el, changeHandler);
   }
   else if(tblId==='weekly')
   {
@@ -250,6 +244,59 @@ function replace_month(el, month)
   }
   el.classList.add(month);
 }
+/**
+ *
+ * @param {Object} _this
+ * @param {Object} event
+ * @returns {boolean}
+ */
+function changeHandler(_this, event)
+{
+  let retVal=true;
+  let tgt=event.target;
+  /* check we are on target */
+  if(tgt.classList.contains('dropdown-item')===true)
+  {
+    /* Get the type of dropdown menu we are dealing with */
+    let type=_this.dataset.type;
+
+    /* Ensure it is a string */
+    if(typeof type==="string")
+    {
+      /* If month, we need to modify the days if current days > days in new month */
+      if(type==="month")
+      {
+        let dsEl=closest(tgt, "[data-type='dayStart']");
+        replace_month(dsEl, tgt.textContent);
+        let ds=dsEl.dataset.value;
+
+        let deEl=closest(tgt, "[data-type='dayEnd']");
+        replace_month(deEl, tgt.textContent);
+        let de=dsEl.dataset.value;
+      }
+      /* If we are modifying the start day, ensure it is <= the end day */
+      else if(type==="dayStart")
+      {
+        let ed=closest(tgt, "[data-type=dayEnd]");
+        if(tgt.value>ed.dataset.value)
+        {
+          retVal=false;
+        }
+      }
+        /* Likewise, check the end day is >= the start day and <= days in the selected month */
+      else if(type==="dayEnd")
+      {
+        let sd = closest(tgt, "[data-type=dayStart]");
+        if(tgt.value<sd.dataset.value)
+        {
+          retVal=false;
+        }
+      }
+    }
+  }
+  /* Return false if we want to stop the change happening */
+  return retVal;
+}
 function eventHandler(event)
 {
   let tgt;
@@ -274,31 +321,6 @@ function eventHandler(event)
       if(typeof tbl==='object')
       {
         console.log(tbl.id, closest(tgt, 'tr').id);
-      }
-    }
-    else if(tgt.classList.contains('dropdown-item')===true)
-    {
-      let type=tgt.parentElement.parentElement.parentElement.dataset.type;
-      if(typeof type==="string")
-      {
-        if(type==="month")
-        {
-          let dsEl=closest(tgt, "[data-type='dayStart']");
-          replace_month(dsEl, tgt.innerText);
-          let ds=dsEl.dataset.value;
-
-          let deEl=closest(tgt, "[data-type='dayEnd']");
-          replace_month(deEl, tgt.innerText);
-          let de = dsEl.dataset.value;
-        }
-        else if(type==="dayStart")
-        {
-          closest(tgt, "[data-type=dayStart]");
-        }
-        else if(type==="dayEnd")
-        {
-          closest(tgt, "[data-type=dayEnd]");
-        }
       }
     }
   }
