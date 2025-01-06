@@ -43,6 +43,7 @@ input[type="number"] {
 }
 input.time {
   background-color: transparent;
+  cursor: pointer;
   line-height:23px;
   height:22px;
   width: 30px;

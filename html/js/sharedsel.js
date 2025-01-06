@@ -12,20 +12,22 @@ function init_sharedSel()
   {
     for(let i=0; i<g; i++)
     {
+      /** @type {Object} oldNode */
+      /** @type {Object} newNode */
       let oldNode=document.getElementById(shrdGrp[i].id);
       let newNode=oldNode.cloneNode(true);
       oldNode.parentNode.insertBefore(newNode, oldNode);
       oldNode.parentNode.removeChild(oldNode);
       shrdGrp[i]=undefined;
     }
-    mongrp=[];
+    shrdGrp=[];
   }
 
   let lst=document.getElementsByClassName("sharedSel");
   let l=lst.length;
   for(let i=0; i<l; i++)
   {
-    lst[i]=new sharedSel(lst[i]);
+    shrdGrp[i]=new sharedSel(lst[i]);
   }
 }
 function append_sharedSel(el)
@@ -41,10 +43,11 @@ function append_sharedSel(el)
   shrdGrp[l]=new sharedSel(el);
 }
 // https://stackoverflow.com/questions/175739/how-can-i-check-if-a-string-is-a-valid-number
+/** @param {string} str */
 function isNumeric(str)
 {
   if(typeof str!="string") return false; // we only process strings!
-  return !isNaN(str)&& // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+  return !isNaN(Number(str))&& // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
     !isNaN(parseFloat(str)); // ...and ensure strings of whitespace fail
 }
 class sharedSel
@@ -137,7 +140,7 @@ class sharedSel
         sharedSel.#_menus[i].addEventListener("mouseleave", this);
       }
     }
-    var x='';
+    let x=[];
     try
     {
       x=ctarget.getAttribute('data-value');
@@ -146,7 +149,7 @@ class sharedSel
     catch
     {
       console.error('Error parsing data-value');
-      return false;
+      return;
     }
 
     // Check if the user knows which index they want
@@ -191,12 +194,10 @@ class sharedSel
 
     ctarget.classList.add('dropdown-container');
     /*** *** Create toggle switch *** ***/
-    this.header=document.createElement('div');
-    //this.header.classList.add('dropdown-toggle', 'hover-dropdown');
+    this.header=ctarget;
     this.header.classList.add('dropdown-toggle', 'click-dropdown');
-    this.header.dataset.value=this.val;
+    this.header.dataset.value=String(this.val);
     this.header.innerText=sharedSel.options[this.menu].menu[this.val].name;
-    ctarget.appendChild(this.header);
     /*** *** Create dropdown menu *** ***/
     let d=document.createElement('div');
     d.classList.add('dropdown-menu');
@@ -231,7 +232,7 @@ class sharedSel
       {
         var subul=document.createElement('ul');
         nestedli.appendChild(subul);
-        parseMenu(subul, menu[i].submenu);
+        this.parseMenu(subul, menu[i].submenu);
       }
       element.appendChild(nestedli);
     }
@@ -239,54 +240,47 @@ class sharedSel
   /**** **** Shared control **** ****/
   onclick(_this, event)
   {
-    let tgt=event.target.parentNode;
-    if(event.target.classList.contains('click-dropdown')===true)
+    let tgt=event.target;
+    let tgtMenu=tgt.children[0];
+    if(tgt.classList.contains('click-dropdown')===true)
     {
-      let m=event.target.parentNode.querySelectorAll('.dropdown-menu')[0];
+      let m=event.target.querySelector("div");
       if(sharedSel.#_menus[_this.menu].parentNode!==m)
       {
         m.appendChild(sharedSel.#_menus[_this.menu]);
       }
       /**** **** **** ****/
-      if(event.target.nextElementSibling.classList.contains('dropdown-active')===true)
+      if(tgtMenu.classList.contains('dropdown-active')===true)
       {
-        event.target.parentElement.classList.remove('dropdown-open');
-        event.target.nextElementSibling.classList.remove('dropdown-active');
+        tgt.parentElement.classList.remove('dropdown-open');
+        tgtMenu.classList.remove('dropdown-active');
       }
       else
       {
         closeDropdown();
-        event.target.parentElement.classList.add('dropdown-open');
-        event.target.nextElementSibling.classList.add('dropdown-active');
+        tgt.parentElement.classList.add('dropdown-open');
+        tgtMenu.classList.add('dropdown-active');
       }
     }
     else
     {
-      if(event.target.classList.contains('dropdown-item'))
+      if(tgt.classList.contains('dropdown-item'))
       {
         let tgt=event.target;
         _this.val=tgt.value;
         _this.header.dataset.value=_this.val;
-        _this.header.innerText=tgt.innerText;
+        /* Change text content node, but not the HTML */
+        _this.header.childNodes.forEach(el =>
+        {
+          if(el.nodeType===Node.TEXT_NODE)
+          {
+            el.textContent=tgt.innerText;
+          }
+        });
       }
       closeDropdown();
     }
     return false;
-  }
-  onmouseover(_this, event)
-  {
-    let tgt=event.target.parentNode;
-    if(event.target.classList.contains('hover-dropdown')===true)
-    {
-      let m=event.target.parentNode.querySelectorAll('.dropdown-menu')[0];
-      if(monthMenu.parentNode!==m)
-      {
-        m.appendChild(monthMenu);
-      }
-      closeDropdown();
-      event.target.parentElement.classList.add('dropdown-open');
-      event.target.nextElementSibling.classList.add('dropdown-active');
-    }
   }
   onmouseleave(_this, event)
   {

@@ -9,17 +9,6 @@ const EVENT_DEFAULT      = 0x20;     // Default event to be run when no other ev
 const EVENT_IMMUTABLE    = 0x40;     // Event cannot be removed/altered
 const EVENT_DISABLED     = 0x80;     // Event is not active (don't run)
 
-var mousedown=false;
-var hasMoved=false;
-var setDates=false;
-var sPos={
-  target: null,
-  doy: 0,
-};
-var ePos={
-  target: null,
-  doy: 0,
-};
 function clone_row(tbl, id)
 {
   // Get our parent table, which is the table we are inserting a new row.
@@ -304,14 +293,12 @@ function eventHandler(event)
         }
         else if(type==="dayStart")
         {
-          closest(tgt, "dayEnd");
+          closest(tgt, "[data-type=dayStart]");
         }
         else if(type==="dayEnd")
         {
-          closest(tgt, "dayStart");
+          closest(tgt, "[data-type=dayEnd]");
         }
-        let ddl=tgt.parentNode.parentNode.parentNode;
-
       }
     }
   }

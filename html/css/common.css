@@ -1615,31 +1615,17 @@ ul::-webkit-scrollbar {
   position: relative;
   max-width: 240px;
 
-  .dropdown-toggle {
-    box-shadow: 0px 0px 4px -2px rgba(0, 0, 0, 0.5);
-    background-color: transparent; /*var(--def-col-bg);*/
-    border-radius: 5px;
-    color: var(--def-col-fg);
-    font-size: 15px;
-    padding-left: 4px;
-    border-radius: 4px;
-    font-weight: 400;
-    cursor: pointer;
-    position: relative;
-    transition: all ease-in-out 0.3s;
-
-    label {
-      cursor: pointer;
-      width: 100%;
-    }
-
-    &:hover,
-    &:active,
-    &:focus {
-      background-color: #0979ce;
-      color: #ffffff;
-    }
-  }
+  box-shadow: 0px 0px 4px -2px rgba(0, 0, 0, 0.5);
+  background-color: transparent; /*var(--def-col-bg);*/
+  border-radius: 5px;
+  color: var(--def-col-fg);
+  font-size: 15px;
+  padding-left: 4px;
+  border-radius: 4px;
+  font-weight: 400;
+  cursor: pointer;
+  position: relative;
+  transition: all ease-in-out 0.3s;
 
   .dropdown-menu {
     width: 100%;
@@ -1670,6 +1656,7 @@ ul::-webkit-scrollbar {
       background-color: var(--dd-col-li-bg);
       color: var(--dd-col-li-fg);
       padding: 1px 0px 1px 10px;
+      cursor: pointer;
       font-size: 16px;
       font-weight: lighter;
       font-style: italic;
