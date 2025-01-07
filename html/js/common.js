@@ -225,7 +225,6 @@ class dDropDown
     this.id=el.id;
 
     el.addEventListener("mouseleave", this);
-    console.log(el);
     var clkr=closest(this.ddgrp, ".dropdown-toggle");
     clkr.addEventListener("click", this);
 
@@ -368,7 +367,6 @@ function updateControl (param, val)
 function setControl (xhttp)
 {
   var resp = JSON.parse(xhttp.response);
-  /*console.log(resp.count);*/
 
   var elephant = document.getElementById(resp.param);
   if (typeof (elephant) != "undefined" && elephant != null)
@@ -438,11 +436,8 @@ function closeDropdown()
 /*****************************************************************/
 document.addEventListener("DOMContentLoaded", function (event)
 {
-  console.log("Ready!");
   document.body.onclick = function (e)
   {
-    console.log("e.target.className = " + e.target.className);
-
     if (!e.target.closest(".dropdown-container"))
     {
       closeDropdown();

@@ -236,7 +236,6 @@ function replace_month(el, month)
   let cl=el.classList;
   for(let cssClass of cl)
   {
-    console.log(cssClass);
     if(cssClass.search(/sharedsel|dropdown/) < 0)
     {
       el.classList.remove(cssClass);

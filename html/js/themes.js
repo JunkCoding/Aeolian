@@ -6,7 +6,7 @@ function fillTable(jsonData)
   {
     var theme = jsonData.items[i];
 
-    var tbl = document.createElement("Table");
+    let tbl=document.createElement("Table");
     tbl.id = theme.name; tbl.className = "hdr_table";
 
     var hdr = tbl.createTHead();
@@ -207,8 +207,6 @@ function colourChooser()
 
   document.body.onclick = function(e)
   {
-    //console.log("e.target.className = " + e.target.className);
-
     // Do we have a colour picker open?
     if ( colbox != false )
     {
@@ -216,7 +214,6 @@ function colourChooser()
       let ce = e.target.closest("#colPicker");
       if ( Boolean(ce) )
       {
-        //console.log(e.target.className);
         if ( e.target.className == "tile" )
         {
           // Update our colour

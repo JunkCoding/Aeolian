@@ -2,8 +2,8 @@
 
 function APconfig()
 {
-  ssid=null;
-  bssid = null;
+  let ssid=null;
+  let bssid=null;
 }
 
 var curAP = new APconfig();
@@ -124,21 +124,33 @@ function baseDecode (input)
   output = utf8decode(output);
   return output;
 }
+/**
+ *
+ * @param {String} bssid
+ * @param {String} ssid
+ */
 function updateSelAP (bssid, ssid)
 {
-  document.getElementById("sta_ssid").value = ssid;
+  let staEl=document.getElementById("sta_ssid");
+  if(staEl instanceof HTMLInputElement)
+  {
+    staEl.value=ssid;
+  }
   selAP.bssid = bssid;
   selAP.ssid = ssid;
-  let f_ap = document.getElementById("ap_fixed");
-  if (selAP.ssid === curAP.ssid && selAP.bssid !== curAP.bssid)
+  let f_ap=document.getElementById("ap_fixed");
+  if(f_ap instanceof HTMLInputElement)
   {
-    f_ap.checked = true;
+    if(selAP.ssid===curAP.ssid&&selAP.bssid!==curAP.bssid)
+    {
+      f_ap.checked=true;
+    }
+    else
+    {
+      f_ap.checked=false;
+    }
+    toggleFixedAP(f_ap);
   }
-  else
-  {
-    f_ap.checked = false;
-  }
-  toggleFixedAP(f_ap);
 }
 
 function createRowForAp (row, ap, hasFocus)
@@ -156,10 +168,11 @@ function createRowForAp (row, ap, hasFocus)
   input.value = ap.ssid;
   input.addEventListener("change", function () { updateSelAP(ap.bssid, ap.ssid); });
   /*if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";*/
+  /*
   if (hasFocus)
   {
     input.checked = "1";
-  }
+  }*/
   input.id = "opt-" + ap.ssid;
   radio.appendChild(input);
   row.appendChild(radio);
