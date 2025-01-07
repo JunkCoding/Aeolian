@@ -29,7 +29,7 @@ function init_sharedSel(callback=null)
     {
       /** @type {Object} oldNode */
       /** @type {Object} newNode */
-      let oldNode=document.getElementById(shrdGrp[i].id);
+      let oldNode=shrdGrp[i].target;
       let newNode=oldNode.cloneNode(true);
       oldNode.parentNode.insertBefore(newNode, oldNode);
       oldNode.parentNode.removeChild(oldNode);
@@ -38,27 +38,27 @@ function init_sharedSel(callback=null)
     shrdGrp=[];
   }
 
-  let lst=document.getElementsByClassName("sharedSel");
+  let SList=document.getElementsByClassName("sharedSel");
   let l=lst.length;
   for(let i=0; i<l; i++)
   {
-    shrdGrp[i]=new sharedSel(lst[i], callback);
+    shrdGrp[i]=new sharedSel(SList[i], callback);
   }
 }
 /**
  *
  * @param {Object} el
  * @param {fnCallback|null} callback
- * @returns
+ * @returns {Object|null}
  */
 function append_sharedSel(el, callback = null)
 {
   let l=shrdGrp.length;
   for(let i=0; i<l; i++)
   {
-    if(shrdGrp[i].id===el.id)
+    if(shrdGrp[i].target===el)
     {
-      return;
+      return null;
     }
   }
   shrdGrp[l]=new sharedSel(el, callback);
@@ -73,6 +73,7 @@ function isNumeric(str)
 }
 class sharedSel
 {
+  static daysInMonth =[31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   static #initialised=false;
   static #_menus=[];
   static options=[
@@ -149,7 +150,7 @@ class sharedSel
   {
     this.target=ctarget;
     this.callback=callback;
-    this.menu=-1;
+    this.menuNum=-1;
     this.val=-1;
 
     // We need to ensure this is done first
@@ -180,20 +181,20 @@ class sharedSel
     // Check if the user knows which index they want
     if(isNumeric(x[0]))
     {
-      this.menu=Number(x[0]);
-      if(this.menu<0||this.menu>=sharedSel.options.length)
+      this.menuNum=Number(x[0]);
+      if(this.menuNum<0||this.menuNum>=sharedSel.options.length)
       {
-        this.menu=-2;
+        this.menuNum=-2;
       }
     }
     // Ekse we are looking for our target by name
     else
     {
-      for(var i=0; i<sharedSel.options.length&&this.menu<0; i++)
+      for(var i=0; i<sharedSel.options.length&&this.menuNum<0; i++)
       {
         if(x[0]===sharedSel.options[i].name)
         {
-          this.menu=i;
+          this.menuNum=i;
         }
       }
     }
@@ -205,14 +206,14 @@ class sharedSel
     }
 
     // Check both required values were set
-    if(this.menu<0||this.val<0)
+    if(this.menuNum<0||this.val<0)
     {
-      //console.error(`Failed to parse menu item: ${this.menu}:${this.val}`);
-      console.error(`Failed to parse menu item: ${ctarget}`);
+      //console.error(`Failed to parse menu item: ${this.menuNum}:${this.val}`);
+      console.error(`Failed to parse menu item: ${this.target}`);
       return;
     }
     // Sanitize input
-    else if(this.val<0||this.val>(sharedSel.options[this.menu].menu.length-1))
+    else if(this.val<0||this.val>(sharedSel.options[this.menuNum].menu.length-1))
     {
       this.val=0;
     }
@@ -224,7 +225,7 @@ class sharedSel
     this.target=ctarget;
     this.target.classList.add("dropdown-toggle", "click-dropdown");
     this.target.dataset.value=String(this.val);
-    this.target.appendChild(document.createTextNode(sharedSel.options[this.menu].menu[this.val].name));
+    this.target.appendChild(document.createTextNode(sharedSel.options[this.menuNum].menu[this.val].name));
     /*** *** Create dropdown menu *** ***/
     let d=document.createElement("div");
     d.classList.add("dropdown-menu");
@@ -264,6 +265,44 @@ class sharedSel
       element.appendChild(nestedli);
     }
   }
+  /**
+   *
+   * @param {Object} ddList
+   * @param {Number} itemNum
+   */
+  setSelected(ddList, itemNum)
+  {
+    ddList.val=itemNum;
+    ddList.target.dataset.value=itemNum;
+
+    /* Change text content node, but not the HTML */
+    ddList.target.childNodes.forEach(el =>
+    {
+      if(el.nodeType===Node.TEXT_NODE)
+      {
+        el.nodeValue=sharedSel.options[ddList.menuNum].menu[itemNum].name;
+      }
+    });
+  }
+  /**
+   *
+   * @param {Object} tgt
+   * @param {Number} menuItem
+   * @returns {Boolean}
+   */
+  setMenuItem =function(tgt, menuItem)
+  {
+    let l=shrdGrp.length;
+    for(let i=0; i<l; i++)
+    {
+      if(shrdGrp[i].target===tgt)
+      {
+        this.setSelected(shrdGrp[i], menuItem);
+        return true;
+      }
+    }
+    return false;
+  }
   /**** **** Shared control **** ****/
   /**
    *
@@ -278,9 +317,9 @@ class sharedSel
     if(tgt.classList.contains("click-dropdown")===true)
     {
       let m=event.target.querySelector("div");
-      if(sharedSel.#_menus[_this.menu].parentNode!==m)
+      if(sharedSel.#_menus[_this.menuNum].parentNode!==m)
       {
-        m.appendChild(sharedSel.#_menus[_this.menu]);
+        m.appendChild(sharedSel.#_menus[_this.menuNum]);
       }
       /**** **** **** ****/
       if(tgtMenu.classList.contains("dropdown-active")===true)
@@ -303,22 +342,12 @@ class sharedSel
         /* If we have a callback, call it to check if can proceed with the change */
         if(_this.callback!==null)
         {
-          chng = _this.callback(_this.target, event);
+          chng = _this.callback(_this, event);
         }
 
         if(chng===true)
         {
-          let tgt=event.target;
-          _this.val=tgt.value;
-          _this.target.dataset.value=_this.val;
-          /* Change text content node, but not the HTML */
-          _this.target.childNodes.forEach(el =>
-          {
-            if(el.nodeType===Node.TEXT_NODE)
-            {
-              el.nodeValue=tgt.textContent;
-            }
-          });
+          _this.setSelected(_this, event.target.value);
         }
       }
       closeDropdown();

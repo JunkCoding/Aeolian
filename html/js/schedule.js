@@ -258,7 +258,7 @@ function changeHandler(_this, event)
   if(tgt.classList.contains('dropdown-item')===true)
   {
     /* Get the type of dropdown menu we are dealing with */
-    let type=_this.dataset.type;
+    let type=_this.target.dataset.type;
 
     /* Ensure it is a string */
     if(typeof type==="string")
@@ -266,13 +266,24 @@ function changeHandler(_this, event)
       /* If month, we need to modify the days if current days > days in new month */
       if(type==="month")
       {
+        /* Add/replace the month class of the parents to prevent selection of N/A days */
         let dsEl=closest(tgt, "[data-type='dayStart']");
         replace_month(dsEl, tgt.textContent);
-        let ds=dsEl.dataset.value;
-
         let deEl=closest(tgt, "[data-type='dayEnd']");
         replace_month(deEl, tgt.textContent);
-        let de=dsEl.dataset.value;
+
+
+        /* Check the current days are valid for the selected month */
+        let monMax=sharedSel.daysInMonth[tgt.value]-1;
+        if(deEl.dataset.value>monMax)
+        {
+          _this.setMenuItem(deEl, monMax);
+        }
+        /* check start date is on or before the end date */
+        if(dsEl.dataset.value>deEl.dataset.value)
+        {
+          _this.setMenuItem(dsEl, deEl.dataset.value);
+        }
       }
       /* If we are modifying the start day, ensure it is <= the end day */
       else if(type==="dayStart")

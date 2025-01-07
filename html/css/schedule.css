@@ -26,14 +26,15 @@
     min-width: 105px;
   }
   .new {
-    animation: changeBackgroundColor 2.5s ease alternate infinite;
+    animation: changeBackgroundColor 1.5s ease alternate;
+    background-color: #dd39ae30;
   }
 }
 @keyframes changeBackgroundColor {
   0% {
     background-color: #dd39ae70;
   }
-  50%,
+
   100% {
     background-color: #dd39ae30;
   }
