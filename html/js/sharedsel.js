@@ -149,8 +149,11 @@ class sharedSel
   constructor(ctarget, callback=null)
   {
     this.target=ctarget;
+    /** @type {Function|null} callback */
     this.callback=callback;
+    /** @type {Number} menuNum */
     this.menuNum=-1;
+    /** @type {Number} val */
     this.val=-1;
 
     // We need to ensure this is done first
@@ -224,7 +227,7 @@ class sharedSel
     /*** *** Create toggle switch *** ***/
     this.target=ctarget;
     this.target.classList.add("dropdown-toggle", "click-dropdown");
-    this.target.dataset.value=String(this.val);
+    this.target.dataset.value=this.val;
     this.target.appendChild(document.createTextNode(sharedSel.options[this.menuNum].menu[this.val].name));
     /*** *** Create dropdown menu *** ***/
     let d=document.createElement("div");
@@ -273,7 +276,7 @@ class sharedSel
   setSelected(ddList, itemNum)
   {
     ddList.val=itemNum;
-    ddList.target.dataset.value=itemNum;
+    ddList.target.dataset.value=Number(itemNum);
 
     /* Change text content node, but not the HTML */
     ddList.target.childNodes.forEach(el =>
@@ -371,7 +374,7 @@ class sharedSel
     {
       if(el.classList.contains("monthsel"))
       {
-        el.value=String(Number(el.value)-delta);
+        el.value=(Number(el.value)-delta);
       }
     }
   }
