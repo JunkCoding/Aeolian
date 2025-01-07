@@ -272,12 +272,22 @@ function changeHandler(_this, event)
         let deEl=closest(tgt, "[data-type='dayEnd']");
         replace_month(deEl, tgt.textContent);
 
+        /* Get the max days in the month before selection */
+        let curMonth=closest(tgt, '.dropdown-container').dataset.value;
+        let curMax=sharedSel.daysInMonth[curMonth]-1;
 
         /* Check the current days are valid for the selected month */
-        let monMax=sharedSel.daysInMonth[tgt.value]-1;
-        if(deEl.dataset.value>monMax)
+        let selMax=sharedSel.daysInMonth[tgt.value]-1;
+        /* Ccheck if our current day exceeds the number in the selected month */
+        if(deEl.dataset.value>selMax)
         {
-          _this.setMenuItem(deEl, monMax);
+          _this.setMenuItem(deEl, selMax);
+        }
+        /* If our current day is the last day, and also not the same as the end day
+         * we will make the new month also the last day */
+        else if(deEl.dataset.value==curMax&&dsEl.dataset.value<deEl.dataset.value)
+        {
+          _this.setMenuItem(deEl, selMax);
         }
         /* check start date is on or before the end date */
         if(dsEl.dataset.value>deEl.dataset.value)
