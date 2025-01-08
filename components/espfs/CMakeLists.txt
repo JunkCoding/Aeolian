@@ -43,6 +43,7 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/css/timesel.css"
   "${PROJECT_DIR}/html/css/wifi.css"
   "${PROJECT_DIR}/html/js/ansi_up.js"
+  "${PROJECT_DIR}/html/js/clockpicker.js"
   "${PROJECT_DIR}/html/js/common.js"
   "${PROJECT_DIR}/html/js/console.js"
   "${PROJECT_DIR}/html/js/dragable.js"
@@ -56,8 +57,6 @@ list(APPEND webpages
   "${PROJECT_DIR}/html/js/themes.js"
   "${PROJECT_DIR}/html/js/timesel.js"
   "${PROJECT_DIR}/html/js/wifi.js"
-  "${PROJECT_DIR}/html/img/arrow_down.png"
-  "${PROJECT_DIR}/html/img/arrow_up.png"
   "${PROJECT_DIR}/html/img/favicon.png"
   )
 # ---------------------------------------------------------

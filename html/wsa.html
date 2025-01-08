@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8">
   <title>Welsh Space Agency</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" type="text/css" href="/css/common.css">
   <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
-  <script type="text/javascript" src="/js/common.js"></script>
-  <script type="text/javascript" src="/js/index.js"></script>
-  <script language="javascript">
+  <script src="/js/common.js"></script>
+  <script src="/js/index.js"></script>
+  <script>
     function page_onload()
     {
       for ( var c = 0; (allow_launch(c, false)); c++ );
@@ -138,7 +138,7 @@
                 <div class="column zone_start">
                   <div class="onoffswitch">
                     <input type="hidden" id="hidden_switch0" value="1">
-                    <input type="checkbox" id="safety_switch0" class="onoffswitch-checkbox" checked="True" onClick="allow_launch(0, !this.checked)">
+                    <input type="checkbox" id="safety_switch0" class="onoffswitch-checkbox" checked onClick="allow_launch(0, !this.checked)">
                     <label class="onoffswitch-label" for="safety_switch0">
                       <span class="onoffswitch-inner"></span>
                       <span class="onoffswitch-switch"></span>
@@ -154,7 +154,7 @@
                 <div class="column zone_start">
                   <div class="onoffswitch">
                     <input type="hidden" id="hidden_switch1" value="1">
-                    <input type="checkbox" id="safety_switch1" class="onoffswitch-checkbox" checked="True" onClick="allow_launch(1, !this.checked)">
+                    <input type="checkbox" id="safety_switch1" class="onoffswitch-checkbox" checked onClick="allow_launch(1, !this.checked)">
                     <label class="onoffswitch-label" for="safety_switch1">
                       <span class="onoffswitch-inner"></span>
                       <span class="onoffswitch-switch"></span>
@@ -170,7 +170,7 @@
                 <div class="column zone_start">
                   <div class="onoffswitch">
                     <input type="hidden" id="hidden_switch2" value="1">
-                    <input type="checkbox" id="safety_switch2" class="onoffswitch-checkbox" checked="True" onClick="allow_launch(2, !this.checked)">
+                    <input type="checkbox" id="safety_switch2" class="onoffswitch-checkbox" checked onClick="allow_launch(2, !this.checked)">
                     <label class="onoffswitch-label" for="safety_switch2">
                       <span class="onoffswitch-inner"></span>
                       <span class="onoffswitch-switch"></span>
@@ -186,7 +186,7 @@
                 <div class="column zone_start">
                   <div class="onoffswitch">
                     <input type="hidden" id="hidden_switch3" value="1">
-                    <input type="checkbox" id="safety_switch3" class="onoffswitch-checkbox" checked="True" onClick="allow_launch(3, !this.checked)">
+                    <input type="checkbox" id="safety_switch3" class="onoffswitch-checkbox" checked onClick="allow_launch(3, !this.checked)">
                     <label class="onoffswitch-label" for="safety_switch3">
                       <span class="onoffswitch-inner"></span>
                       <span class="onoffswitch-switch"></span>

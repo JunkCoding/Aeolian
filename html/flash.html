@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8">
   <title>Upgrade Firmware</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" type="text/css" href="/css/common.css">
   <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
-  <script type="text/javascript" src="/js/common.js"></script>
-  <script type="text/javascript" src="/js/flash.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/flash.js"></script>
 </head>
 
 <body onload="page_onload()">
@@ -29,7 +29,7 @@
     <h2>App Partitions</h2>
     <div class="fw-group">
       <div id="fw-selector">
-        <input type="file" id="sel-fw" />
+        <input type="file" id="sel-fw">
         <label for="sel-fw" class="inp_select">
           <i class="fa-solid fa-arrow-up-from-bracket"></i>
           Firmware File
@@ -51,7 +51,7 @@
       </thead>
       <tbody></tbody>
     </table>
-    <br />
+    <br>
     <h2>Data Partitions</h2>
     <table id="tblData" class="hdr_table">
       <thead>
@@ -65,9 +65,9 @@
       <tbody></tbody>
     </table>
     <div class="btn_group">
-      <input type="submit" value="Reboot!" id="reboot" onclick="doReboot()" />
+      <input type="submit" value="Reboot!" id="reboot" onclick="doReboot()">
     </div>
-    <div id="status" class="alert remark">Loading...</div>
+    <div id="msgBar" class="alert remark">Loading...</div>
     <div id="progbar" class="html5-progress-bar">
       <div class="prog-wrapper">
         <progress id="progressBar" value="0" max="100"></progress>

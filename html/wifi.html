@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8">
   <title>Wifi Configuration</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" type="text/css" href="/css/common.css">
   <link rel="stylesheet" type="text/css" href="/css/wifi.css">
   <link rel="shortcut icon" type="image/png" href="/img/favicon.png">
-  <script type="text/javascript" src="/js/common.js"></script>
-  <script type="text/javascript" src="/js/wifi.js"></script>
-  <script type="text/javascript" src="/js/dragable.js"></script>
-  <script language="javascript">
+  <script src="/js/common.js"></script>
+  <script src="/js/wifi.js"></script>
+  <script src="/js/dragable.js"></script>
+  <script>
     document.addEventListener("DOMContentLoaded", function (event)
     {
       set_dd('wifi_mode', %wifi_mode%);
@@ -107,13 +107,13 @@
         <tbody>
           <tr>
             <th>SSID:</th>
-            <td> <input id="ap_ssid" type="text" maxlength="32" size="45" name="ap_ssid" value="%ap_ssid%" onchange="updateControl(this.id, this.value)" /> </td>
+            <td> <input id="ap_ssid" type="text" maxlength="32" size="45" name="ap_ssid" value="%ap_ssid%" onchange="updateControl(this.id, this.value)"> </td>
           </tr>
           <tr>
             <th>Password:</th>
             <td>
               <div class="pwd_group">
-                <input id="ap_password" class="password" type="password" placeholder="Leave blank if not modifying." maxlength="64" size="45" name="ap_password" value="" onchange="validatePassword(this)" />
+                <input id="ap_password" class="password" type="password" placeholder="Leave blank if not modifying." maxlength="64" size="45" name="ap_password" value="" onchange="validatePassword(this)">
                 <div id="show-pwd" class="iconfont eye icon-yincang" onclick="pwdShowHide(this)"></div>
               </div>
             </td>
@@ -219,7 +219,7 @@
         <div class="preference">
           <label for="ap_autooff">AP Auto Off:</label>
           <div class="tickbox">
-            <input type="checkbox" name="apAutoOff" id="ap_autooff" onclick="onClickHandler(this.id)" />
+            <input type="checkbox" name="apAutoOff" id="ap_autooff" onclick="onClickHandler(this.id)">
           </div>
         </div>
         <label for="ap_autooff" class="pref_label">Disable AP when the device has a valid STA connection.</label>
@@ -232,13 +232,13 @@
         <tbody>
           <tr>
             <th>SSID:</th>
-            <td> <input id="sta_ssid" type="text" maxlength="32" size="45" name="sta_ssid" value="%sta_ssid%" onchange="validateSSID(this)" /> </td>
+            <td> <input id="sta_ssid" type="text" maxlength="32" size="45" name="sta_ssid" value="%sta_ssid%" onchange="validateSSID(this)"> </td>
           </tr>
           <tr>
             <th>Password:</th>
             <td>
               <div class="pwd_group">
-                <input id="sta_password" class="password" type="password" placeholder="Leave blank if not modifying." maxlength="64" size="45" name="sta_password" value="" onchange="validatePassword(this)" />
+                <input id="sta_password" class="password" type="password" placeholder="Leave blank if not modifying." maxlength="64" size="45" name="sta_password" value="" onchange="validatePassword(this)">
                 <div id="show-pwd" class="iconfont eye icon-yincang" onclick="pwdShowHide(this)"></div>
               </div>
             </td>
@@ -249,15 +249,15 @@
         <div class="preference">
           <label for="ap_fixed">Lock AP:</label>
           <div class="tickbox">
-            <input type="checkbox" name="ap_fixed" id="ap_fixed" onchange="toggleFixedAP(this)" />
+            <input type="checkbox" name="ap_fixed" id="ap_fixed" onchange="toggleFixedAP(this)">
           </div>
         </div>
         <label for="ap_fixed" class="pref_label">Lock to the specific AP using the BSSID.</label>
       </div>
       <div class="btn_group">
-        <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan()" /></div>
+        <div class="freqscan"><input type="submit" name="ap_scan" class="scan_start" id="ap_scan" value="Scan Start" onclick="toggleScan()"></div>
         <div class="submit"><input type="submit" name="sta_test" class="sta_test" id="sta_test" value="Test" onclick="staTestConfig(this)" disabled/></div>
-        <div class="submit"><input type="submit" name="sta_save" class="sta_save" id="sta_save" value="Save" onclick="staSaveConfig(this)" disabled /></div>
+        <div class="submit"><input type="submit" name="sta_save" class="sta_save" id="sta_save" value="Save" onclick="staSaveConfig(this)" disabled></div>
       </div>
     </div>
     <div class="notes">
