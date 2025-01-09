@@ -17,6 +17,7 @@ class clockPicker
 
   #mousedown;
   #hasMoved;
+  /* Previous target we had the mouse over */
   #pre_tgt;
 
   #interface;
@@ -35,8 +36,8 @@ class clockPicker
     this.#parentdiv=ctarget;
     this.#picker=clockPicker.SEL_HOURS;
     this.#interface=[
-      {items: null, disp: null, ovr_tgt: 0, cur_sel: 0, cur_tgt: 0},
-      {items: null, disp: null, ovr_tgt: 0, cur_sel: 0, cur_tgt: 0}];
+      {items: null, disp: null, ovr_tgt: null, sel_tgt: null, ini_tgt: null},
+      {items: null, disp: null, ovr_tgt: null, sel_tgt: null, ini_tgt: null}];
     /* default */
     this.#curInt=this.#interface[this.#picker];
 
@@ -88,7 +89,7 @@ class clockPicker
     this.#picker=clockPicker.SEL_HOURS;
     this.#curInt=this.#interface[clockPicker.SEL_HOURS];
     this.#interface[clockPicker.SEL_HOURS].disp.style.display="block";
-    this.selectCurItem(this);
+    this.setCurItem(this);
   };
   minSelect=function()
   {
@@ -99,10 +100,10 @@ class clockPicker
     this.#picker=clockPicker.SEL_MINS;
     this.#curInt=this.#interface[clockPicker.SEL_MINS];
     this.#interface[clockPicker.SEL_MINS].disp.style.display="block";
-    this.selectCurItem(this);
+    this.setCurItem(this);
   };
   /* =========================================================== */
-  selectCurItem(_this, item=null)
+  setCurItem(_this, item=null)
   {
     [...document.getElementsByClassName('sel')].forEach(el =>
     {
@@ -124,8 +125,9 @@ class clockPicker
 
     if((num>=0)&&num<_this.#curInt.items.length)
     {
+      _this.#curInt.sel_tgt=_this.#curInt.items[num];
       document.getElementById('sel_line').style.visibility='visible';
-      (_this.#curInt.items[num]).classList.add('sel');
+      (_this.#curInt.items[num]).classList.add("sel");
       _this.adjustLine(document.getElementById('pin'), _this.#curInt.items[num], document.getElementById('sel_line'));
     }
     else
@@ -138,8 +140,8 @@ class clockPicker
   {
     var foc_line=document.createElement('div');
     foc_line.style.visibility='hidden';
-    foc_line.classList.add("clock", "foc_line");
-    foc_line.style.zIndex=0;
+    foc_line.classList.add("clock", "clk_hand", "foc_line");
+    //foc_line.style.zIndex=0;
     foc_line.id=("foc_line");
     this.#parentdiv.appendChild(foc_line);
   }
@@ -147,10 +149,19 @@ class clockPicker
   sel_line_create()
   {
     var sel_line=document.createElement('div');
-    sel_line.classList.add("clock", "sel_line");
-    sel_line.style.zIndex=0;
+    sel_line.classList.add("clock", "clk_hand", "sel_line");
+    //sel_line.style.zIndex=0;
     sel_line.id=("sel_line");
     this.#parentdiv.appendChild(sel_line);
+  }
+  /* =========================================================== */
+  foc_line_hide()
+  {
+    [...document.getElementsByClassName('focus')].forEach(el =>
+    {
+      el.classList.remove("focus");
+    });
+    document.getElementById('foc_line').style.visibility='hidden';
   }
   /* =========================================================== */
   adjustLine(from, to, line)
@@ -236,7 +247,7 @@ class clockPicker
       segment.style.top=(y+this.#numOffset).toString()+"px";
       if(z)
       {
-        segment.style.zIndex=1;
+        //segment.style.zIndex=1;
         segment.classList.add("cardinal");
       }
       this.#interface[clockPicker.SEL_MINS].items[i]=segment;
@@ -304,7 +315,8 @@ class clockPicker
     /* Note: Best used with double click to perform loose selection */
     //if (el.classList.contains("seg") && _this.#curInt.ovr_tgt !== null)
     {
-      _this.selectCurItem(_this, _this.#curInt.ovr_tgt);
+      _this.setCurItem(_this, _this.#curInt.ovr_tgt);
+      _this.foc_line_hide();
     }
   }
   /* =========================================================== */
@@ -313,7 +325,7 @@ class clockPicker
     let el=event.target;
     if(el.classList.contains("clock")&&_this.#curInt.ovr_tgt!==null)
     {
-      _this.selectCurItem(_this, _this.#curInt.ovr_tgt);
+      _this.setCurItem(_this, _this.#curInt.ovr_tgt);
     }
   }
   /* =========================================================== */
@@ -323,22 +335,33 @@ class clockPicker
     {
       _this.#mousedown=true;
       _this.#hasMoved=false;
-      _this.#curInt.cur_tgt=event.target;
+      _this.#curInt.ini_tgt=event.target;
     }
-  }
-  onmousedown(_this, event)
-  {
-    _this.#mousedown=true;
   }
   /* =========================================================== */
   onmousemove(_this, event)
   {
+    /* Stop drag and select */
     window.getSelection().removeAllRanges();
+
     let el=event.target;
+
+    /* Check and mark movement with the mouse down */
+    if(_this.#mousedown===true)
+    {
+      if(_this.#curInt.ini_tgt!==el)
+      {
+        _this.#hasMoved=true;
+      }
+    }
+
+    /* No point processing if we don't have any items in the list */
     if(!_this.#curInt.items.length||_this.#curInt.items.length<1)
     {
       return;
     }
+
+    /* Should never not be true, but lets make sure */
     if(el.classList.contains("clock"))
     {
       // Math, something I suck at
@@ -376,17 +399,17 @@ class clockPicker
       }
 
       _this.#curInt.ovr_tgt=_this.#curInt.items[z];
-
       if(_this.#pre_tgt!==_this.#curInt.ovr_tgt)
       {
-        [...document.getElementsByClassName('focus')].forEach(el =>
-        {
-          el.classList.remove("focus");
-        });
+        _this.foc_line_hide();
 
-        (_this.#curInt.items[z]).classList.add('focus');
-        _this.adjustLine(document.getElementById('pin'), _this.#curInt.items[z], document.getElementById('foc_line'));
-        document.getElementById('foc_line').style.visibility='visible';
+        /* Only show the "focus"/"hover" line when not over the selected item */
+        if(_this.#curInt.sel_tgt!==_this.#curInt.ovr_tgt&&!_this.#mousedown)
+        {
+          (_this.#curInt.items[z]).classList.add("focus");
+          _this.adjustLine(document.getElementById('pin'), _this.#curInt.items[z], document.getElementById('foc_line'));
+          document.getElementById('foc_line').style.visibility='visible';
+        }
 
         if((_this.#mousedown)&&el.classList.contains("clock"))
         {
@@ -394,9 +417,9 @@ class clockPicker
           {
             el.classList.remove("sel");
           });
-          //(_this.#curInt.items[z]).classList.add('sel');
-          //_this.adjustLine(document.getElementById('pin'), _this.#curInt.items[z], document.getElementById('sel_line'));
-          if(_this.#curInt.cur_sel!=z)
+          (_this.#curInt.items[z]).classList.add('sel');
+          _this.adjustLine(document.getElementById('pin'), _this.#curInt.items[z], document.getElementById('sel_line'));
+          if(_this.#curInt.sel_tgt!=_this.#curInt.items[z])
           {
             _this.#hasMoved=true;
           }
@@ -411,11 +434,13 @@ class clockPicker
   }
   onmouseleave(_this, event)
   {
-    [...document.getElementsByClassName('focus')].forEach(el =>
+    if(_this.#mousedown===true)
     {
-      el.classList.remove("focus");
-    });
-    document.getElementById('foc_line').style.visibility='hidden';
+      _this.setCurItem(_this, _this.#curInt.ini_tgt);
+      _this.#mousedown=false;
+      _this.#hasMoved=false;
+    }
+    _this.foc_line_hide();
     _this.#pre_tgt=undefined; /* clear this for when we re-enter */
   }
   /* =========================================================== */

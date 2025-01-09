@@ -40,42 +40,46 @@ body {
   font-size: 16px;
   font-weight: bold;
   cursor:pointer;
+  z-index:0;
 }
 .cardinal {
   color: black;
+  z-index:1;
 }
-.focus {
-  background-color:var(--focus-color);
-  color: #eee;
-  z-index: 2;
-}
-.sel {
-  background-color:var(--sel-color); !important;
-  color: #eee;
-  z-index: 2;
-}
-/* Clock Hands */
-#sel_line {
+/* Clock Hands (Keep in this order with the z-index) */
+.sel_line {
   position:absolute;
   width:6px;
   margin-top:0px;
   background-color:var(--sel-color);
-  z-index:0;
+  z-index:1;
 }
-#foc_line {
+.sel {
+  background-color:var(--sel-color);
+  color: #eee;
+  z-index:2;
+}
+.foc_line {
   position:absolute;
   width:6px;
   margin-top:0px;
   background-color:var(--focus-color);
-  z-index:0;
+  z-index:2;
+}
+.focus {
+  background-color:var(--focus-color);
+  color: #eee;
+  /* We need to override cardinal points */
+  z-index:3;
 }
 .pin {
-  border: 1px solid black;
+  border: 3px solid black;
   width:14px;height:14px;
   margin:-14px 0 0 -14px;
   position:absolute;
   background-color:var(--sel-color);
   border-radius:50%;
+  z-index:4;
 }
 
 @keyframes fadein {
