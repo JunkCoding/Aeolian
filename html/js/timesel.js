@@ -204,6 +204,10 @@ class timesel
     {
       _this.picker=new clockPicker(_this.tElement);
     }
+    else
+    {
+      _this.picker.setParent(_this.tElement);
+    }
   }
   onwheel(tgt, event)
   {
