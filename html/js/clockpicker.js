@@ -151,7 +151,7 @@ class clockPicker
     }
 
     /* Open the default window */
-    this.minSelect();
+    this.hourSelect();
 
     /* Let the end user know what's happening */
     console.log("initialised...");
@@ -187,6 +187,23 @@ class clockPicker
     {
       pElement.appendChild(clockPicker.#parentdiv);
     }
+  }
+  isVisible=function()
+  {
+    return clockPicker.#parentdiv.style.visibility === "visible";
+  }
+  hide=function()
+  {
+    clockPicker.#parentdiv.style.visibility="hidden";
+    clockPicker.#hands[0].style.visibility="hidden";
+    clockPicker.#hands[1].style.visibility="hidden";
+    clockPicker.#interface[0].disp.style.visibility="hidden";
+    clockPicker.#interface[1].disp.style.visibility="hidden";
+  }
+  show=function()
+  {
+    clockPicker.#parentdiv.style.visibility="visible";
+    this.hourSelect();
   }
   /* =========================================================== */
   setCurItem(_this, item)
