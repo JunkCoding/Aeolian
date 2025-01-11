@@ -5,13 +5,15 @@
 .clock-wrapper {
   all:revert;
   box-shadow: 0 0 0 4px #000000;
-  padding:0;
-  position: absolute;
-  display:block;
-  contain:content;
   width:180px;height:180px;
   background-color: #eee;
   border-radius: 50%;
+  position: absolute;
+  margin: 20px -60px;
+  contain:content;
+  display:block;
+  z-index: 1;
+  padding:0;
 }
 #pdiv {
   top:40px;
@@ -23,7 +25,7 @@
   position: absolute;
   text-align:center;
   border-radius: 50%;
-  line-height: 30px;
+  line-height: 28px;
   width: 28px;
   height: 28px;
   color: #eee;

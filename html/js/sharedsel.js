@@ -246,7 +246,7 @@ class sharedSel
     {
       var nestedli=document.createElement("li");
       nestedli.classList.add("dropdown-item");
-      if(typeof menu[i].classes!==undefined)
+      if(typeof menu[i].classes!=undefined)
       {
         if(menu[i].classes instanceof Array)
         {
@@ -343,7 +343,7 @@ class sharedSel
       {
         let chng=true;
         /* If we have a callback, call it to check if can proceed with the change */
-        if(_this.callback!==null)
+        if(_this.callback!=undefined)
         {
           chng = _this.callback(_this, event);
         }

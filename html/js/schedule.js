@@ -360,7 +360,7 @@ function setFooter(type)
 {
   /** @type  {Object} tbl */
   let tbl=_(type);
-  if(tbl!==null)
+  if(tbl!=undefined)
   {
     let foot=tbl.createTFoot(0);
     let nr=foot.insertRow(0);

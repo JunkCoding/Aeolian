@@ -45,20 +45,21 @@ function append_timesel(el)
 
 class timesel
 {
-  constructor(ctarget)
+  constructor(tElement)
   {
-    this.ctarget=ctarget;
+    this.tElement=tElement;
+    this.picker=null;
     this.init();
-    ctarget.addEventListener("click", this);
-    ctarget.addEventListener("change", this);
-    ctarget.addEventListener("input", this);
-    ctarget.addEventListener("keypress", this);
-    ctarget.addEventListener("wheel", this);
+    tElement.addEventListener("click", this);
+    tElement.addEventListener("change", this);
+    tElement.addEventListener("input", this);
+    tElement.addEventListener("keypress", this);
+    tElement.addEventListener("wheel", this);
   }
   init()
   {
     var tar;
-    let el=this.ctarget;
+    let el=this.tElement;
     try
     {
       tar=el.getAttribute("data-value").split(":");
@@ -123,7 +124,7 @@ class timesel
     const te=closest(el, "[data-type='timeEnd']");
 
     /* If both are not null, we need to constrain ourselves */
-    if(ts!==null&&te!==null)
+    if(ts!=undefined&&te!=undefined)
     {
       let tsm=(Number(ts.querySelector("input[name=hours]").value)*60)+Number(ts.querySelector("input[name=mins]").value);
       let tem=(Number(te.querySelector("input[name=hours]").value)*60)+Number(te.querySelector("input[name=mins]").value);
@@ -196,10 +197,13 @@ class timesel
       }
     }
   }
-  onclick(tgt, event)
+  onclick(_this, event)
   {
-    //console.log(`event: ${event.type}, ${event.target.id}`);
-    //event.target.removeEventListener(event.type, this);
+    console.log(`event: ${event.type}, ${event.target.id}`);
+    if(_this.picker==undefined)
+    {
+      _this.picker=new clockPicker(_this.tElement);
+    }
   }
   onwheel(tgt, event)
   {

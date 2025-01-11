@@ -49,7 +49,7 @@ function set_background ()
   c.width = 1440;
   c.height = 2560;
   let ctx = c.getContext("2d");
-  if(ctx!==null)
+  if(ctx!=undefined)
   {
     const grad=ctx.createLinearGradient(0, 0, c.width/2, c.height/2);
 
@@ -132,7 +132,7 @@ function init_all_dropboxes ()
     for (let i = 0; i < g; i++)
     {
       let oldNode=document.getElementById(ddgrp[i].id);
-      if((oldNode!==null)&&oldNode.parentNode)
+      if((oldNode!=undefined)&&oldNode.parentNode)
       {
         let newNode=oldNode.cloneNode(true);
         oldNode.parentNode.insertBefore(newNode, oldNode);
@@ -291,7 +291,7 @@ function set_dd (dl, val)
   {
     console.error("'val' is not a number");
   }
-  else if(dl===null)
+  else if(dl==undefined)
   {
     console.error("'dl' is 'null'");
   }
@@ -405,7 +405,7 @@ function checkboxToggle (checkboxID)
 function navbar ()
 {
   let x=document.getElementById("myTopnav");
-  if(x!==null)
+  if(x!=undefined)
   {
     if(x.className==="navbar")
     {
