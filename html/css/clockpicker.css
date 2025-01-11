@@ -2,42 +2,32 @@
   --focus-color: #a0a0a0;
   --sel-color: #904040;
 }
-body {
-  paddding: 0;
-  border: 0;
-  margin: 0;
-  background-color: #8080A0;
-  display:flex;
-  vertical-align: top;
-  align-items: flex-end;
-  justify-content:center;
-  height: 420px;
-}
-#pdiv {
-  border: 7px solid black;
+.clock-wrapper {
+  all:revert;
+  box-shadow: 0 0 0 4px #000000;
   padding:0;
   position: absolute;
-  top:30px;left:750px;
-  width:200px;height:200px;
+  display:block;
+  contain:content;
+  width:180px;height:180px;
   background-color: #eee;
   border-radius: 50%;
 }
-.face-wrapper {
-   animation: fadein 1s;
-  -moz-animation: fadein 1s; /* Firefox */
-  -webkit-animation: fadein 1s; /* Safari and Chrome */
-  -o-animation: fadein 1s; /* Opera */
+#pdiv {
+  top:40px;
+  left:500px;
 }
 .seg {
+  all:revert;
   background-color: #eee;
   position: absolute;
   text-align:center;
   border-radius: 50%;
-  line-height: 34px;
-  width: 32px;
-  height: 32px;
+  line-height: 30px;
+  width: 28px;
+  height: 28px;
   color: #eee;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
   cursor:pointer;
   z-index:0;
@@ -47,12 +37,17 @@ body {
   z-index:1;
 }
 /* Clock Hands (Keep in this order with the z-index) */
-.sel_line {
+.clock_hand {
+  all:revert;
+  border:1px solid #00000030;
+  pointer-events:none;
   position:absolute;
-  width:6px;
   margin-top:0px;
+  width:4px;
+}
+.sel_line {
   background-color:var(--sel-color);
-  z-index:1;
+  z-index:2;
 }
 .sel {
   background-color:var(--sel-color);
@@ -60,11 +55,8 @@ body {
   z-index:2;
 }
 .foc_line {
-  position:absolute;
-  width:6px;
-  margin-top:0px;
   background-color:var(--focus-color);
-  z-index:2;
+  z-index:3;
 }
 .focus {
   background-color:var(--focus-color);
@@ -73,44 +65,18 @@ body {
   z-index:3;
 }
 .pin {
-  border: 3px solid black;
-  width:14px;height:14px;
-  margin:-14px 0 0 -14px;
-  position:absolute;
+  all:revert;
   background-color:var(--sel-color);
+  border: 3px solid black;
+  width:8px;height:8px;
+  margin:-7px 0 0 -7px;
+  position:absolute;
   border-radius:50%;
   z-index:4;
 }
-
-@keyframes fadein {
-    from {
-        opacity:0;
-    }
-    to {
-        opacity:1;
-    }
-}
-@-moz-keyframes fadein { /* Firefox */
-    from {
-        opacity:0;
-    }
-    to {
-        opacity:1;
-    }
-}
-@-webkit-keyframes fadein { /* Safari and Chrome */
-    from {
-        opacity:0;
-    }
-    to {
-        opacity:1;
-    }
-}
-@-o-keyframes fadein { /* Opera */
-    from {
-        opacity:0;
-    }
-    to {
-        opacity: 1;
-    }
+.face-wrapper {
+  all:revert;
+  display:block;
+  clear:both;
+  position: absolute;
 }
