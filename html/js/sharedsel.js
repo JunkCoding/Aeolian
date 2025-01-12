@@ -63,14 +63,6 @@ function append_sharedSel(el, callback = null)
   }
   shrdGrp[l]=new sharedSel(el, callback);
 }
-// https://stackoverflow.com/questions/175739/how-can-i-check-if-a-string-is-a-valid-number
-/** @param {string} str */
-function isNumeric(str)
-{
-  if(typeof str!="string") return false; // we only process strings!
-  return !isNaN(Number(str))&& // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-    !isNaN(parseFloat(str)); // ...and ensure strings of whitespace fail
-}
 class sharedSel
 {
   static daysInMonth =[31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -172,7 +164,7 @@ class sharedSel
     let x=[];
     try
     {
-      x=ctarget.getAttribute("data-value");
+      x=ctarget.dataset.value;
       x=x.split(":");
     }
     catch

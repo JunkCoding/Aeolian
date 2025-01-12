@@ -62,7 +62,7 @@ class timesel
     let el=this.tElement;
     try
     {
-      tar=el.getAttribute("data-value").split(":");
+      tar=el.dataset.value.split(":");
     }
     catch
     {
@@ -199,35 +199,35 @@ class timesel
   }
   onclick(_this, event)
   {
-    /* Prevent view closing if already open */
-    let noclose=false;
+    /* Define our default end state */
+    let closeView=true;
 
     console.log(`event: ${event.type}, ${event.target.id}`);
     /* Check we have a picker connection */
     if(_this.picker==undefined)
     {
       _this.picker=new clockPicker(_this.tElement);
-      noclose=true;
+      closeView=false;
     }
     else if (_this.picker.getParent()!==_this.tElement)
     {
       /* Need to load values if transferred from elsewhere */
       _this.picker.setParent(_this.tElement);
-      noclose=true;
-    }
-
-    /* check if we are open or closed */
-    if(_this.picker.isVisible())
-    {
-      /* If not transferred from another, we shoukd hide */
-      if(!noclose)
-      {
-        _this.picker.hide();
-      }
+      closeView=false;
     }
     else
     {
-      _this.picker.show();
+      closeView=_this.picker.isVisible();
+    }
+
+    /* check if we are open or closed */
+    if(closeView)
+    {
+      _this.picker.hide();
+    }
+    else
+    {
+      _this.picker.show(clockPicker.SEL_HOURS);
     }
   }
   onwheel(tgt, event)

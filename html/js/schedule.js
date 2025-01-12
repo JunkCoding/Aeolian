@@ -59,36 +59,36 @@ function fillTable(type, jsonData)
     let el=divEls[d++].querySelector(".sharedsel");
     if(tbl.id==='annual')
     {
-      el.setAttribute('data-value', `0:${sched.M}`);
+      el.dataset.value = `0:${sched.M}`;
       append_sharedSel(el, changeHandler);
 
       el=divEls[d++].querySelector(".sharedsel");
-      el.setAttribute('data-value', `2:${Number(sched.sd)-1}`);
+      el.dataset.value = `2:${Number(sched.sd)-1}`;
       append_sharedSel(el, changeHandler);
 
       el=divEls[d++].querySelector(".sharedsel");
-      el.setAttribute('data-value', `2:${Number(sched.ed)-1}`);
+      el.dataset.value = `2:${Number(sched.ed)-1}`;
       append_sharedSel(el, changeHandler);
     }
     else if(tbl.id==='weekly')
     {
-      el.setAttribute('data-value', `1:${sched.D}`);
+      el.dataset.value = `1:${sched.D}`;
       append_sharedSel(el);
     }
     el=divEls[d++].querySelector(".timesel");
-    el.setAttribute('data-value', `${sched.SH}:${sched.SM}`);
+    el.dataset.value = `${sched.SH}:${sched.SM}`;
     append_timesel(el);
 
     el=divEls[d++].querySelector(".timesel");
-    el.setAttribute('data-value', `${sched.EH}:${sched.EM}`);
+    el.dataset.value = `${sched.EH}:${sched.EM}`;
     append_timesel(el);
 
     el=divEls[d++].querySelector(".sharedsel");
-    el.setAttribute('data-value', `theme:${sched.Th}`);
+    el.dataset.value = `theme:${sched.Th}`;
     append_sharedSel(el);
 
     el=divEls[d++].querySelector(".sharedsel");
-    el.setAttribute('data-value', `brightness:${sched.Br}`);
+    el.dataset.value = `brightness:${sched.Br}`;
     append_sharedSel(el);
 
     el=divEls[d++].querySelector("input[type=checkbox]");
@@ -194,36 +194,36 @@ function set_row_defaults(tblId, divEls)
   let el=divEls[d++].querySelector(".sharedsel");
   if(tblId==='annual')
   {
-    el.setAttribute('data-value', '0:0');
+    el.dataset.value = '0:0';
     append_sharedSel(el, changeHandler);
 
     el=divEls[d++].querySelector(".sharedsel");
-    el.setAttribute('data-value', '2:0');
+    el.dataset.value = '2:0';
     append_sharedSel(el, changeHandler);
 
     el=divEls[d++].querySelector(".sharedsel");
-    el.setAttribute('data-value', '2:0');
+    el.dataset.value = '2:0';
     append_sharedSel(el, changeHandler);
   }
   else if(tblId==='weekly')
   {
-    el.setAttribute('data-value', '1:0');
+    el.dataset.value = '1:0';
     append_sharedSel(el);
   }
   el=divEls[d++].querySelector(".timesel");
-  el.setAttribute('data-value', '00:00');
+  el.dataset.value = '00:00';
   append_timesel(el);
 
   el=divEls[d++].querySelector(".timesel");
-  el.setAttribute('data-value', '00:00');
+  el.dataset.value='00:00';
   append_timesel(el);
 
   el=divEls[d++].querySelector(".sharedsel");
-  el.setAttribute('data-value', 'theme:0');
+  el.dataset.value='theme:0';
   append_sharedSel(el);
 
   el=divEls[d++].querySelector(".sharedsel");
-  el.setAttribute('data-value', 'brightness:2');
+  el.dataset.value='brightness:2';
   append_sharedSel(el);
 
   el=divEls[d++].querySelector("input[type=checkbox]");
