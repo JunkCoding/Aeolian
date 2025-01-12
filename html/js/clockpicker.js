@@ -27,6 +27,10 @@ class clockPicker
   /* Index of picker arrays */
   static SEL_HOURS=0;
   static SEL_MINS=1;
+  /**
+   * @type {HTMLDivElement}
+   */
+  static #parent;
 
   /* Shared */
   /**
@@ -40,7 +44,7 @@ class clockPicker
   /**
    * @type {HTMLDivElement}
    */
-  static #parentdiv;
+  static #wrapper;
 
   #numOffset;
   #parentRect;
@@ -73,23 +77,22 @@ class clockPicker
     /* default */
     this.#curInt=clockPicker.#interface[this.#picker];
 
-
     /* Exposed to the end user */
     this.time={hours: "00", mins: "00"};
 
-    /* Create the parent div on first invocation. */
-    if(clockPicker.#parentdiv==undefined)
+    /* Create the wrapper div on first invocation. */
+    if(clockPicker.#wrapper==undefined)
     {
-      clockPicker.#parentdiv=document.createElement("div");
-      clockPicker.#parentdiv.classList.add("clock", "clock-wrapper");
-      clockPicker.#parentdiv.style.width=`${clockPicker.#width}px`;
-      clockPicker.#parentdiv.style.height=`${clockPicker.#height}px`;
+      clockPicker.#wrapper=document.createElement("div");
+      clockPicker.#wrapper.classList.add("clock", "clock-wrapper");
+      clockPicker.#wrapper.style.width=`${clockPicker.#width}px`;
+      clockPicker.#wrapper.style.height=`${clockPicker.#height}px`;
 
       /* Configure some basics for later utility */
-      this.#parentRect=clockPicker.#parentdiv.getBoundingClientRect();
+      this.#parentRect=clockPicker.#wrapper.getBoundingClientRect();
       if(this.#parentRect.width>0)
       {
-        this.#offsetToParentCenter=Math.round(clockPicker.#parentdiv.offsetWidth/2);
+        this.#offsetToParentCenter=Math.round(clockPicker.#wrapper.offsetWidth/2);
         this.#centre={x: this.#parentRect.left+((this.#parentRect.width-0)/2), y: this.#parentRect.top+((this.#parentRect.height-0)/2)};
       }
       else
@@ -101,19 +104,16 @@ class clockPicker
       this.#numOffset=this.#offsetToParentCenter-clockPicker.#offsetToNumCenter;
 
       /* Add user interaction (we only need to do this once) */
-      clockPicker.#parentdiv.addEventListener("click", this);
-      clockPicker.#parentdiv.addEventListener("dblclick", this);
-      clockPicker.#parentdiv.addEventListener("mousemove", this);
-      clockPicker.#parentdiv.addEventListener("mousedown", this);
-      clockPicker.#parentdiv.addEventListener("mouseup", this);
-      clockPicker.#parentdiv.addEventListener("mouseleave", this);
+      clockPicker.#wrapper.addEventListener("click", this);
+      clockPicker.#wrapper.addEventListener("dblclick", this);
+      clockPicker.#wrapper.addEventListener("mousemove", this);
+      clockPicker.#wrapper.addEventListener("mousedown", this);
+      clockPicker.#wrapper.addEventListener("mouseup", this);
+      clockPicker.#wrapper.addEventListener("mouseleave", this);
     }
 
     /* Check if we are being added to an element */
-    if(pElement!=undefined)
-    {
-      pElement.appendChild(clockPicker.#parentdiv);
-    }
+    this.setParent(pElement);
     //console.log(this.#offsetToParentCenter, this.#centre.x, this.#centre.y, this.#numOffset);
 
     /* Create the centre pin */
@@ -185,16 +185,25 @@ class clockPicker
   {
     if(pElement!=undefined)
     {
-      pElement.appendChild(clockPicker.#parentdiv);
+      clockPicker.#parent=pElement;
+      pElement.appendChild(clockPicker.#wrapper);
     }
+  }
+  /**
+   *
+   * @returns {HTMLDivElement}
+   */
+  getParent=function()
+  {
+    return clockPicker.#parent;
   }
   isVisible=function()
   {
-    return clockPicker.#parentdiv.style.visibility === "visible";
+    return clockPicker.#wrapper.style.visibility === "visible";
   }
   hide=function()
   {
-    clockPicker.#parentdiv.style.visibility="hidden";
+    clockPicker.#wrapper.style.visibility="hidden";
     clockPicker.#hands[0].style.visibility="hidden";
     clockPicker.#hands[1].style.visibility="hidden";
     clockPicker.#interface[0].disp.style.visibility="hidden";
@@ -202,7 +211,7 @@ class clockPicker
   }
   show=function()
   {
-    clockPicker.#parentdiv.style.visibility="visible";
+    clockPicker.#wrapper.style.visibility="visible";
     this.hourSelect();
   }
   /* =========================================================== */
@@ -263,7 +272,7 @@ class clockPicker
     /* We need to take into account pin dimensions */
     clockPicker.#pin.style.left=`${this.#offsetToParentCenter}px`;
     clockPicker.#pin.style.top=`${this.#offsetToParentCenter}px`;
-    clockPicker.#parentdiv.appendChild(clockPicker.#pin);
+    clockPicker.#wrapper.appendChild(clockPicker.#pin);
   }
   /* =========================================================== */
   foc_line_create()
@@ -272,7 +281,7 @@ class clockPicker
     clockPicker.#hands[0].style.visibility='hidden';
     clockPicker.#hands[0].classList.add("clock", "clock_hand", "foc_line");
     clockPicker.#hands[0].id=("foc_line");
-    clockPicker.#parentdiv.appendChild(clockPicker.#hands[0]);
+    clockPicker.#wrapper.appendChild(clockPicker.#hands[0]);
   }
   /* =========================================================== */
   sel_line_create()
@@ -280,7 +289,7 @@ class clockPicker
     clockPicker.#hands[1]=document.createElement('hr');
     clockPicker.#hands[1].classList.add("clock", "clock_hand", "sel_line");
     clockPicker.#hands[1].id=("sel_line");
-    clockPicker.#parentdiv.appendChild(clockPicker.#hands[1]);
+    clockPicker.#wrapper.appendChild(clockPicker.#hands[1]);
   }
   /* =========================================================== */
   foc_line_hide()
@@ -381,7 +390,7 @@ class clockPicker
     let wrapper=clockPicker.#interface[clockPicker.SEL_MINS].disp;
     wrapper.classList.add("clock", "face-wrapper");
     wrapper.style.visibility="visible";
-    clockPicker.#parentdiv.append(wrapper);
+    clockPicker.#wrapper.append(wrapper);
 
     clockPicker.#interface[clockPicker.SEL_MINS].items=new Array();
     for(let i=0; i<=59; i++)
@@ -412,7 +421,7 @@ class clockPicker
     let wrapper=clockPicker.#interface[clockPicker.SEL_HOURS].disp;
     wrapper.classList.add("clock", "face-wrapper");
     wrapper.style.visibility="hidden";
-    clockPicker.#parentdiv.append(wrapper);
+    clockPicker.#wrapper.append(wrapper);
 
     clockPicker.#interface[clockPicker.SEL_HOURS].items=new Array();
     for(let i=1; i<=12; i++)

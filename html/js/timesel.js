@@ -199,22 +199,31 @@ class timesel
   }
   onclick(_this, event)
   {
+    /* Prevent view closing if already open */
+    let noclose=false;
+
     console.log(`event: ${event.type}, ${event.target.id}`);
-    /* Check we have a picker link */
+    /* Check we have a picker connection */
     if(_this.picker==undefined)
     {
       _this.picker=new clockPicker(_this.tElement);
+      noclose=true;
     }
-    else
+    else if (_this.picker.getParent()!==_this.tElement)
     {
       /* Need to load values if transferred from elsewhere */
       _this.picker.setParent(_this.tElement);
+      noclose=true;
     }
 
     /* check if we are open or closed */
     if(_this.picker.isVisible())
     {
-      _this.picker.hide();
+      /* If not transferred from another, we shoukd hide */
+      if(!noclose)
+      {
+        _this.picker.hide();
+      }
     }
     else
     {
