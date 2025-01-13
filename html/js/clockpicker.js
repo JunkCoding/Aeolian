@@ -27,6 +27,9 @@ class clockPicker
   /* Index of picker arrays */
   static SEL_HOURS=0;
   static SEL_MINS=1;
+  static SEL_NONE=2;
+  static #FOC_LINE=0;
+  static #SEL_LINE=1;
   /**
    * @type {HTMLDivElement}
    */
@@ -36,10 +39,13 @@ class clockPicker
    * @type {HTMLDivElement|undefined} items
    */
   static #pin=undefined;
-  static #interface=[
-    {items: undefined, disp: undefined, ovr_tgt: undefined, sel_tgt: undefined, ini_tgt: undefined},
-    {items: undefined, disp: undefined, ovr_tgt: undefined, sel_tgt: undefined, ini_tgt: undefined}];
-  static #hands=[undefined, undefined];
+  static #clockFace=[
+    {items: undefined, disp: undefined, sel_tgt: undefined, ini_tgt: undefined},
+    {items: undefined, disp: undefined, sel_tgt: undefined, ini_tgt: undefined}];
+  /**
+   * @type {Array<HTMLHRElement>} []
+   */
+  static #hands;
   /**
    * @type {HTMLDivElement}
    */
@@ -64,12 +70,30 @@ class clockPicker
    * @type {Boolean}
    */
   static #hasMoved;
-  /* Previous target we had the mouse over */
-  #pre_tgt;
-
-  #parentRect;
-  #picker;
-  #curInt;
+  /**
+   * @type {HTMLDivElement}
+   */
+  static #pre_tgt;
+  /**
+   * @type {HTMLDivElement}
+   */
+  static #ovr_tgt;
+  /**
+   * @type {DOMRect}
+   */
+  static #parentRect;
+  /**
+  * @type {Number}
+  */
+  static #face;
+  /**
+   * @type {object}
+   */
+  static #curInt;
+  /**
+   * @type {HTMLDivElement}
+   */
+  #cTarget;
 
   /* =========================================================== */
   /**
@@ -78,16 +102,18 @@ class clockPicker
    */
   constructor(pElement)
   {
+    /* save our target element */
+    this.#cTarget=pElement;
+
     /* Object manipulation */
     clockPicker.#mousedown=false;
     clockPicker.#hasMoved=false;
-    this.#pre_tgt=undefined;
 
     /* Display coordination */
-    this.#picker=clockPicker.SEL_HOURS;
+    clockPicker.#face=clockPicker.SEL_HOURS;
 
     /* default */
-    this.#curInt=clockPicker.#interface[this.#picker];
+    clockPicker.#curInt=clockPicker.#clockFace[clockPicker.#face];
 
     /* Exposed to the end user */
     this.time={hours: "00", mins: "00"};
@@ -101,11 +127,11 @@ class clockPicker
       clockPicker.#wrapper.style.height=`${clockPicker.#height}px`;
 
       /* Configure some basics for later utility */
-      this.#parentRect=clockPicker.#wrapper.getBoundingClientRect();
-      if(this.#parentRect.width>0)
+      clockPicker.#parentRect=clockPicker.#wrapper.getBoundingClientRect();
+      if(clockPicker.#parentRect.width>0)
       {
         clockPicker.#offsetToParentCenter=Math.round(clockPicker.#wrapper.offsetWidth/2);
-        clockPicker.#centre={x: this.#parentRect.left+((this.#parentRect.width-0)/2), y: this.#parentRect.top+((this.#parentRect.height-0)/2)};
+        clockPicker.#centre={x: clockPicker.#parentRect.left+((clockPicker.#parentRect.width-0)/2), y: clockPicker.#parentRect.top+((clockPicker.#parentRect.height-0)/2)};
       }
       else
       {
@@ -124,9 +150,6 @@ class clockPicker
       clockPicker.#wrapper.addEventListener("mouseleave", this);
     }
 
-    /* Check if we are being added to an element */
-    this.setParent(pElement);
-
     /* Create the centre pin */
     if(clockPicker.#pin==undefined)
     {
@@ -134,60 +157,81 @@ class clockPicker
     }
 
     /* Create the focus line */
-    if(clockPicker.#hands[0]==undefined)
+    if(clockPicker.#hands==undefined)
     {
+      clockPicker.#hands=new Array();
       console.log("creating foc_line");
       this.foc_line_create();
-    }
-
-    /* Create the selection line */
-    if(clockPicker.#hands[1]==undefined)
-    {
       console.log("creating sel_line");
       this.sel_line_create();
     }
 
     /* Initialise the hours clock face */
-    if(clockPicker.#interface[clockPicker.SEL_HOURS].disp==undefined)
+    if(clockPicker.#clockFace[clockPicker.SEL_HOURS].disp==undefined)
     {
       console.log("creating hour picker");
       this.create_hourPicker();
     }
 
     /* Initialise the minutes clock face */
-    if(clockPicker.#interface[clockPicker.SEL_MINS].disp==undefined)
+    if(clockPicker.#clockFace[clockPicker.SEL_MINS].disp==undefined)
     {
       console.log("creating mins picker");
       this.create_minsPicker();
     }
 
     /* Open the default window */
-    this.hourSelect();
+    //this.selectFace(clockPicker.SEL_HOURS);
+
+    /* Check if we are being added to an element */
+    this.setParent(pElement);
 
     /* Let the end user know what's happening */
     console.log("initialised...");
   }
-  hourSelect=function()
+  /**
+   *
+   * @param {HTMLElement} element
+   */
+  hideEl(element)
   {
-    if(this.#picker!==clockPicker.SEL_HOURS)
-    {
-      clockPicker.#interface[this.#picker].disp.style.visibility="hidden";
-    }
-    this.#picker=clockPicker.SEL_HOURS;
-    this.#curInt=clockPicker.#interface[clockPicker.SEL_HOURS];
-    clockPicker.#interface[clockPicker.SEL_HOURS].disp.style.visibility="visible";
-    this.setCurItem(this);
+    element.classList.add("hidden");
   }
-  minSelect=function()
+  /**
+   *
+   * @param {HTMLElement} element
+   */
+  showEl(element)
   {
-    if(this.#picker!==clockPicker.SEL_MINS)
+    element.classList.remove("hidden");
+  }
+  log()
+  {
+    console.log(`curInt set: ${clockPicker.#curInt===clockPicker.#clockFace[clockPicker.#face]}`);
+    console.log(`clockPicker.#face: ${clockPicker.#face}, items: ${clockPicker.#curInt.items.length}`);
+    console.log(`hour face hidden: ${clockPicker.#clockFace[0].disp.classList.contains("hidden")}`)
+    console.log(`mins face hidden: ${clockPicker.#clockFace[1].disp.classList.contains("hidden")}`)
+  }
+  /**
+   *
+   * @param {Number} face
+   */
+  selectFace(face)
+  {
+    let l=clockPicker.#clockFace.length;
+    if(face>=0&&face<l)
     {
-      clockPicker.#interface[this.#picker].disp.style.visibility="hidden";
+      for(let i=0; i<l; i++)
+      {
+        console.log(`Hiding: ${i}`);
+        this.hideEl(clockPicker.#clockFace[i].disp);
+      }
+      clockPicker.#face=face;
+      clockPicker.#curInt=clockPicker.#clockFace[face];
+      this.showEl(clockPicker.#clockFace[face].disp);
+      console.log(`selectFace(${face}) done`);
+      this.log();
     }
-    this.#picker=clockPicker.SEL_MINS;
-    this.#curInt=clockPicker.#interface[clockPicker.SEL_MINS];
-    clockPicker.#interface[clockPicker.SEL_MINS].disp.style.visibility="visible";
-    this.setCurItem(this);
   }
   /**
    *
@@ -218,8 +262,8 @@ class clockPicker
     }
 
     this.time={hours: ("00"+indie[0]).slice(-2), mins: ("00"+indie[1]).slice(-2)};
-    clockPicker.#interface[clockPicker.SEL_HOURS].cur_tgt=Number(indie[0]);
-    clockPicker.#interface[clockPicker.SEL_MINS].cur_tgt=Number(indie[1]);
+    clockPicker.#clockFace[clockPicker.SEL_HOURS].cur_tgt=Number(indie[0]);
+    clockPicker.#clockFace[clockPicker.SEL_MINS].cur_tgt=Number(indie[1]);
   }
   /**
    * @param {HTMLDivElement} pElement
@@ -231,6 +275,7 @@ class clockPicker
       clockPicker.#parent=pElement;
       pElement.appendChild(clockPicker.#wrapper);
       this.setTimeFromData();
+      //this.focusSelItem(this, Number(this.time.hours));
     }
   }
   /**
@@ -247,15 +292,15 @@ class clockPicker
    */
   isVisible=function()
   {
-    return clockPicker.#wrapper.style.visibility === "visible";
+    return clockPicker.#wrapper.classList.contains("hidden") === false;
   }
   hide=function()
   {
-    clockPicker.#wrapper.style.visibility="hidden";
-    clockPicker.#hands[0].style.visibility="hidden";
-    clockPicker.#hands[1].style.visibility="hidden";
-    clockPicker.#interface[0].disp.style.visibility="hidden";
-    clockPicker.#interface[1].disp.style.visibility="hidden";
+    this.hideEl(clockPicker.#wrapper);
+    this.hideEl(clockPicker.#hands[0]);
+    this.hideEl(clockPicker.#hands[1]);
+    this.hideEl(clockPicker.#clockFace[0].disp);
+    this.hideEl(clockPicker.#clockFace[1].disp);
   }
   /**
    *
@@ -263,17 +308,19 @@ class clockPicker
    */
   show=function(which)
   {
-    /* Make our wrapper visible, if not already so */
-    clockPicker.#wrapper.style.visibility="visible";
-    if(which===clockPicker.SEL_HOURS)
+    if(which>=0&&which<clockPicker.#clockFace.length)
     {
-      this.hourSelect();
-      this.setCurItem(this, Number(this.time.hours));
-    }
-    else if(which===clockPicker.SEL_MINS)
-    {
-      this.minSelect();
-      this.setCurItem(this, Number(this.time.mins));
+      this.showEl(clockPicker.#wrapper);
+      this.selectFace(which);
+
+      if(which===clockPicker.SEL_HOURS)
+      {
+        this.focusSelItem(this, Number(this.time.hours));
+      }
+      else if(which===clockPicker.SEL_MINS)
+      {
+        this.focusSelItem(this, Number(this.time.mins));
+      }
     }
   }
   /* =========================================================== */
@@ -283,7 +330,7 @@ class clockPicker
    * @param {*} _this
    * @param {Number|object} item
    */
-  setCurItem(_this, item)
+  focusSelItem(_this, item)
   {
     [...document.getElementsByClassName('sel')].forEach(el =>
     {
@@ -297,40 +344,40 @@ class clockPicker
       {
         num=item;
       }
-      else if(typeof item==="object"&&typeof item.dataset.value)
+      else if(typeof item==="object"&&typeof item.dataset.value==="string")
       {
-        num=item.dataset.value;
+        num=Number(item.dataset.value);
       }
     }
 
-    if((num>=0)&&num<_this.#curInt.items.length)
+    if((num>=0)&&num<clockPicker.#curInt.items.length)
     {
-      _this.#curInt.sel_tgt=_this.#curInt.items[num];
-      let line=document.getElementById('sel_line');
-      if(line!=undefined)
-      {
-        line.style.visibility='visible';
-      }
-      (_this.#curInt.items[num]).classList.add("sel");
-      _this.adjustLine(document.getElementById('pin'), _this.#curInt.items[num], document.getElementById('sel_line'));
-
-      if(clockPicker.SEL_HOURS===_this.#picker)
-      {
-        _this.time.hours=("00"+_this.#curInt.sel_tgt.dataset.value).slice(-2);
-      }
-      else if(clockPicker.SEL_MINS===_this.#picker)
-      {
-        _this.time.mins=("00"+_this.#curInt.sel_tgt.dataset.value).slice(-2);
-      }
+      clockPicker.#curInt.sel_tgt=clockPicker.#curInt.items[num];
+      this.showEl(clockPicker.#hands[clockPicker.#SEL_LINE]);
+      (clockPicker.#curInt.items[num]).classList.add("sel");
+      _this.adjustLine(document.getElementById('pin'), clockPicker.#curInt.items[num], clockPicker.#hands[clockPicker.#SEL_LINE]);
     }
     else
     {
-      let line=document.getElementById('sel_line');
-      if(line!=undefined)
-      {
-        line.style.visibility='hidden';
-      }
+      this.hideEl(clockPicker.#hands[clockPicker.#SEL_LINE]);
     }
+    console.log(`focusSelItem(${num})`);
+    _this.log();
+  }
+  /**
+   * Save the current selected value (hours|minutes) to dataset.value
+   */
+  setDataFromSelItem()
+  {
+    if(clockPicker.SEL_HOURS===clockPicker.#face)
+    {
+      this.time.hours=("00"+clockPicker.#curInt.sel_tgt.dataset.value).slice(-2);
+    }
+    else if(clockPicker.SEL_MINS===clockPicker.#face)
+    {
+      this.time.mins=("00"+clockPicker.#curInt.sel_tgt.dataset.value).slice(-2);
+    }
+    this.#cTarget.dataset.value=`${this.time.hours}:${this.time.mins}`;
   }
   create_centre_pin()
   {
@@ -345,19 +392,20 @@ class clockPicker
   /* =========================================================== */
   foc_line_create()
   {
-    clockPicker.#hands[0]=document.createElement('hr');
-    clockPicker.#hands[0].style.visibility='hidden';
-    clockPicker.#hands[0].classList.add("clock", "clock_hand", "foc_line");
-    clockPicker.#hands[0].id=("foc_line");
-    clockPicker.#wrapper.appendChild(clockPicker.#hands[0]);
+    clockPicker.#hands[clockPicker.#FOC_LINE]=document.createElement('hr');
+    this.hideEl(clockPicker.#hands[clockPicker.#FOC_LINE]);
+    clockPicker.#hands[clockPicker.#FOC_LINE].classList.add("clock", "clock_hand", "foc_line");
+    clockPicker.#hands[clockPicker.#FOC_LINE].id=("foc_line");
+    clockPicker.#wrapper.appendChild(clockPicker.#hands[clockPicker.#FOC_LINE]);
   }
   /* =========================================================== */
   sel_line_create()
   {
-    clockPicker.#hands[1]=document.createElement('hr');
-    clockPicker.#hands[1].classList.add("clock", "clock_hand", "sel_line");
-    clockPicker.#hands[1].id=("sel_line");
-    clockPicker.#wrapper.appendChild(clockPicker.#hands[1]);
+    clockPicker.#hands[clockPicker.#SEL_LINE]=document.createElement('hr');
+    this.hideEl(clockPicker.#hands[clockPicker.#SEL_LINE]);
+    clockPicker.#hands[clockPicker.#SEL_LINE].classList.add("clock", "clock_hand", "sel_line");
+    clockPicker.#hands[clockPicker.#SEL_LINE].id=("sel_line");
+    clockPicker.#wrapper.appendChild(clockPicker.#hands[clockPicker.#SEL_LINE]);
   }
   /* =========================================================== */
   foc_line_hide()
@@ -369,7 +417,7 @@ class clockPicker
     let line=document.getElementById('foc_line');
     if(line!=undefined)
     {
-      line.style.visibility='hidden';
+      this.hideEl(line);
     }
   }
   /**
@@ -382,15 +430,15 @@ class clockPicker
     if(_this!=undefined&&target!=undefined)
     {
       /* Only show the "focus"/"hover" line when not over the selected item */
-      if(_this.#curInt.sel_tgt!==_this.#curInt.ovr_tgt&&!clockPicker.#mousedown)
+      if(clockPicker.#curInt.sel_tgt!==clockPicker.#ovr_tgt&&!clockPicker.#mousedown)
       {
-        (_this.#curInt.items[target]).classList.add("focus");
-        _this.adjustLine(document.getElementById('pin'), _this.#curInt.items[target], document.getElementById('foc_line'));
-        let tmpEl=document.getElementById('foc_line');
-        if(tmpEl!=undefined)
-        {
-          tmpEl.style.visibility='visible';
-        }
+        (clockPicker.#curInt.items[target]).classList.add("focus");
+        _this.adjustLine(document.getElementById('pin'), clockPicker.#curInt.items[target], clockPicker.#hands[clockPicker.#FOC_LINE]);
+        _this.showEl(clockPicker.#hands[clockPicker.#FOC_LINE]);
+      }
+      else
+      {
+        _this.hideEl(clockPicker.#hands[clockPicker.#FOC_LINE]);
       }
     }
   }
@@ -407,13 +455,9 @@ class clockPicker
       {
         el.classList.remove("sel");
       });
-      (_this.#curInt.items[target]).classList.add('sel');
-      _this.adjustLine(document.getElementById('pin'), _this.#curInt.items[target], document.getElementById('sel_line'));
-      let tmpEl=document.getElementById('sel_line');
-      if(tmpEl!=undefined)
-      {
-        tmpEl.style.visibility='visible';
-      }
+      (clockPicker.#curInt.items[target]).classList.add('sel');
+      _this.adjustLine(document.getElementById('pin'), clockPicker.#curInt.items[target], clockPicker.#hands[clockPicker.#SEL_LINE]);
+      _this.showEl(clockPicker.#hands[clockPicker.#SEL_LINE]);
     }
   }
   /* =========================================================== */
@@ -506,13 +550,13 @@ class clockPicker
   create_minsPicker()
   {
     let div=360/60;
-    clockPicker.#interface[clockPicker.SEL_MINS].disp=document.createElement("div");
-    let wrapper=clockPicker.#interface[clockPicker.SEL_MINS].disp;
+    clockPicker.#clockFace[clockPicker.SEL_MINS].disp=document.createElement("div");
+    let wrapper=clockPicker.#clockFace[clockPicker.SEL_MINS].disp;
     wrapper.classList.add("clock", "face-wrapper");
-    wrapper.style.visibility="visible";
+    this.showEl(wrapper);
     clockPicker.#wrapper.append(wrapper);
 
-    clockPicker.#interface[clockPicker.SEL_MINS].items=new Array();
+    clockPicker.#clockFace[clockPicker.SEL_MINS].items=new Array();
     for(let i=0; i<=59; i++)
     {
       let z=((i%5)===0);
@@ -528,7 +572,7 @@ class clockPicker
       {
         segment.classList.add("cardinal");
       }
-      clockPicker.#interface[clockPicker.SEL_MINS].items[i]=segment;
+      clockPicker.#clockFace[clockPicker.SEL_MINS].items[i]=segment;
       wrapper.appendChild(segment);
     }
   }
@@ -537,13 +581,13 @@ class clockPicker
   {
     /* Draw the outer ring for AM in 24 hour notation */
     let div=360/12;
-    clockPicker.#interface[clockPicker.SEL_HOURS].disp=document.createElement("div");
-    let wrapper=clockPicker.#interface[clockPicker.SEL_HOURS].disp;
+    clockPicker.#clockFace[clockPicker.SEL_HOURS].disp=document.createElement("div");
+    let wrapper=clockPicker.#clockFace[clockPicker.SEL_HOURS].disp;
     wrapper.classList.add("clock", "face-wrapper");
-    wrapper.style.visibility="hidden";
+    this.hideEl(wrapper);
     clockPicker.#wrapper.append(wrapper);
 
-    clockPicker.#interface[clockPicker.SEL_HOURS].items=new Array();
+    clockPicker.#clockFace[clockPicker.SEL_HOURS].items=new Array();
     for(let i=1; i<=12; i++)
     {
       let segment=document.createElement('div');
@@ -555,7 +599,7 @@ class clockPicker
       segment.style.top=(seg.y+clockPicker.#numOffset).toString()+"px";
       segment.style.left=(seg.x+clockPicker.#numOffset).toString()+"px";
       segment.classList.add("cardinal");
-      clockPicker.#interface[clockPicker.SEL_HOURS].items[i]=segment;
+      clockPicker.#clockFace[clockPicker.SEL_HOURS].items[i]=segment;
       wrapper.appendChild(segment);
     }
     /* Draw the inner ring for PM in 24 hour notation */
@@ -575,7 +619,7 @@ class clockPicker
       segment.style.top=(seg.y+clockPicker.#numOffset).toString()+"px";
       segment.style.left=(seg.x+clockPicker.#numOffset).toString()+"px";
       segment.classList.add("cardinal");
-      clockPicker.#interface[clockPicker.SEL_HOURS].items[v]=segment;
+      clockPicker.#clockFace[clockPicker.SEL_HOURS].items[v]=segment;
       wrapper.appendChild(segment);
     }
   }
@@ -585,13 +629,14 @@ class clockPicker
     let el=event.target;
 
     /* Loose selection (mouse can be clicked anywhere in the clock face)*/
-    if(el.classList.contains("clock")&&_this.#curInt.ovr_tgt!=undefined)
+    if(el.classList.contains("clock")&&clockPicker.#ovr_tgt!=undefined)
 
     /* Focused selection (mouse must be clicked over desired field) */
     /* Note: Best used with double click to perform loose selection */
-    //if (el.classList.contains("seg") && _this.#curInt.ovr_tgt !== undefined)
+    //if (el.classList.contains("seg") && clockPicker.#ovr_tgt !== undefined)
     {
-      _this.setCurItem(_this, _this.#curInt.ovr_tgt);
+      _this.focusSelItem(_this, clockPicker.#ovr_tgt);
+      _this.setDataFromSelItem();
       _this.foc_line_hide();
     }
   }
@@ -599,9 +644,10 @@ class clockPicker
   ondblclick(_this, event)
   {
     let el=event.target;
-    if(el.classList.contains("clock")&&_this.#curInt.ovr_tgt!=undefined)
+    if(el.classList.contains("clock")&&clockPicker.#ovr_tgt!=undefined)
     {
-      _this.setCurItem(_this, _this.#curInt.ovr_tgt);
+      _this.focusSelItem(_this, clockPicker.#ovr_tgt);
+      _this.setDataFromSelItem();
     }
   }
   /* =========================================================== */
@@ -611,7 +657,7 @@ class clockPicker
     {
       clockPicker.#mousedown=true;
       clockPicker.#hasMoved=false;
-      _this.#curInt.ini_tgt=event.target;
+      clockPicker.#curInt.ini_tgt=event.target;
     }
   }
   /* =========================================================== */
@@ -625,14 +671,14 @@ class clockPicker
     /* Check and mark movement with the mouse down */
     if(clockPicker.#mousedown===true)
     {
-      if(_this.#curInt.ini_tgt!==el)
+      if(clockPicker.#curInt.ini_tgt!==el)
       {
         clockPicker.#hasMoved=true;
       }
     }
 
     /* No point processing if we don't have any items in the list */
-    if(!_this.#curInt.items.length||_this.#curInt.items.length<1)
+    if(!clockPicker.#curInt.items.length||clockPicker.#curInt.items.length<1)
     {
       return;
     }
@@ -658,21 +704,23 @@ class clockPicker
       const ny=x*Math.sin(-90*Math.PI/180)+y*Math.cos(-90*Math.PI/180);
       const angle=Math.atan2(ny, nx)+Math.PI;
       let z;
-      if(_this.#curInt.items.length===60)
+      if(clockPicker.#clockFace[clockPicker.#face].items.length===60)
       {
+        console.log("mins: "+clockPicker.#face);
         z=_this.roundNumber(((Math.PI*angle)*3.0), 0);
       }
-      else if(_this.#curInt.items.length===24)
+      else if(clockPicker.#clockFace[clockPicker.#face].items.length===24)
       {
+        console.log("hours: "+clockPicker.#face);
         z=_this.roundNumber(((Math.PI*angle)*.6), 0);
         if(z===0)
         {
           z=12;
         }
-        if(z<_this.#curInt.items.length)
+        if(z<clockPicker.#clockFace[clockPicker.#face].items.length)
         {
-          let xPos=hover.x-_this.#parentRect.left;
-          let yPos=hover.y-_this.#parentRect.top;
+          let xPos=hover.x-clockPicker.#parentRect.left;
+          let yPos=hover.y-clockPicker.#parentRect.top;
           let dist=_this.getDistance(xPos, yPos, clockPicker.#offsetToParentCenter, clockPicker.#offsetToParentCenter);
           if(dist<65)
           {
@@ -686,13 +734,13 @@ class clockPicker
       }
 
       /* Sanity check */
-      if(isNaN(z)===true||z>_this.#curInt.items.length)
+      if(isNaN(z)===true||z>clockPicker.#clockFace[clockPicker.#face].items.length)
       {
         return;
       }
 
-      _this.#curInt.ovr_tgt=_this.#curInt.items[z];
-      if(_this.#pre_tgt!==_this.#curInt.ovr_tgt)
+      clockPicker.#ovr_tgt=clockPicker.#clockFace[clockPicker.#face].items[z];
+      if(clockPicker.#pre_tgt!==clockPicker.#ovr_tgt)
       {
         /* Hide the last position */
         _this.foc_line_hide();
@@ -703,7 +751,7 @@ class clockPicker
         {
           _this.sel_line_show(_this, z);
         }
-        _this.#pre_tgt=_this.#curInt.ovr_tgt;
+        clockPicker.#pre_tgt=clockPicker.#ovr_tgt;
       }
     }
   }
@@ -711,12 +759,12 @@ class clockPicker
   {
     if(clockPicker.#mousedown===true)
     {
-      _this.setCurItem(_this, _this.#curInt.ini_tgt);
+      _this.focusSelItem(_this, clockPicker.#curInt.ini_tgt);
       clockPicker.#mousedown=false;
       clockPicker.#hasMoved=false;
     }
     _this.foc_line_hide();
-    _this.#pre_tgt=undefined; /* clear this for when we re-enter */
+    clockPicker.#pre_tgt=undefined; /* clear this for when we re-enter */
   }
   /* =========================================================== */
   handleEvent(event)

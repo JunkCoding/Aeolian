@@ -47,6 +47,7 @@ class timesel
 {
   constructor(tElement)
   {
+    this.curSel=clockPicker.SEL_NONE;
     this.tElement=tElement;
     this.picker=null;
     this.init();
@@ -200,34 +201,51 @@ class timesel
   onclick(_this, event)
   {
     /* Define our default end state */
-    let closeView=true;
+    let closeView=false;
 
     console.log(`event: ${event.type}, ${event.target.id}`);
     /* Check we have a picker connection */
     if(_this.picker==undefined)
     {
       _this.picker=new clockPicker(_this.tElement);
-      closeView=false;
+      _this.curSel=clockPicker.SEL_NONE;
     }
     else if (_this.picker.getParent()!==_this.tElement)
     {
       /* Need to load values if transferred from elsewhere */
+      _this.curSel=clockPicker.SEL_NONE;
       _this.picker.setParent(_this.tElement);
-      closeView=false;
     }
     else
     {
       closeView=_this.picker.isVisible();
     }
 
-    /* check if we are open or closed */
-    if(closeView)
+    /* We will close the clock picker when closeView is true and we are on the "minutes" picker */
+    /* Logic: We will always end on minutes, and never ask for hours without minutes */
+    if(closeView&&_this.curSel===clockPicker.SEL_MINS)
     {
+      /* ToDo: Update the local minutes from the picker */
+
+      _this.curSel=clockPicker.SEL_NONE;
       _this.picker.hide();
     }
     else
     {
-      _this.picker.show(clockPicker.SEL_HOURS);
+      /* We are opening a picker, determine which one it is */
+      if(_this.curSel===clockPicker.SEL_HOURS)
+      {
+        /* ToDo: Update local hours from the picker */
+        _this.curSel=clockPicker.SEL_MINS;
+      }
+      else
+      {
+        /* ToDo: ... */
+        _this.curSel=clockPicker.SEL_HOURS;
+      }
+
+      /* Make it so */
+      _this.picker.show(_this.curSel);
     }
   }
   onwheel(tgt, event)
