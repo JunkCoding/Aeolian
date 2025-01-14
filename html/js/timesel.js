@@ -214,7 +214,7 @@ class timesel
     {
       /* Need to load values if transferred from elsewhere */
       _this.curSel=clockPicker.SEL_NONE;
-      _this.picker.setParent(_this.tElement);
+      _this.picker.setInstance(_this.picker);
     }
     else
     {
