@@ -64,14 +64,22 @@ class timesel
   */
   static #selLst=[];
   /**
-  * @type {clockPicker}
+  * @type {clockPicker} Clock Picker class.
   */
   #picker;
+  /**
+   * @type {Number}
+   */
+  #curSel;
+  /**
+   * @type {HTMLDivElement}
+   */
+  #tElement;
 
   constructor(tElement)
   {
-    this.curSel=clockPicker.SEL_NONE;
-    this.tElement=tElement;
+    this.#curSel=clockPicker.SEL_NONE;
+    this.#tElement=tElement;
     this.#picker;
 
     this.selId=timesel.#selLst.length;
@@ -94,7 +102,7 @@ class timesel
   }
   init()
   {
-    let el=this.tElement;
+    let el=this.#tElement;
     this.t=document.createElement("input");
     this.t.classList.add("time");
     this.t.name="hours";
@@ -115,7 +123,7 @@ class timesel
   setTimeFromData()
   {
     var st;
-    let el=this.tElement;
+    let el=this.#tElement;
     try
     {
       st=el.dataset.value.split(":");
@@ -130,19 +138,17 @@ class timesel
   }
   /**
    *
-   * @param {timesel} _this
-   * @param {*} event
+   * @param {timesel} tsObj
+   * @param {HTMLInputElement} inpEl
    * @returns
    */
-  validate_time(_this, event)
+  validate_time(tsObj, inpEl)
   {
-    let el=event.target;
-
-    /* Stotr the current value without leading zeros */
-    let tmpStr=el.value.replace(/\b0+/g, "");
+    /* Store the current value without leading zeros */
+    let tmpStr=inpEl.value.replace(/\b0+/g, "");
 
     /* Are we actually interested in this element? */
-    if(!el.classList.contains("time"))
+    if(!inpEl.classList.contains("time"))
     {
       return;
     }
@@ -150,27 +156,9 @@ class timesel
     // Check content is numeric */
     let isNum=tmpStr.match(/^[0-9]+$/)!=null;
 
-    /* Check for keypress */
-    if(typeof event.keyCode!=="undefined")
-    {
-      if(event.keyCode<48||event.keyCode>57)
-      {
-        return;
-      }
-      if(tmpStr.length<2)
-      {
-        tmpStr+=event.key;
-      }
-      else
-      {
-        tmpStr=event.key;
-      }
-      el.value=tmpStr;
-    }
-
     /* Check if we are a start or emd time */
-    const ts=closest(el, "[data-type='timeStart']");
-    const te=closest(el, "[data-type='timeEnd']");
+    const ts=closest(inpEl, "[data-type='timeStart']");
+    const te=closest(inpEl, "[data-type='timeEnd']");
 
     /* If both are not null, we need to constrain ourselves */
     if(ts!=undefined&&te!=undefined)
@@ -197,7 +185,7 @@ class timesel
         if((tsm>=tem)&&tem)
         {
           /* Check if "ts" is the current element */
-          if(ts===el.parentNode)
+          if(ts===inpEl.parentNode)
           {
             if(tem>0)
             {
@@ -236,23 +224,50 @@ class timesel
       te.querySelector("input[name=mins]").value=tmpStrB;
       te.dataset.value=`${tmpStrA}:${tmpStrB}`;
     }
-    else
+    /* ELSE, deal with time selectos that aren't linked start/end times */
+    /* (I don't have any need for this now, so in no rush to implement) */
+  }
+  /**
+   *
+   * @param {timesel} _this
+   * @param {*} event
+   * @returns
+   */
+  onkeypress(_this, event)
+  {
+    let inpEl=event.target;
+
+    /* Store the current value without leading zeros */
+    let tmpStr=inpEl.value.replace(/\b0+/g, "");
+
+    /* Are we actually interested in this element? */
+    if(!inpEl.classList.contains("time"))
     {
-      /* Deal with time selectos that aren't linked start/end times */
-      /* (I don't have any need for this now, so in no rush to implement) */
-      if(el.name==="hours")
+      return;
+    }
+
+    // Check content is numeric */
+    let isNum=tmpStr.match(/^[0-9]+$/)!=null;
+
+    /* Check for keypress */
+    if(typeof event.keyCode!=="undefined")
+    {
+      if(event.keyCode<48||event.keyCode>57)
       {
-        /* ToDo */
+        return;
       }
-      else if(el.name==="mins")
+      if(tmpStr.length<2)
       {
-        /* ToDo */
+        tmpStr+=event.key;
       }
       else
       {
-        el.value=("00"+tmpStr).slice(-2);
+        tmpStr=event.key;
       }
+      inpEl.value=tmpStr;
     }
+
+    _this.validate_time(_this, inpEl);
   }
   /**
    *
@@ -267,13 +282,13 @@ class timesel
     /* Check we have a picker connection */
     if(_this.#picker==undefined)
     {
-      _this.#picker=new clockPicker(_this.tElement);
-      _this.curSel=clockPicker.SEL_NONE;
+      _this.#picker=new clockPicker(_this.#tElement);
+      _this.#curSel=clockPicker.SEL_NONE;
     }
-    else if (_this.#picker.getParent()!==_this.tElement)
+    else if (_this.#picker.getParent()!==_this.#tElement)
     {
       /* Need to load values if transferred from elsewhere */
-      _this.curSel=clockPicker.SEL_NONE;
+      _this.#curSel=clockPicker.SEL_NONE;
       _this.#picker.setInstance(_this.#picker);
     }
     else
@@ -283,47 +298,52 @@ class timesel
 
     /* We will close the clock picker when closeView is true and we are on the "minutes" picker */
     /* Logic: We will always end on minutes, and never ask for hours without minutes */
-    if(closeView&&_this.curSel===clockPicker.SEL_MINS)
+    if(closeView&&_this.#curSel===clockPicker.SEL_MINS)
     {
       /* ToDo: Update the local minutes from the picker */
 
-      _this.curSel=clockPicker.SEL_NONE;
+      _this.#curSel=clockPicker.SEL_NONE;
       _this.#picker.hide();
       _this.setTimeFromData();
     }
     else
     {
       /* We are opening a picker, determine which one it is */
-      if(_this.curSel===clockPicker.SEL_HOURS)
+      if(_this.#curSel===clockPicker.SEL_HOURS)
       {
         /* ToDo: Update local hours from the picker */
-        _this.curSel=clockPicker.SEL_MINS;
+        _this.#curSel=clockPicker.SEL_MINS;
       }
       else
       {
         /* ToDo: ... */
-        _this.curSel=clockPicker.SEL_HOURS;
+        _this.#curSel=clockPicker.SEL_HOURS;
       }
 
       /* Make it so */
-      _this.#picker.show(_this.curSel);
+      _this.#picker.show(_this.#curSel);
     }
+
+    //_this.validate_time(_this, event.target);
   }
   onwheel(tgt, event)
   {
     const delta=Math.sign(event.deltaY);
-    let el=event.target;
-    if(el.classList.contains("time"))
+    let inpEl=event.target;
+    if(inpEl.classList.contains("time"))
     {
-      if(el.name==="hours"||el.name==="mins")
+      if(inpEl.name==="hours"||inpEl.name==="mins")
       {
-        el.value=String(Number(el.value)-delta);
-        tgt.validate_time(tgt, event);
+        inpEl.value=String(Number(inpEl.value)-delta);
+        tgt.validate_time(tgt, inpEl);
       }
     }
   }
   handleEvent(event)
   {
+    /**
+     * {timesel} _this
+     */
     let _this;
 
     /* Is this object interesting for us? */
@@ -331,8 +351,8 @@ class timesel
     {
       if(event.target.classList.contains("time")||event.target.classList.contains("clock"))
       {
-        let tsEl=closest(event.target, ".timesel");
-        _this=timesel.#selLst[tsEl.dataset.selId];
+        let tsObj=closest(event.target, ".timesel");
+        _this=timesel.#selLst[tsObj.dataset.selId];
       }
     }
 
@@ -350,7 +370,7 @@ class timesel
     }
     else
     {
-      _this.validate_time(_this, event);
+      _this.validate_time(_this, event.target);
     }
   }
 }
