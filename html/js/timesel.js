@@ -1,11 +1,18 @@
 /* jshint esversion: 10 */
+"use strict";
 
-var clklst=[];
+/**
+ * @type {Array<timesel|undefined>} clkgrp
+ */
 var clkgrp=[];
 
 /* =========================================================== */
 function init_timesel()
 {
+  /**
+ * @type {Array<HTMLDivElement|undefined>} clklst
+ */
+  var clklst=[];
   // Remove any existing class associations
   // ------------------------------------------------
   let g=clkgrp.length;
@@ -14,10 +21,13 @@ function init_timesel()
     for(let i=0; i<g; i++)
     {
       let oldNode=document.getElementById(clkgrp[i].id);
-      let newNode=oldNode.cloneNode(true);
-      oldNode.parentNode.insertBefore(newNode, oldNode);
-      oldNode.parentNode.removeChild(oldNode);
-      clkgrp[i]=undefined;
+      if(oldNode!=undefined&&oldNode.parentNode!=undefined)
+      {
+        let newNode=oldNode.cloneNode(true);
+        oldNode.parentNode.insertBefore(newNode, oldNode);
+        oldNode.parentNode.removeChild(oldNode);
+        clkgrp[i]=undefined;
+      }
     }
     clkgrp=[];
   }
@@ -26,7 +36,7 @@ function init_timesel()
   let l=clklst.length;
   for(let i=0; i<l; i++)
   {
-    clklst[i]=new timesel(clklst[i]);
+    clkgrp[i]=new timesel(clklst[i]);
   }
 }
 
@@ -45,48 +55,86 @@ function append_timesel(el)
 
 class timesel
 {
+  /**
+   * @type {Boolean}
+   */
+  static #initialised=false;
+  /**
+  * @type {Array<timesel>} [] An array of timesel class objects
+  */
+  static #selLst=[];
+  /**
+  * @type {clockPicker}
+  */
+  #picker;
+
   constructor(tElement)
   {
     this.curSel=clockPicker.SEL_NONE;
     this.tElement=tElement;
-    this.picker=null;
+    this.#picker;
+
+    this.selId=timesel.#selLst.length;
+    timesel.#selLst[this.selId]=this;
+    tElement.dataset.selId=this.selId;
+
     this.init();
-    tElement.addEventListener("click", this);
-    tElement.addEventListener("change", this);
-    tElement.addEventListener("input", this);
-    tElement.addEventListener("keypress", this);
-    tElement.addEventListener("wheel", this);
+    this.setTimeFromData();
+
+    if(!timesel.#initialised)
+    {
+      timesel.#initialised=true;
+      /* We don't want lots of event handlers */
+      document.addEventListener("click", this);
+      document.addEventListener("change", this);//, {passive: true});
+      document.addEventListener("input", this);
+      document.addEventListener("keypress", this);
+      document.addEventListener("wheel", this);//, {passive: true});
+    }
   }
   init()
   {
-    var tar;
     let el=this.tElement;
-    try
-    {
-      tar=el.dataset.value.split(":");
-    }
-    catch
-    {
-      return false;
-    }
-    let t=document.createElement("input");
-    t.classList.add("time");
-    t.name="hours";
-    t.value=("00"+tar[0]).slice(-2);
-    el.appendChild(t);
+    this.t=document.createElement("input");
+    this.t.classList.add("time");
+    this.t.name="hours";
+    this.t.value="00";
+    el.appendChild(this.t);
 
     let p=document.createElement("div");
     p.classList.add("time", "divider", "no-select");
     p.innerHTML=":";
     el.appendChild(p);
 
-    let m=document.createElement("input");
-    m.classList.add("time");
-    m.name="mins";
-    m.value=("00"+tar[1]).slice(-2);
-    el.appendChild(m);
+    this.m=document.createElement("input");
+    this.m.classList.add("time");
+    this.m.name="mins";
+    this.m.value="00";
+    el.appendChild(this.m);
   }
-  validate_time(event)
+  setTimeFromData()
+  {
+    var st;
+    let el=this.tElement;
+    try
+    {
+      st=el.dataset.value.split(":");
+    }
+    catch
+    {
+      return false;
+    }
+    this.t.value=("00"+st[0]).slice(-2);
+    this.m.value=("00"+st[1]).slice(-2);
+
+  }
+  /**
+   *
+   * @param {timesel} _this
+   * @param {*} event
+   * @returns
+   */
+  validate_time(_this, event)
   {
     let el=event.target;
 
@@ -174,16 +222,24 @@ class timesel
           }
         }
       }
+      /* Set the start inputs and parent dataset values */
+      let tmpStrA=("00"+String(Math.floor(tsm/60))).slice(-2);
+      let tmpStrB=("00"+String(Math.floor(tsm%60))).slice(-2);
+      ts.querySelector("input[name=hours]").value=tmpStrA;
+      ts.querySelector("input[name=mins]").value=tmpStrB;
+      ts.dataset.value=`${tmpStrA}:${tmpStrB}`;
 
-      ts.querySelector("input[name=hours]").value=String(Math.floor(tsm/60)).padStart(2, "0");
-      ts.querySelector("input[name=mins]").value=String(Math.floor(tsm%60)).padStart(2, "0");
-
-      te.querySelector("input[name=hours]").value=String(Math.floor(tem/60)).padStart(2, "0");
-      te.querySelector("input[name=mins]").value=String(Math.floor(tem%60)).padStart(2, "0");
+      /* Set the end inputs and parent dataSET VALUES */
+      tmpStrA=("00"+String(Math.floor(tem/60))).slice(-2);
+      tmpStrB=("00"+String(Math.floor(tem%60))).slice(-2);
+      te.querySelector("input[name=hours]").value=tmpStrA;
+      te.querySelector("input[name=mins]").value=tmpStrB;
+      te.dataset.value=`${tmpStrA}:${tmpStrB}`;
     }
     else
     {
-      /* Deal with individual needs of hours/minutes */
+      /* Deal with time selectos that aren't linked start/end times */
+      /* (I don't have any need for this now, so in no rush to implement) */
       if(el.name==="hours")
       {
         /* ToDo */
@@ -198,27 +254,31 @@ class timesel
       }
     }
   }
+  /**
+   *
+   * @param {timesel} _this
+   * @param {Event} event
+   */
   onclick(_this, event)
   {
     /* Define our default end state */
     let closeView=false;
 
-    console.log(`event: ${event.type}, ${event.target.id}`);
     /* Check we have a picker connection */
-    if(_this.picker==undefined)
+    if(_this.#picker==undefined)
     {
-      _this.picker=new clockPicker(_this.tElement);
+      _this.#picker=new clockPicker(_this.tElement);
       _this.curSel=clockPicker.SEL_NONE;
     }
-    else if (_this.picker.getParent()!==_this.tElement)
+    else if (_this.#picker.getParent()!==_this.tElement)
     {
       /* Need to load values if transferred from elsewhere */
       _this.curSel=clockPicker.SEL_NONE;
-      _this.picker.setInstance(_this.picker);
+      _this.#picker.setInstance(_this.#picker);
     }
     else
     {
-      closeView=_this.picker.isVisible();
+      closeView=_this.#picker.isVisible();
     }
 
     /* We will close the clock picker when closeView is true and we are on the "minutes" picker */
@@ -228,7 +288,8 @@ class timesel
       /* ToDo: Update the local minutes from the picker */
 
       _this.curSel=clockPicker.SEL_NONE;
-      _this.picker.hide();
+      _this.#picker.hide();
+      _this.setTimeFromData();
     }
     else
     {
@@ -245,7 +306,7 @@ class timesel
       }
 
       /* Make it so */
-      _this.picker.show(_this.curSel);
+      _this.#picker.show(_this.curSel);
     }
   }
   onwheel(tgt, event)
@@ -257,23 +318,39 @@ class timesel
       if(el.name==="hours"||el.name==="mins")
       {
         el.value=String(Number(el.value)-delta);
-        tgt.validate_time(event);
+        tgt.validate_time(tgt, event);
       }
     }
   }
   handleEvent(event)
   {
+    let _this;
+
+    /* Is this object interesting for us? */
+    if(event.target instanceof HTMLInputElement||event.target instanceof HTMLDivElement)
+    {
+      if(event.target.classList.contains("time")||event.target.classList.contains("clock"))
+      {
+        let tsEl=closest(event.target, ".timesel");
+        _this=timesel.#selLst[tsEl.dataset.selId];
+      }
+    }
+
+    /* If we don't have "this", we return to sender */
+    if(_this==undefined)
+    {
+      return;
+    }
+
     event.preventDefault();
     let obj=this["on"+event.type];
     if(typeof obj==="function")
     {
-      //console.log("Function exists for ""+event.type+"" ("+event.target.id+")");
-      obj(this, event);
+      obj(_this, event);
     }
     else
     {
-      this.validate_time(event);
+      _this.validate_time(_this, event);
     }
   }
 }
-init_timesel();

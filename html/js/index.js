@@ -1,4 +1,6 @@
 /* jshint esversion: 8 */
+"use strict";
+
 
 var retries;
 function set_switch(switchID, state)

@@ -1,4 +1,5 @@
 /* jshint esversion: 8 */
+"use strict";
 
 // https://www.w3schools.com/howto/howto_js_draggable.asp
 // https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_draggable

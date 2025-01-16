@@ -1,4 +1,6 @@
 /* jshint esversion: 8 */
+"use strict";
+
 
 let xhr=new XMLHttpRequest();
 let valid_apps = {};

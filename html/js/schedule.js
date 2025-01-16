@@ -1,4 +1,5 @@
 /* jshint esversion: 8 */
+"use strict";
 
 var jsonBri='{"name": "brightness","menu":[{"name": "Maximum", "value": 0, "submenu": null},{"name": "High", "value": 1, "submenu": null},{"name": "Medium", "value": 2, "submenu": null},{"name": "Low", "value": 3, "submenu": null},{"name": "Minimum", "value": 4, "submenu": null}]}';
 
@@ -8,13 +9,18 @@ const EVENT_AUTONOMOUS   = 0x10;     // Event will display with sunset/sunrise s
 const EVENT_DEFAULT      = 0x20;     // Default event to be run when no other event is matched
 const EVENT_IMMUTABLE    = 0x40;     // Event cannot be removed/altered
 const EVENT_DISABLED     = 0x80;     // Event is not active (don't run)
-
-function clone_row(tbl, id)
+/**
+ *
+ * @param {*} tbl
+ * @param {*} id
+ * @returns
+ */
+async function clone_row(tbl, id)
 {
   // Get our parent table, which is the table we are inserting a new row.
   const tbdy=tbl.getElementsByTagName('tbody')[0];
   const clone=document.querySelector(`#t_${tbl.id}Row`).content.cloneNode(true);
-  const divs=clone.querySelectorAll("td");
+  const divs=await clone.querySelectorAll("td");
   tbdy.appendChild(clone);
   /* Set the row id */
   if(id!==255)
@@ -28,7 +34,13 @@ function clone_row(tbl, id)
   }
   return (divs);
 }
-function fillTable(type, jsonData)
+/**
+ *
+ * @param {*} type
+ * @param {*} jsonData
+ * @returns
+ */
+async function fillTable(type, jsonData)
 {
   /** @type  {Object} tbl */
   let tbl=_(type);
@@ -52,7 +64,7 @@ function fillTable(type, jsonData)
     const sched=jsonData.items[i];
 
     let d=0;
-    let divEls=clone_row(tbl, sched.N);
+    let divEls=await clone_row(tbl, sched.N);
     divEls[d].querySelector("i").className="del";
     divEls[d++].querySelector("i").addEventListener("click", eventHandler);
 
@@ -106,50 +118,68 @@ function fillTable(type, jsonData)
     fetchData(jsonData.next);
   }
 }
-// FixMe: Convert to promise...
-function fetchSchedule(type, start)
+/**
+ *
+ * @param {*} type
+ * @param {*} start
+ */
+async function fetchSchedule(type, start)
 {
-  var req=new XMLHttpRequest();
-  req.overrideMimeType("application/json");
-  req.open("get", `schedule.json?schedule=${type}&start=${start}`, true);
-
-  req.onload=function()
-  {
-    var jsonResponse=JSON.parse(req.responseText);
-    fillTable(type, jsonResponse);
-  };
-  req.send(null);
-}
-function fetchData(JSONSource, start)
-{
-  var req=new XMLHttpRequest();
-  req.overrideMimeType("application/json");
-  req.open("get", JSONSource+".json?terse=1&start="+start, true);
-
-  req.onload=function()
-  {
-    var jsonResponse;
-    try
-    {
-      jsonResponse=JSON.parse(req.responseText);
-    }
-    catch(error)
-    {
-      console.error(error);
-    }
-    if(typeof jsonResponse==='object')
-    {
-      fillTable(JSONSource, jsonResponse);
+  /***** For POST which is not implemented :-) *****/
+  /*const json={
+    schedule: type,
+    start: start
+  };*/
+  // request options
+  const options={
+    signal: AbortSignal.timeout(5000),
+    method: "GET",
+    /*body: JSON.stringify(json),*/
+    headers: {
+      "Content-Type": "application/json"
     }
   };
-  req.send(null);
+
+  const url=`schedule.json?schedule=${type}&start=${start}`;
+  const response=await fetch(url, options).catch(handleError);
+  const data=await response.json();
+  if(data.noerr===true)
+  {
+    fillTable(type, data);
+  }
 }
-function extend_sharedSel(jsonStr)
+/**
+ *
+ * @param {*} JSONSource
+ * @param {*} start
+ */
+async function fetchData(JSONSource, start)
+{
+  const options={
+    signal: AbortSignal.timeout(5000),
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  };
+  const url=`${JSONSource}.json?terse=1&start=${start}`;
+  const response=await fetch(url, options).catch(handleError);
+  const data=await response.json();
+  if(data.noerr===true)
+  {
+    fillTable(JSONSource, data);
+  }
+}
+async function extend_sharedSel(jsonStr)
 {
 
   sharedSel.options.push(JSON.parse(jsonStr));
 }
-
+/**
+ *
+ * @param {*} JSONSource
+ * @param {*} start
+ */
 async function fetchMenuItems(JSONSource, start)
 {
   var doLoop=true;
@@ -185,7 +215,12 @@ async function fetchMenuItems(JSONSource, start)
   }
   extend_sharedSel(`{"name":"${JSONSource}","menu":[${jsonItemsStr}]}`);
 }
-function set_row_defaults(tblId, divEls)
+/**
+ *
+ * @param {*} tblId
+ * @param {*} divEls
+ */
+async function set_row_defaults(tblId, divEls)
 {
   let d=0;
   divEls[d].querySelector("i").className="del";
@@ -231,7 +266,12 @@ function set_row_defaults(tblId, divEls)
   el=divEls[d++].querySelector("input[type=checkbox]");
   el=divEls[d++].querySelector("input[type=checkbox]");
 }
-function replace_month(el, month)
+/**
+ *
+ * @param {*} el
+ * @param {*} month
+ */
+async function replace_month(el, month)
 {
   let cl=el.classList;
   for(let cssClass of cl)
@@ -247,9 +287,9 @@ function replace_month(el, month)
  *
  * @param {Object} _this
  * @param {Object} event
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-function changeHandler(_this, event)
+async function changeHandler(_this, event)
 {
   let retVal=true;
   let tgt=event.target;
@@ -317,7 +357,7 @@ function changeHandler(_this, event)
   /* Return false if we want to stop the change happening */
   return retVal;
 }
-function eventHandler(event)
+async function eventHandler(event)
 {
   let tgt;
   if(event.type==="click")
@@ -356,7 +396,7 @@ function eventHandler(event)
 /**
  * @param {string} type
  */
-function setFooter(type)
+async function setFooter(type)
 {
   /** @type  {Object} tbl */
   let tbl=_(type);
@@ -376,7 +416,7 @@ function setFooter(type)
     nr.appendChild(td);
   }
 }
-function page_onload()
+async function page_onload()
 {
   set_background();
   extend_sharedSel(jsonBri);
@@ -385,5 +425,6 @@ function page_onload()
   setFooter("weekly");
   fetchSchedule("annual", 0);
   setFooter("annual");
+  init_timesel();
 }
 
