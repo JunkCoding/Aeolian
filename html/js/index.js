@@ -87,7 +87,7 @@ function wsOpen()
         document.getElementById("selDim").textContent = document.getElementById("dim").querySelectorAll("li")[stats.di].textContent;
       }
 
-      pathlist = document.getElementById("pattern").querySelectorAll("li");
+      let pathlist = document.getElementById("pattern").querySelectorAll("li");
       if ( (stats.cp) && pathlist.length > 0 )
       {
         for ( var item of pathlist )

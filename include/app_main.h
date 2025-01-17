@@ -23,6 +23,7 @@
 #define     TASK_RESET_PERIOD_S       2
 #define     MAX_HTTPD_CLIENTS         12          // Too small and experience difficulties accessing the web page
                                                   // Fixme: Make the websockets more dynamic
+#define     HTTPD_BACKLOG_CONN        6
 #define     URI_DECODE_BUFLEN         128
 
 // Where can we find the LED strip?

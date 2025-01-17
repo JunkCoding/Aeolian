@@ -421,9 +421,9 @@ function page_onload()
   set_background();
   extend_sharedSel(jsonBri);
   fetchMenuItems("theme", 0);
-  //fetchSchedule("weekly", 0);
   setFooter("weekly");
-  //fetchSchedule("annual", 0);
   setFooter("annual");
+  fetchSchedule("annual", 0);
+  fetchSchedule("weekly", 0);
 }
 

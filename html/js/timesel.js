@@ -28,6 +28,10 @@ class timesel
    * @type {HTMLDivElement}
    */
   #tElement;
+  /**
+   * @type {HTMLInputElement|undefined}
+   */
+  #curTarget;
 
   /**
    *
@@ -91,20 +95,20 @@ class timesel
   }
   /* =========================================================== */
   /**
-   * @param {timesel} tEl
+   * @param {timesel} tsObj
    * @returns
    */
-  setTimeFromData(tEl)
+  setTimeFromData(tsObj)
   {
     let timeStr=["00", "00"];
 
-    if(tEl.#tElement!=undefined)
+    if(tsObj.#tElement!=undefined)
     {
-      if(tEl.#tElement.dataset.value)
+      if(tsObj.#tElement.dataset.value)
       {
         try
         {
-          timeStr=tEl.#tElement.dataset.value.split(":");
+          timeStr=tsObj.#tElement.dataset.value.split(":");
         }
         catch
         {
@@ -112,10 +116,19 @@ class timesel
         }
       }
 
-      if(tEl.t&&tEl.m)
+      if(tsObj.t&&tsObj.m)
       {
-        tEl.t.value=("00"+timeStr[0]).slice(-2);
-        tEl.m.value=("00"+timeStr[1]).slice(-2);
+        tsObj.t.value=("00"+timeStr[0]).slice(-2);
+        tsObj.m.value=("00"+timeStr[1]).slice(-2);
+
+        /* If we are being called on return from clockPicker, validate times */
+        if(tsObj.#curTarget)
+        {
+          /* Validate the clock input */
+          tsObj.validate_time(tsObj.#curTarget);
+          /* Set back to undefined so we don't call it incorrectly */
+          tsObj.#curTarget=undefined;
+        }
       }
     }
   }
@@ -172,23 +185,16 @@ class timesel
   /* =========================================================== */
   /**
    *
-   * @param {timesel} tsObj
    * @param {HTMLInputElement} inpEl
    * @returns
    */
-  validate_time(tsObj, inpEl)
+  validate_time(inpEl)
   {
-    /* Store the current value without leading zeros */
-    let tmpStr=inpEl.value.replace(/\b0+/g, "");
-
     /* Are we actually interested in this element? */
     if(!inpEl.classList.contains("time"))
     {
       return;
     }
-
-    // Check content is numeric */
-    let isNum=tmpStr.match(/^[0-9]+$/)!=null;
 
     /* Check if we are a start or emd time */
     /**
@@ -205,7 +211,7 @@ class timesel
     {
       let tsm=this.inputStrToMins(ts);
       let tem=this.inputStrToMins(te);
-      console.log(`tsm: ${tsm}, tem: ${tem}`)
+
       /* Check our start time is within bounds */
       if(tsm<0||tsm>1439)
       {
@@ -259,11 +265,11 @@ class timesel
   /* =========================================================== */
   /**
    *
-   * @param {timesel} _this
+   * @param {timesel} tsObj
    * @param {*} event
    * @returns
    */
-  onkeypress(_this, event)
+  onkeypress(tsObj, event)
   {
     let inpEl=event.target;
 
@@ -298,65 +304,71 @@ class timesel
       inpEl.value=tmpStr;
     }
 
-    _this.validate_time(_this, inpEl);
+    tsObj.validate_time(inpEl);
   }
   /* =========================================================== */
   /**
    *
-   * @param {timesel} _this
+   * @param {timesel} tsObj
    * @param {Event} event
    */
-  onclick(_this, event)
+  onclick(tsObj, event)
   {
     /* Define our default end state */
     let closeView=false;
 
     /* Check we have a picker connection */
-    if(_this.#picker==undefined)
+    if(tsObj.#picker==undefined)
     {
-      _this.#picker=new clockPicker(_this.#tElement);
-      _this.#curSel=clockPicker.SEL_NONE;
+      tsObj.#picker=new clockPicker(tsObj.#tElement);
+      tsObj.#curSel=clockPicker.SEL_NONE;
     }
-    else if (_this.#picker.getParent()!==_this.#tElement)
+    else if (tsObj.#picker.getParent()!==tsObj.#tElement)
     {
       /* Need to load values if transferred from elsewhere */
-      _this.#curSel=clockPicker.SEL_NONE;
-      _this.#picker.setInstance(_this.#picker);
+      tsObj.#curSel=clockPicker.SEL_NONE;
+      tsObj.#picker.setInstance(tsObj.#picker);
     }
     else
     {
-      closeView=_this.#picker.isVisible();
+      closeView=tsObj.#picker.isVisible();
+    }
+
+    /* Save a reference to the clicked input element */
+    if(event.target instanceof HTMLInputElement)
+    {
+      tsObj.#curTarget=event.target;
     }
 
     /* We will close the clock picker when closeView is true and we are on the "minutes" picker */
     /* Logic: We will always end on minutes, and never ask for hours without minutes */
-    if(closeView&&_this.#curSel===clockPicker.SEL_MINS)
+    if(closeView&&tsObj.#curSel===clockPicker.SEL_MINS)
     {
       /* ToDo: Update the local minutes from the picker */
 
-      _this.#curSel=clockPicker.SEL_NONE;
-      _this.#picker.hide();
-      _this.setTimeFromData(_this);
+      tsObj.#curSel=clockPicker.SEL_NONE;
+      tsObj.#picker.hide();
+      tsObj.setTimeFromData(tsObj);
     }
     else
     {
       /* We are opening a picker, determine which one it is */
-      if(_this.#curSel===clockPicker.SEL_HOURS)
+      if(tsObj.#curSel===clockPicker.SEL_HOURS)
       {
         /* ToDo: Update local hours from the picker */
-        _this.#curSel=clockPicker.SEL_MINS;
+        tsObj.#curSel=clockPicker.SEL_MINS;
       }
       else
       {
         /* ToDo: ... */
-        _this.#curSel=clockPicker.SEL_HOURS;
+        tsObj.#curSel=clockPicker.SEL_HOURS;
       }
 
       /* Make it so */
-      _this.#picker.show(_this.#curSel);
+      tsObj.#picker.show(tsObj.#curSel);
     }
 
-    //_this.validate_time(_this, event.target);
+    //tsObj.validate_time(event.target);
   }
   /* =========================================================== */
   onwheel(tgt, event)
@@ -368,7 +380,7 @@ class timesel
       if(inpEl.name==="hours"||inpEl.name==="mins")
       {
         inpEl.value=String(Number(inpEl.value)-delta);
-        tgt.validate_time(tgt, inpEl);
+        tgt.validate_time(inpEl);
       }
     }
   }
@@ -376,22 +388,22 @@ class timesel
   handleEvent(event)
   {
     /**
-     * {timesel} _this
+     * {timesel} tsObj
      */
-    let _this;
+    let tsObj;
 
     /* Is this object interesting for us? */
     if(event.target instanceof HTMLInputElement||event.target instanceof HTMLDivElement)
     {
       if(event.target.classList.contains("time")||event.target.classList.contains("clock"))
       {
-        let tsObj=closest(event.target, ".timesel");
-        _this=timesel.#selLst[tsObj.dataset.selId];
+        let tsEl=closest(event.target, ".timesel");
+        tsObj=timesel.#selLst[tsEl.dataset.selId];
       }
     }
 
     /* If we don't have "this", we return to sender */
-    if(_this==undefined)
+    if(tsObj==undefined)
     {
       return;
     }
@@ -400,11 +412,11 @@ class timesel
     let obj=this["on"+event.type];
     if(typeof obj==="function")
     {
-      obj(_this, event);
+      obj(tsObj, event);
     }
     else
     {
-      _this.validate_time(_this, event.target);
+      tsObj.validate_time(event.target);
     }
   }
 }
