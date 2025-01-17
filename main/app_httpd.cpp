@@ -358,7 +358,7 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
       }
       else
       {
-        F_LOGI (true, true, LC_GREY, "Preparing %s (%d bytes), sys free: %d bytes, task free: %d", req->uri, stat.size, esp_get_free_heap_size(), uxTaskGetStackHighWaterMark(NULL));
+        F_LOGD (true, true, LC_GREY, "Preparing %s (%d bytes), sys free: %d bytes, task free: %d", req->uri, stat.size, esp_get_free_heap_size(), uxTaskGetStackHighWaterMark(NULL));
         // Try an allocate some work space
         char *tmpBuffer = (char *)pvPortMalloc (stat.size);
         if ( tmpBuffer == NULL )
@@ -506,7 +506,7 @@ static esp_err_t  async_cgi_handler (httpd_req_t *req)
 {
   struct async_resp_arg *resp_arg = (async_resp_arg *)pvPortMalloc (sizeof (struct async_resp_arg));
 
-  F_LOGI (true, true, LC_GREY, "Preparing %s. sys free: %d bytes, task free: %d", req->uri, esp_get_free_heap_size (), uxTaskGetStackHighWaterMark (NULL));
+  F_LOGD (true, true, LC_GREY, "Preparing %s. sys free: %d bytes, task free: %d", req->uri, esp_get_free_heap_size (), uxTaskGetStackHighWaterMark (NULL));
 
   if (resp_arg == NULL)
   {

@@ -273,14 +273,14 @@ class timesel
   {
     let inpEl=event.target;
 
-    /* Store the current value without leading zeros */
-    let tmpStr=inpEl.value.replace(/\b0+/g, "");
-
     /* Are we actually interested in this element? */
     if(!inpEl.classList.contains("time"))
     {
       return;
     }
+
+    /* Store the current value without leading zeros */
+    let tmpStr=inpEl.value.replace(/\b0+/g, "");
 
     // Check content is numeric */
     let isNum=tmpStr.match(/^[0-9]+$/)!=null;

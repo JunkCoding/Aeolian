@@ -21,6 +21,22 @@
     "*.inc": "c",
     "string_view": "c"
   },
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "eslint.enable": true,
+  "eslint.run": "onSave",
+  "eslint.options": {
+    "extensions": [ ".js", ".jsx" ],
+    "files": ["html/js/*.js"],
+    "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:prettier/recommended"]
+  },
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "eslint.workingDirectories": [{"mode": "auto"}],
+  "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact"],
   "terminal.explorerKind": "external",
   "idf.flashType": "UART",
   "idf.port": "/dev/cu.SLAB_USBtoUART",
