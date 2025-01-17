@@ -119,7 +119,7 @@ static void report(config *cfg);
 /* Open an IO handle. Returns NULL on error. */
 static io_handle *handle_open(char *fname, IO_mode m, size_t buf_sz) {
     io_handle *io = NULL;
-    io = malloc(sizeof(*io) + buf_sz);
+    io = pvPortMalloc(sizeof(*io) + buf_sz);
     if (io == NULL) { return NULL; }
     memset(io, 0, sizeof(*io) + buf_sz);
     io->fd = -1;
@@ -141,7 +141,7 @@ static io_handle *handle_open(char *fname, IO_mode m, size_t buf_sz) {
     }
 
     if (io->fd == -1) {         /* failed to open */
-        free(io);
+        vPortFree(io);
         HEATSHRINK_ERR(1, "open");
         return NULL;
     }
@@ -261,13 +261,13 @@ static int encoder_sink_read(config *cfg, heatshrink_encoder *hse,
             if (sres < 0) { die("sink"); }
             sunk += sink_sz;
         }
-        
+
         do {
             pres = heatshrink_encoder_poll(hse, out_buf, out_sz, &poll_sz);
             if (pres < 0) { die("poll"); }
             if (handle_sink(out, poll_sz, out_buf) < 0) die("handle_sink");
         } while (pres == HSER_POLL_MORE);
-        
+
         if (poll_sz == 0 && data_sz == 0) {
             fres = heatshrink_encoder_finish(hse);
             if (fres < 0) { die("finish"); }
@@ -279,7 +279,7 @@ static int encoder_sink_read(config *cfg, heatshrink_encoder *hse,
 
 static int encode(config *cfg) {
     uint8_t window_sz2 = cfg->window_sz2;
-    size_t window_sz = 1 << window_sz2; 
+    size_t window_sz = 1 << window_sz2;
     heatshrink_encoder *hse = heatshrink_encoder_alloc(window_sz2, cfg->lookahead_sz2);
     if (hse == NULL) { die("failed to init encoder: bad settings"); }
     ssize_t read_sz = 0;
@@ -334,7 +334,7 @@ static int decoder_sink_read(config *cfg, heatshrink_decoder *hsd,
             if (pres < 0) { die("poll"); }
             if (handle_sink(out, poll_sz, out_buf) < 0) die("handle_sink");
         } while (pres == HSDR_POLL_MORE);
-        
+
         if (data_sz == 0 && poll_sz == 0) {
             fres = heatshrink_decoder_finish(hsd);
             if (fres < 0) { die("finish"); }
@@ -379,7 +379,7 @@ static int decode(config *cfg) {
         }
     }
     if (read_sz == -1) { HEATSHRINK_ERR(1, "read"); }
-        
+
     heatshrink_decoder_free(hsd);
     close_and_report(cfg);
     return 0;
