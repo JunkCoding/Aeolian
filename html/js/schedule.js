@@ -89,11 +89,11 @@ async function fillTable(type, jsonData)
     }
     el=divEls[d++].querySelector(".timesel");
     el.dataset.value = `${sched.SH}:${sched.SM}`;
-    append_timesel(el);
+    new timesel(el);
 
     el=divEls[d++].querySelector(".timesel");
     el.dataset.value = `${sched.EH}:${sched.EM}`;
-    append_timesel(el);
+    new timesel(el);
 
     el=divEls[d++].querySelector(".sharedsel");
     el.dataset.value = `theme:${sched.Th}`;
@@ -247,11 +247,11 @@ async function set_row_defaults(tblId, divEls)
   }
   el=divEls[d++].querySelector(".timesel");
   el.dataset.value = '00:00';
-  append_timesel(el);
+  new timesel(el);
 
   el=divEls[d++].querySelector(".timesel");
   el.dataset.value='00:00';
-  append_timesel(el);
+  new timesel(el);
 
   el=divEls[d++].querySelector(".sharedsel");
   el.dataset.value='theme:0';
@@ -396,7 +396,7 @@ async function eventHandler(event)
 /**
  * @param {string} type
  */
-async function setFooter(type)
+function setFooter(type)
 {
   /** @type  {Object} tbl */
   let tbl=_(type);
@@ -416,15 +416,14 @@ async function setFooter(type)
     nr.appendChild(td);
   }
 }
-async function page_onload()
+function page_onload()
 {
   set_background();
   extend_sharedSel(jsonBri);
   fetchMenuItems("theme", 0);
-  fetchSchedule("weekly", 0);
+  //fetchSchedule("weekly", 0);
   setFooter("weekly");
-  fetchSchedule("annual", 0);
+  //fetchSchedule("annual", 0);
   setFooter("annual");
-  init_timesel();
 }
 

@@ -1,60 +1,13 @@
 /* jshint esversion: 10 */
 "use strict";
 
-/**
- * @type {Array<timesel|undefined>} clkgrp
- */
-var clkgrp=[];
-
 /* =========================================================== */
-function init_timesel()
-{
-  /**
- * @type {Array<HTMLDivElement|undefined>} clklst
- */
-  var clklst=[];
-  // Remove any existing class associations
-  // ------------------------------------------------
-  let g=clkgrp.length;
-  if(g>0)
-  {
-    for(let i=0; i<g; i++)
-    {
-      let oldNode=document.getElementById(clkgrp[i].id);
-      if(oldNode!=undefined&&oldNode.parentNode!=undefined)
-      {
-        let newNode=oldNode.cloneNode(true);
-        oldNode.parentNode.insertBefore(newNode, oldNode);
-        oldNode.parentNode.removeChild(oldNode);
-        clkgrp[i]=undefined;
-      }
-    }
-    clkgrp=[];
-  }
-
-  clklst=document.getElementsByClassName("timesel");
-  let l=clklst.length;
-  for(let i=0; i<l; i++)
-  {
-    clkgrp[i]=new timesel(clklst[i]);
-  }
-}
-
-function append_timesel(el)
-{
-  let l=clkgrp.length;
-  for(let i=0; i<l; i++)
-  {
-    if(clkgrp[i].id===el.id)
-    {
-      return;
-    }
-  }
-  clkgrp[l]=new timesel(el);
-}
-
 class timesel
 {
+  /**
+   * @type {Array<timesel>} clkgrp
+   */
+  clkgrp=[];
   /**
    * @type {Boolean}
    */
@@ -76,18 +29,33 @@ class timesel
    */
   #tElement;
 
+  /**
+   *
+   * @param {HTMLDivElement} tElement
+   * @returns
+   */
   constructor(tElement)
   {
+    /* Check for and prevent duplicates */
+    let l=this.clkgrp.length;
+    for(let i=0; i<l; i++)
+    {
+      if(this.clkgrp[i].#tElement===tElement)
+      {
+        return;
+      }
+    }
+
     this.#curSel=clockPicker.SEL_NONE;
     this.#tElement=tElement;
     this.#picker;
 
     this.selId=timesel.#selLst.length;
     timesel.#selLst[this.selId]=this;
-    tElement.dataset.selId=this.selId;
+    tElement.dataset.selId=String(this.selId);
 
     this.init();
-    this.setTimeFromData();
+    this.setTimeFromData(this);
 
     if(!timesel.#initialised)
     {
@@ -100,6 +68,7 @@ class timesel
       document.addEventListener("wheel", this);//, {passive: true});
     }
   }
+  /* =========================================================== */
   init()
   {
     let el=this.#tElement;
@@ -120,22 +89,87 @@ class timesel
     this.m.value="00";
     el.appendChild(this.m);
   }
-  setTimeFromData()
+  /* =========================================================== */
+  /**
+   * @param {timesel} tEl
+   * @returns
+   */
+  setTimeFromData(tEl)
   {
-    var st;
-    let el=this.#tElement;
-    try
-    {
-      st=el.dataset.value.split(":");
-    }
-    catch
-    {
-      return false;
-    }
-    this.t.value=("00"+st[0]).slice(-2);
-    this.m.value=("00"+st[1]).slice(-2);
+    let timeStr=["00", "00"];
 
+    if(tEl.#tElement!=undefined)
+    {
+      if(tEl.#tElement.dataset.value)
+      {
+        try
+        {
+          timeStr=tEl.#tElement.dataset.value.split(":");
+        }
+        catch
+        {
+          console.error("Invalid time string");
+        }
+      }
+
+      if(tEl.t&&tEl.m)
+      {
+        tEl.t.value=("00"+timeStr[0]).slice(-2);
+        tEl.m.value=("00"+timeStr[1]).slice(-2);
+      }
+    }
   }
+  /* =========================================================== */
+  /**
+   *
+   * @param {HTMLDivElement} tsDataDiv
+   * @returns {Number}
+   */
+  inputStrToMins(tsDataDiv)
+  {
+    let retVal=0;
+    /**
+     * @type {HTMLInputElement|null}
+     */
+    let sH=tsDataDiv.querySelector("input[name=hours]");
+    /**
+    * @type {HTMLInputElement|null}
+    */
+    let sM=tsDataDiv.querySelector("input[name=mins]");
+    if(sH!=undefined&&sM!=undefined)
+    {
+      retVal=(Number(sH.value)*60)+Number(sM.value);
+    }
+    return retVal;
+  }
+  /* =========================================================== */
+  /**
+   *
+   * @param {HTMLDivElement} tsDataDiv
+   * @param {Number} mins
+   * @returns {Number}
+   */
+  minsToInputStr(tsDataDiv, mins)
+  {
+    let retVal=0;
+    /**
+     * @type {HTMLInputElement|null}
+     */
+    let sH=tsDataDiv.querySelector("input[name=hours]");
+    /**
+    * @type {HTMLInputElement|null}
+    */
+    let sM=tsDataDiv.querySelector("input[name=mins]");
+    if(sH!=undefined&&sM!=undefined)
+    {
+      /* Set the start inputs and parent dataset values */
+      sH.value=("00"+String(Math.floor(mins/60))).slice(-2);
+      sM.value=("00"+String(Math.floor(mins%60))).slice(-2);
+      tsDataDiv.dataset.value=`${sH.value}:${sM.value}`;
+    }
+    return retVal;
+  }
+  /* =========================================================== */
   /**
    *
    * @param {timesel} tsObj
@@ -157,15 +191,21 @@ class timesel
     let isNum=tmpStr.match(/^[0-9]+$/)!=null;
 
     /* Check if we are a start or emd time */
+    /**
+     * @type {HTMLDivElement} ts
+     */
     const ts=closest(inpEl, "[data-type='timeStart']");
+    /**
+     * @type {HTMLDivElement} te
+     */
     const te=closest(inpEl, "[data-type='timeEnd']");
 
     /* If both are not null, we need to constrain ourselves */
     if(ts!=undefined&&te!=undefined)
     {
-      let tsm=(Number(ts.querySelector("input[name=hours]").value)*60)+Number(ts.querySelector("input[name=mins]").value);
-      let tem=(Number(te.querySelector("input[name=hours]").value)*60)+Number(te.querySelector("input[name=mins]").value);
-
+      let tsm=this.inputStrToMins(ts);
+      let tem=this.inputStrToMins(te);
+      console.log(`tsm: ${tsm}, tem: ${tem}`)
       /* Check our start time is within bounds */
       if(tsm<0||tsm>1439)
       {
@@ -210,23 +250,13 @@ class timesel
           }
         }
       }
-      /* Set the start inputs and parent dataset values */
-      let tmpStrA=("00"+String(Math.floor(tsm/60))).slice(-2);
-      let tmpStrB=("00"+String(Math.floor(tsm%60))).slice(-2);
-      ts.querySelector("input[name=hours]").value=tmpStrA;
-      ts.querySelector("input[name=mins]").value=tmpStrB;
-      ts.dataset.value=`${tmpStrA}:${tmpStrB}`;
-
-      /* Set the end inputs and parent dataSET VALUES */
-      tmpStrA=("00"+String(Math.floor(tem/60))).slice(-2);
-      tmpStrB=("00"+String(Math.floor(tem%60))).slice(-2);
-      te.querySelector("input[name=hours]").value=tmpStrA;
-      te.querySelector("input[name=mins]").value=tmpStrB;
-      te.dataset.value=`${tmpStrA}:${tmpStrB}`;
+      this.minsToInputStr(ts, tsm);
+      this.minsToInputStr(te, tem);
     }
     /* ELSE, deal with time selectos that aren't linked start/end times */
     /* (I don't have any need for this now, so in no rush to implement) */
   }
+  /* =========================================================== */
   /**
    *
    * @param {timesel} _this
@@ -249,6 +279,7 @@ class timesel
     // Check content is numeric */
     let isNum=tmpStr.match(/^[0-9]+$/)!=null;
 
+    /* ToDo: Allow 0* & 1* & 2[0-3] */
     /* Check for keypress */
     if(typeof event.keyCode!=="undefined")
     {
@@ -269,6 +300,7 @@ class timesel
 
     _this.validate_time(_this, inpEl);
   }
+  /* =========================================================== */
   /**
    *
    * @param {timesel} _this
@@ -304,7 +336,7 @@ class timesel
 
       _this.#curSel=clockPicker.SEL_NONE;
       _this.#picker.hide();
-      _this.setTimeFromData();
+      _this.setTimeFromData(_this);
     }
     else
     {
@@ -326,6 +358,7 @@ class timesel
 
     //_this.validate_time(_this, event.target);
   }
+  /* =========================================================== */
   onwheel(tgt, event)
   {
     const delta=Math.sign(event.deltaY);
@@ -339,6 +372,7 @@ class timesel
       }
     }
   }
+  /* =========================================================== */
   handleEvent(event)
   {
     /**
