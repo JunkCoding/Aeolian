@@ -15,12 +15,12 @@ const EVENT_DISABLED     = 0x80;     // Event is not active (don't run)
  * @param {*} id
  * @returns
  */
-async function clone_row(tbl, id)
+function clone_row(tbl, id)
 {
   // Get our parent table, which is the table we are inserting a new row.
   const tbdy=tbl.getElementsByTagName('tbody')[0];
   const clone=document.querySelector(`#t_${tbl.id}Row`).content.cloneNode(true);
-  const divs=await clone.querySelectorAll("td");
+  const divs=clone.querySelectorAll("td");
   tbdy.appendChild(clone);
   /* Set the row id */
   if(id!==255)
@@ -40,7 +40,7 @@ async function clone_row(tbl, id)
  * @param {*} jsonData
  * @returns
  */
-async function fillTable(type, jsonData)
+function fillTable(type, jsonData)
 {
   /** @type  {Object} tbl */
   let tbl=_(type);
@@ -64,7 +64,7 @@ async function fillTable(type, jsonData)
     const sched=jsonData.items[i];
 
     let d=0;
-    let divEls=await clone_row(tbl, sched.N);
+    let divEls=clone_row(tbl, sched.N);
     divEls[d].querySelector("i").className="del";
     divEls[d++].querySelector("i").addEventListener("click", eventHandler);
 
@@ -170,7 +170,7 @@ async function fetchData(JSONSource, start)
     fillTable(JSONSource, data);
   }
 }
-async function extend_sharedSel(jsonStr)
+function extend_sharedSel(jsonStr)
 {
 
   sharedSel.options.push(JSON.parse(jsonStr));
@@ -220,7 +220,7 @@ async function fetchMenuItems(JSONSource, start)
  * @param {*} tblId
  * @param {*} divEls
  */
-async function set_row_defaults(tblId, divEls)
+function set_row_defaults(tblId, divEls)
 {
   let d=0;
   divEls[d].querySelector("i").className="del";
@@ -271,7 +271,7 @@ async function set_row_defaults(tblId, divEls)
  * @param {*} el
  * @param {*} month
  */
-async function replace_month(el, month)
+function replace_month(el, month)
 {
   let cl=el.classList;
   for(let cssClass of cl)
@@ -289,7 +289,7 @@ async function replace_month(el, month)
  * @param {Object} event
  * @returns {Promise<boolean>}
  */
-async function changeHandler(_this, event)
+function changeHandler(_this, event)
 {
   let retVal=true;
   let tgt=event.target;
@@ -357,7 +357,7 @@ async function changeHandler(_this, event)
   /* Return false if we want to stop the change happening */
   return retVal;
 }
-async function eventHandler(event)
+function eventHandler(event)
 {
   let tgt;
   if(event.type==="click")
