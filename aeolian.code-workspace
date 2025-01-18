@@ -132,7 +132,7 @@
     "chat.editor.fontSize": 11,
     "markdown.preview.fontSize": 11,
     "markdown.preview.lineHeight": 1.5,
-    "editor.minimap.renderCharacters": true,
+    "editor.minimap.renderCharacters": false,
     "scm.diffDecorations": "all",
     "idf.espIdfPathWin": "${env:IDF_PATH}",
     "idf.pythonBinPathWin": "E:/VSCode/esp/v4.4.6/python_env/idf4.4_py3.11_env/Scripts/python.exe",

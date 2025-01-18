@@ -57,9 +57,9 @@ void vPortStartFirstTask (void)
 // ******************************************************************
 // ******************************************************************
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
-IRAM_ATTR static int sTaskSortFunc (const void *a, const void *b)
+IRAM_ATTR static int sTaskSortByPID (const void *a, const void *b)
 #else
-static int sTaskSortFunc (const void *a, const void *b)
+static int sTaskSortByPID (const void *a, const void *b)
 #endif
 {
   return (int)((const TaskStatus_t *)a)->xTaskNumber - (int)((const TaskStatus_t *)b)->xTaskNumber;
@@ -79,7 +79,6 @@ static int sTaskSortFunc (const void *a, const void *b)
     return (int)pA->xTaskNumber - (int)pB->xTaskNumber;
   }
 }
-
 // ******************************************************************
 // ******************************************************************
 #if defined (CONFIG_COMPILER_OPTIMIZATION_PERF)
@@ -89,7 +88,7 @@ void execRuntimeStats (void)
 #endif
 {
   volatile UBaseType_t x;
-  unsigned long ulTotalRunTime = 0, ulStatsAsPercentage = 0;
+  uint64_t ulTotalRunTime = 0, ulStatsAsPercentage = 0;
 
   // FixMe: Hate this, but it works for now.
   buflen = 0;
@@ -110,19 +109,19 @@ void execRuntimeStats (void)
   if ( pTaskArray != NULL )
   {
     /* Generate raw status information about each task. */
-    nTasks = uxTaskGetSystemState (pTaskArray, nTasks, (uint32_t *)&ulTotalRunTime);
+    nTasks = uxTaskGetSystemState (pTaskArray, nTasks, (uint64_t *)&ulTotalRunTime);
 
     // sort by task ID
-    qsort (pTaskArray, nTasks, sizeof (TaskStatus_t), sTaskSortFunc);
+    //qsort (pTaskArray, nTasks, sizeof (TaskStatus_t), sTaskSortByPID);
 
     /* For percentage calculations. */
     ulTotalRunTime /= 100UL;
-    uint32_t totalRuntime = 0;
 
     // total runtime (tasks, OS, ISRs) since we checked last
-    static uint32_t sLastTotalRuntime;
+    uint64_t totalRuntime = 0;
+    static uint64_t sLastTotalRuntime;
     {
-      const uint32_t runtime = totalRuntime;
+      const uint64_t runtime = totalRuntime;
       totalRuntime = totalRuntime - sLastTotalRuntime;
       sLastTotalRuntime = runtime;
     }
@@ -162,8 +161,8 @@ void execRuntimeStats (void)
         const TaskStatus_t *pTask = &pTaskArray[x];
         char state = '?';
 
-        uint32_t cap8 = 0;
-        uint32_t cap32 = 0;
+        uint64_t cap8 = 0;
+        uint64_t cap32 = 0;
 #if defined (CONFIG_HEAP_TASK_TRACKING)
         for ( int i = 0; i < *heap_info.num_totals; i++ )
         {
@@ -179,6 +178,10 @@ void execRuntimeStats (void)
          * This will always be rounded down to the nearest integer.
          * ulTotalRunTimeDiv100 has already been divided by 100. */
         ulStatsAsPercentage = pTask->ulRunTimeCounter / ulTotalRunTime;
+        if (ulStatsAsPercentage > 100)
+        {
+          F_LOGE (true, true, LC_YELLOW, "pid: %d, ulStatsAsPercentage = %d, ulTotalRunTime = %d, pTask->ulRunTimeCounter = %d", pTask->xTaskNumber, ulStatsAsPercentage, ulTotalRunTime, pTask->ulRunTimeCounter)
+        }
 
         switch ( pTask->eCurrentState )
         {
@@ -192,7 +195,7 @@ void execRuntimeStats (void)
 
         const char core = pTask->xCoreID == tskNO_AFFINITY?'*':('0' + pTask->xCoreID);
 
-        buflen += snprintf (&jsonTasksBuffer[buflen], (JSON_BUFSIZE - buflen), "{\"pid\": %u,\"bp\": %d,\"cp\": %d,\"tn\": \"%s\",\"hwm\": %lu,\"c8\": %lu,\"c32\": %lu,\"rt\": %lu,\"st\": \"%c\",\"core\": \"%c\",\"use\": %ld},",
+        buflen += snprintf (&jsonTasksBuffer[buflen], (JSON_BUFSIZE - buflen), "{\"pid\": %u,\"bp\": %d,\"cp\": %d,\"tn\": \"%s\",\"hwm\": %lu,\"c8\": %llu,\"c32\": %llu,\"rt\": %llu,\"st\": \"%c\",\"core\": \"%c\",\"use\": %lld},",
           pTask->xTaskNumber, pTask->uxBasePriority, pTask->uxCurrentPriority, pTask->pcTaskName, pTask->usStackHighWaterMark, cap8, cap32, pTask->ulRunTimeCounter, state, core, ulStatsAsPercentage);
         if ( ulStatsAsPercentage > 0UL )
         {
