@@ -12,3 +12,8 @@ sdkconfig.old
 .vscode/c_cpp_properties.json
 .vscode/browse.vc.db
 node_modules/*
+.vs/CMake Overview
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/Aeolian/*
+out/*

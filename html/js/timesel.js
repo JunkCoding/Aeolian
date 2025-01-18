@@ -385,6 +385,11 @@ class timesel
     }
   }
   /* =========================================================== */
+  /**
+   *
+   * @param {Event} event
+   * @returns
+   */
   handleEvent(event)
   {
     /**
@@ -414,7 +419,7 @@ class timesel
     {
       obj(tsObj, event);
     }
-    else
+    else if (event.target instanceof HTMLInputElement)
     {
       tsObj.validate_time(event.target);
     }

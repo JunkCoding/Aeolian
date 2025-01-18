@@ -249,11 +249,14 @@ class clockPicker
   setTimeFromData(time)
   {
     let indie;
-    let timeStr;
+    let timeStr="";
 
     if(time==undefined)
     {
-      timeStr=clockPicker.#parent.dataset.value;
+      if(clockPicker.#parent.dataset.value)
+      {
+        timeStr=clockPicker.#parent.dataset.value;
+      }
     }
     else
     {
@@ -736,12 +739,17 @@ class clockPicker
   onmousemove(_this, event)
   {
     /* Stop drag and select */
-    window.getSelection().removeAllRanges();
+    const selObj=window.getSelection();
+    if(selObj)
+    {
+      selObj.removeAllRanges();
+    }
 
-    if(event.target===null)
+    if(!(event.target instanceof HTMLDivElement))
     {
       return;
     }
+
     /**
      * @type {HTMLDivElement} el
      */
