@@ -88,7 +88,11 @@ void execRuntimeStats (void)
 #endif
 {
   volatile UBaseType_t x;
+#if defined(CONFIG_FREERTOS_RUN_TIME_COUNTER_TYPE_U64)
   uint64_t ulTotalRunTime = 0, ulStatsAsPercentage = 0;
+#else
+  uint32_t ulTotalRunTime = 0, ulStatsAsPercentage = 0;
+#endif
 
   // FixMe: Hate this, but it works for now.
   buflen = 0;
@@ -109,22 +113,13 @@ void execRuntimeStats (void)
   if ( pTaskArray != NULL )
   {
     /* Generate raw status information about each task. */
-    nTasks = uxTaskGetSystemState (pTaskArray, nTasks, (uint64_t *)&ulTotalRunTime);
+    nTasks = uxTaskGetSystemState (pTaskArray, nTasks, &ulTotalRunTime);
 
     // sort by task ID
     //qsort (pTaskArray, nTasks, sizeof (TaskStatus_t), sTaskSortByPID);
 
     /* For percentage calculations. */
     ulTotalRunTime /= 100UL;
-
-    // total runtime (tasks, OS, ISRs) since we checked last
-    uint64_t totalRuntime = 0;
-    static uint64_t sLastTotalRuntime;
-    {
-      const uint64_t runtime = totalRuntime;
-      totalRuntime = totalRuntime - sLastTotalRuntime;
-      sLastTotalRuntime = runtime;
-    }
 
     /* Avoid divide by zero errors. */
     if ( ulTotalRunTime > 0 )
@@ -161,8 +156,8 @@ void execRuntimeStats (void)
         const TaskStatus_t *pTask = &pTaskArray[x];
         char state = '?';
 
-        uint64_t cap8 = 0;
-        uint64_t cap32 = 0;
+        uint32_t cap8 = 0;
+        uint32_t cap32 = 0;
 #if defined (CONFIG_HEAP_TASK_TRACKING)
         for ( int i = 0; i < *heap_info.num_totals; i++ )
         {
@@ -195,7 +190,7 @@ void execRuntimeStats (void)
 
         const char core = pTask->xCoreID == tskNO_AFFINITY?'*':('0' + pTask->xCoreID);
 
-        buflen += snprintf (&jsonTasksBuffer[buflen], (JSON_BUFSIZE - buflen), "{\"pid\": %u,\"bp\": %d,\"cp\": %d,\"tn\": \"%s\",\"hwm\": %lu,\"c8\": %llu,\"c32\": %llu,\"rt\": %llu,\"st\": \"%c\",\"core\": \"%c\",\"use\": %lld},",
+        buflen += snprintf (&jsonTasksBuffer[buflen], (JSON_BUFSIZE - buflen), "{\"pid\": %u,\"bp\": %d,\"cp\": %d,\"tn\": \"%s\",\"hwm\": %lu,\"c8\": %lu,\"c32\": %lu,\"rt\": %llu,\"st\": \"%c\",\"core\": \"%c\",\"use\": %lld},",
           pTask->xTaskNumber, pTask->uxBasePriority, pTask->uxCurrentPriority, pTask->pcTaskName, pTask->usStackHighWaterMark, cap8, cap32, pTask->ulRunTimeCounter, state, core, ulStatsAsPercentage);
         if ( ulStatsAsPercentage > 0UL )
         {

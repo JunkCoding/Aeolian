@@ -767,7 +767,7 @@ httpd_handle_t start_webserver (void)
   config.stack_size                       = STACKSIZE_HTTPD;
   config.lru_purge_enable                 = true;
   config.lru_purge_enable                 = true;
-  config.backlog_conn                     = 5;
+  config.backlog_conn                     = 15;
   config.max_uri_handlers                 = basic_handlers_no;
   config.server_port                      = 80;
   config.open_fn                          = httpd_open;
