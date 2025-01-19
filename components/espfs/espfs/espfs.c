@@ -52,9 +52,7 @@ espfs_fs_t* espfs_init (espfs_config_t* conf)
       goto err_out;
     }
 
-    if ( esp_partition_mmap (partition, 0, partition->size,
-      SPI_FLASH_MMAP_DATA, ( const void** )&fs->header,
-      &fs->mmap_handle) != ESP_OK )
+    if ( esp_partition_mmap (partition, 0, partition->size, SPI_FLASH_MMAP_DATA, ( const void** )&fs->header, &fs->mmap_handle) != ESP_OK )
     {
       //ESPFS_LOGE (__func__, "mmap failed");
       goto err_out;
@@ -112,8 +110,7 @@ const char* espfs_get_path (espfs_fs_t* fs, uint16_t index)
   }
 
   const espfs_sorttable_entry_t* entry = fs->sorttable + index;
-  const espfs_object_header_t* object = ( const void* )fs->header +
-    entry->offset;
+  const espfs_object_header_t* object = ( const void* )fs->header + entry->offset;
   return ( const char* )object + object->len;
 }
 
@@ -361,11 +358,9 @@ ssize_t espfs_fread (espfs_file_t* f, void* buf, size_t len)
     heatshrink_decoder* hsd = ( heatshrink_decoder* )f->user;
     if ( hsd == NULL )
     {
-      espfs_heatshrink_header_t* hsh = ( void* )&f->fh->object +
-        f->fh->object.len + f->fh->object.path_len;
+      espfs_heatshrink_header_t* hsh = ( void* )&f->fh->object + f->fh->object.len + f->fh->object.path_len;
       //ESPFS_LOGV (__func__, "heatshrink_decoder_alloc");
-      hsd = heatshrink_decoder_alloc (16, hsh->window_sz2,
-              hsh->lookahead_sz2);
+      hsd = heatshrink_decoder_alloc(16, hsh->window_sz2, hsh->lookahead_sz2);
       if ( hsd == NULL )
       {
         //ESPFS_LOGE (__func__, "heatshrink_decoder_alloc");
@@ -384,8 +379,7 @@ ssize_t espfs_fread (espfs_file_t* f, void* buf, size_t len)
       size_t remain = f->raw_len - (f->raw_ptr - f->raw_start);
       if ( remain > 0 )
       {
-        HSD_sink_res res = heatshrink_decoder_sink (hsd, f->raw_ptr,
-                (remain > 16)?16:remain, &rlen);
+        HSD_sink_res res = heatshrink_decoder_sink (hsd, f->raw_ptr, (remain > 16)?16:remain, &rlen);
         if ( res < 0 )
         {
           //ESPFS_LOGE (__func__, "heatshrink_decoder_sink");
@@ -394,8 +388,7 @@ ssize_t espfs_fread (espfs_file_t* f, void* buf, size_t len)
         f->raw_ptr += rlen;
       }
 
-      HSD_poll_res res = heatshrink_decoder_poll (hsd, ( uint8_t* )buf,
-              len - decoded, &rlen);
+      HSD_poll_res res = heatshrink_decoder_poll (hsd, ( uint8_t* )buf, len - decoded, &rlen);
       if ( res < 0 )
       {
         //ESPFS_LOGE (__func__, "heatshrink_decoder_poll");

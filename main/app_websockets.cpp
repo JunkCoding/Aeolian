@@ -127,7 +127,7 @@ static void send_status_update (async_resp_arg *resp_arg)
   int buflen = prepareSystemStatusMsg(&buf);
   send_async_frame (resp_arg, (uint8_t *)buf, buflen);
   //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "e) Releasing allocation 0x%08X", (unsigned int)buf);
-  free (buf);
+  vPortFree (buf);
 
   //F_LOGI (true, true, LC_BRIGHT_MAGENTA, "f) Releasing allocation 0x%08X", (unsigned int)resp_arg);
   vPortFree (resp_arg);
@@ -309,7 +309,7 @@ static void send_ping (void *arg)
 
   httpd_ws_send_frame_async (resp_arg->hd, resp_arg->fd, &ws_pkt);
 
-  free (resp_arg);
+  vPortFree(resp_arg);
 }
 
 #define JSON_SCAN_STR "{\"ssid\": \"%s\",\"bssid\": \"%02X:%02X:%02X:%02X:%02X:%02X\",\"chan\": %d,\"2chan\": %d,\"rssi\": %d,\"enc\": \"%s\"}"
@@ -556,7 +556,7 @@ static void keep_alive_task(void *arg)
     }
   }
   vQueueDelete(keep_alive_storage->q);
-  free(keep_alive_storage);
+  vPortFree(keep_alive_storage);
 
   vTaskDelete(NULL);
 }

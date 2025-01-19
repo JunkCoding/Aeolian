@@ -325,6 +325,7 @@ IRAM_ATTR static  void  dynamic_request (httpd_req_t *req, char *buffer, uint16_
 // --------------------------------------------------------------------------
 //
 // --------------------------------------------------------------------------
+#define CHUNK_SIZE 1024
 #if defined (CONFIG_HTTPD_USE_ASYNC)
 IRAM_ATTR static  void  sendEspFs (void *arg)
 {
@@ -336,7 +337,7 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 #endif
   espfs_stat_t stat;
 
-  F_LOGD(true, true, LC_BRIGHT_MAGENTA, "sendEspFs() %s\n", req->uri);
+  F_LOGD(true, true, LC_BRIGHT_MAGENTA, "sendEspFs() %s", req->uri);
 
   if ( fs == NULL )
   {
@@ -351,73 +352,83 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
       {
         F_LOGE(true, true, LC_YELLOW, "Error opening file: '%s'", req->uri);
       }
-      else if ( stat.size == 0 )
-      {
-        F_LOGE(true, true, LC_YELLOW, "stat.size reported 0 bytes for '%s'", req->uri);
-        espfs_fclose(f);
-      }
       else
       {
-        F_LOGD (true, true, LC_GREY, "Preparing %s (%d bytes), sys free: %d bytes, task free: %d", req->uri, stat.size, esp_get_free_heap_size(), uxTaskGetStackHighWaterMark(NULL));
-        // Try an allocate some work space
-        char *tmpBuffer = (char *)pvPortMalloc (stat.size);
-        if ( tmpBuffer == NULL )
+        if (stat.size == 0)
         {
-          F_LOGE(true, true, LC_YELLOW, "pvPortMalloc failed allocating 'tmpBuffer' (%d bytes)", stat.size);
+          F_LOGE(true, true, LC_YELLOW, "stat.size reported 0 bytes for '%s'", req->uri);
         }
         else
         {
-          //F_LOGI (true, true, LC_BRIGHT_CYAN, "y) Allocated %d bytes of memory starting at: 0x%08X", stat.size, (unsigned int)tmpBuffer);
+          //F_LOGI (true, true, LC_GREY, "Preparing %s (%d bytes), sys free: %d bytes, task free: %d", req->uri, stat.size, esp_get_free_heap_size (), uxTaskGetStackHighWaterMark (NULL));
 
-          int bytes = espfs_fread (f, tmpBuffer, stat.size);
-          espfs_fclose(f);
-
-#if defined (CONFIG_HTTPD_USE_ASYNC)
           // Set our content type
+#if defined (CONFIG_HTTPD_USE_ASYNC)
           send_async_header_using_ext (req, req->uri);
 #else
           set_content_type_using_ext (req, req->uri);
 #endif
-
-          // Check if we have a function to process the request
-#if defined (CONFIG_HTTPD_USE_ASYNC)
-          if ( req->fp )
-#else
-          if ( req->user_ctx )
-#endif
+          // Try an allocate some work space
+          char *tmpBuffer = (char *)pvPortMalloc (CHUNK_SIZE);
+          if (tmpBuffer == NULL)
           {
-            dynamic_request(req, tmpBuffer, bytes);
+            F_LOGE (true, true, LC_YELLOW, "pvPortMalloc failed allocating 'tmpBuffer' (%d bytes)", CHUNK_SIZE);
           }
-          // Else, just send the file...
           else
           {
-            // After sending the appropriate header....
-#if defined (CONFIG_HTTPD_USE_ASYNC)
-            httpd_socket_send(req->hd, req->fd, tmpBuffer, bytes, 0);
-#else
-            httpd_resp_send_chunk(req, tmpBuffer, bytes);
-#endif
-          }
+            //F_LOGI (true, true, LC_GREEN, "Allocated %d bytes of memory starting at 0x%08X for %s", CHUNK_SIZE, (unsigned int)tmpBuffer, req->uri);
+            uint32_t bytesToSend = stat.size;
+            while (bytesToSend > 0)
+            {
+              int bRead = espfs_fread (f, tmpBuffer, CHUNK_SIZE);
+              bytesToSend -= bRead;
+              //F_LOGI (true, true, LC_GREY, "%d bytes read/to send", bRead);
 
+              // Check if we have a function to process the request
+#if defined (CONFIG_HTTPD_USE_ASYNC)
+              if (req->fp)
+#else
+              if (req->user_ctx)
+#endif
+              {
+                // ToDo/FixMe: Need function to account for chunks. For now, no errors encountered.
+                dynamic_request (req, tmpBuffer, bRead);
+              }
+              // Else, just send the file...
+              else
+              {
+              // After sending the appropriate header....
+#if defined (CONFIG_HTTPD_USE_ASYNC)
+                httpd_socket_send (req->hd, req->fd, tmpBuffer, bRead, 0);
+#else
+                httpd_resp_send_chunk (req, tmpBuffer, bRead);
+#endif
+              }
+            }
+
+            // Free our work space
+            //F_LOGI (true, true, LC_MAGENTA, "Releasing allocation 0x%08X", (unsigned int)tmpBuffer);
+            vPortFree (tmpBuffer);
+            tmpBuffer = NULL;
+          }
 #if defined (CONFIG_HTTPD_USE_ASYNC)
           // Terminate the connection
-          httpd_sess_trigger_close(req->hd, req->fd);
+          //F_LOGI (true, true, LC_GREY, "Closing 'async' connection for %s", req->uri);
+          httpd_sess_trigger_close (req->hd, req->fd);
 #else
+          //F_LOGI (true, true, LC_GREY, "Closing connection for %s", req->uri);
           // Signal completion
-          httpd_resp_send_chunk(req, NULL, 0);
+          httpd_resp_send_chunk (req, NULL, 0);
 #endif
-
-          // Free our work space
-          //F_LOGI (true, true, LC_MAGENTA, "a) Releasing allocation 0x%08X", (unsigned int)tmpBuffer);
-          vPortFree (tmpBuffer);
-          tmpBuffer = NULL;
         }
-      }
+        //F_LOGI (true, true, LC_GREY, "Closing FP for %s. sys free: %d bytes, task free: %d", req->uri, esp_get_free_heap_size (), uxTaskGetStackHighWaterMark (NULL));
+        espfs_fclose (f);
 
 #ifndef CONFIG_HTTPD_USE_ASYNC
-      // Alls okay
-      err = ESP_OK;
+        // Alls okay
+        err = ESP_OK;
 #endif
+      }
     }
     else if ( stat.type == ESPFS_TYPE_DIR )
     {
@@ -431,9 +442,9 @@ IRAM_ATTR static  esp_err_t sendEspFs (httpd_req_t * req)
 
   // Clean up our mess
 #if defined (CONFIG_HTTPD_USE_ASYNC)
-  //F_LOGI (true, true, LC_MAGENTA, "b) Releasing allocation 0x%08X", (unsigned int)req->uri);
+  //F_LOGI (true, true, LC_MAGENTA, "Releasing allocation 0x%08X", (unsigned int)req->uri);
   vPortFree (req->uri);
-  //F_LOGI (true, true, LC_MAGENTA, "c) Releasing allocation 0x%08X", (unsigned int)arg);
+  //F_LOGI (true, true, LC_MAGENTA, "Releasing allocation 0x%08X", (unsigned int)arg);
   vPortFree(arg);
 #else
   return err;
@@ -452,18 +463,18 @@ IRAM_ATTR static  esp_err_t  async_espfs_handler (httpd_req_t * req)
   }
   else
   {
-    //F_LOGI (true, true, LC_BRIGHT_CYAN, "x) Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
+    //F_LOGI (true, true, LC_BRIGHT_CYAN, "Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
 
     char decUri[512] = {};
     url_decode (decUri, req->uri, 512);
-    //F_LOGV(true, true, LC_GREY, "cgiConfig: %s -> %s\n", req->uri, decUri);
+    //F_LOGI(true, true, LC_GREY, "cgiConfig: %s -> %s", req->uri, decUri);
 
     resp_arg->uri = strdup (decUri);
     resp_arg->fd  = httpd_req_to_sockfd (req);
     resp_arg->hd  = req->handle;
     resp_arg->fp  = req->user_ctx;
 
-    //F_LOGV(true, true, LC_MAGENTA, "%0X -> %0X *\n", (unsigned int)&resp_arg->fp, (unsigned int)resp_arg->fp);
+    //F_LOGV(true, true, LC_MAGENTA, "%0X -> %0X *", (unsigned int)&resp_arg->fp, (unsigned int)resp_arg->fp);
 
     if ( resp_arg->fd < 0 )
     {
@@ -514,7 +525,7 @@ static esp_err_t  async_cgi_handler (httpd_req_t *req)
   }
   else
   {
-    //F_LOGI (true, true, LC_BRIGHT_CYAN, "z) Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
+    //F_LOGI (true, true, LC_BRIGHT_CYAN, "Allocated %d bytes of memory at location 0x%08X", sizeof (struct async_resp_arg), resp_arg);
 
     char  decUri[512] = {};
     url_decode (decUri, req->uri, 512);

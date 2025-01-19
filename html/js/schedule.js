@@ -18,7 +18,7 @@ const EVENT_DISABLED     = 0x80;     // Event is not active (don't run)
 function clone_row(tbl, id)
 {
   // Get our parent table, which is the table we are inserting a new row.
-  const tbdy=tbl.getElementsByTagName('tbody')[0];
+  const tbdy=tbl.getElementsByTagName("tbody")[0];
   const clone=document.querySelector(`#t_${tbl.id}Row`).content.cloneNode(true);
   const divs=clone.querySelectorAll("td");
   tbdy.appendChild(clone);
@@ -32,6 +32,7 @@ function clone_row(tbl, id)
     divs[0].parentNode.id=`${tbl.id}_${tbdy.querySelectorAll("tr").length-1}`;/* -1 as we already added a row */
     divs[0].parentNode.classList.add("new");
   }
+  divs[0].parentNode.dataset.id=id;
   return (divs);
 }
 /**
@@ -53,7 +54,7 @@ function fillTable(type, jsonData)
 
   // Remove the old and introduce the new
   /** @type  {Object} ntbdy */
-  const ntbdy=document.createElement('tbody');
+  const ntbdy=document.createElement("tbody");
   /** @type  {Object} otbdy */
   const otbdy=document.querySelector(`#${tbl.id} > tbody`);
   otbdy.parentNode.replaceChild(ntbdy, otbdy);
@@ -69,7 +70,7 @@ function fillTable(type, jsonData)
     divEls[d++].querySelector("i").addEventListener("click", eventHandler);
 
     let el=divEls[d++].querySelector(".sharedsel");
-    if(tbl.id==='annual')
+    if(tbl.id==="annual")
     {
       el.dataset.value = `0:${sched.M}`;
       append_sharedSel(el, changeHandler);
@@ -82,7 +83,7 @@ function fillTable(type, jsonData)
       el.dataset.value = `2:${Number(sched.ed)-1}`;
       append_sharedSel(el, changeHandler);
     }
-    else if(tbl.id==='weekly')
+    else if(tbl.id==="weekly")
     {
       el.dataset.value = `1:${sched.D}`;
       append_sharedSel(el);
@@ -183,13 +184,13 @@ function extend_sharedSel(jsonStr)
 async function fetchMenuItems(JSONSource, start)
 {
   var doLoop=true;
-  var jsonItemsStr='';
+  var jsonItemsStr="";
 
   // request options
   const options={
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json"
     }
   };
   while(doLoop===true)
@@ -201,9 +202,9 @@ async function fetchMenuItems(JSONSource, start)
     {
       for(let it of data.items)
       {
-        if(jsonItemsStr!=='')
+        if(jsonItemsStr!=="")
         {
-          jsonItemsStr+=',';
+          jsonItemsStr+=",";
         }
         jsonItemsStr+=`{"name":"${it.name}","value":${it.id},"submenu":null}`;
       }
@@ -227,38 +228,38 @@ function set_row_defaults(tblId, divEls)
   divEls[d++].querySelector("i").addEventListener("click", eventHandler);
 
   let el=divEls[d++].querySelector(".sharedsel");
-  if(tblId==='annual')
+  if(tblId==="annual")
   {
-    el.dataset.value = '0:0';
+    el.dataset.value = "0:0";
     append_sharedSel(el, changeHandler);
 
     el=divEls[d++].querySelector(".sharedsel");
-    el.dataset.value = '2:0';
+    el.dataset.value = "2:0";
     append_sharedSel(el, changeHandler);
 
     el=divEls[d++].querySelector(".sharedsel");
-    el.dataset.value = '2:0';
+    el.dataset.value = "2:0";
     append_sharedSel(el, changeHandler);
   }
-  else if(tblId==='weekly')
+  else if(tblId==="weekly")
   {
-    el.dataset.value = '1:0';
+    el.dataset.value = "1:0";
     append_sharedSel(el);
   }
   el=divEls[d++].querySelector(".timesel");
-  el.dataset.value = '00:00';
+  el.dataset.value = "00:00";
   new timesel(el);
 
   el=divEls[d++].querySelector(".timesel");
-  el.dataset.value='00:00';
+  el.dataset.value="00:00";
   new timesel(el);
 
   el=divEls[d++].querySelector(".sharedsel");
-  el.dataset.value='theme:0';
+  el.dataset.value="theme:0";
   append_sharedSel(el);
 
   el=divEls[d++].querySelector(".sharedsel");
-  el.dataset.value='brightness:2';
+  el.dataset.value="brightness:2";
   append_sharedSel(el);
 
   el=divEls[d++].querySelector("input[type=checkbox]");
@@ -294,7 +295,7 @@ function changeHandler(_this, event)
   let retVal=true;
   let tgt=event.target;
   /* check we are on target */
-  if(tgt.classList.contains('dropdown-item')===true)
+  if(tgt.classList.contains("dropdown-item")===true)
   {
     /* Get the type of dropdown menu we are dealing with */
     let type=_this.target.dataset.type;
@@ -312,7 +313,7 @@ function changeHandler(_this, event)
         replace_month(deEl, tgt.textContent);
 
         /* Get the max days in the month before selection */
-        let curMonth=closest(tgt, '.dropdown-container').dataset.value;
+        let curMonth=closest(tgt, ".dropdown-container").dataset.value;
         let curMax=sharedSel.daysInMonth[curMonth]-1;
 
         /* Check the current days are valid for the selected month */
@@ -363,24 +364,25 @@ function eventHandler(event)
   if(event.type==="click")
   {
     tgt=event.target;
-    if(tgt.classList.contains('add')===true)
+    if(tgt.classList.contains("add")===true)
     {
       // If we don't have 'template' support we don't get a new row.
       if("content" in document.createElement("template"))
       {
-        const tbl=closest(tgt, 'table');
-        if(typeof tbl==='object')
+        const tbl=tgt.closest("table");
+        if(typeof tbl==="object")
         {
           set_row_defaults(tbl.id, clone_row(tbl, 0xff));
         }
       }
     }
-    else if(tgt.classList.contains('del')===true)
+    else if(tgt.classList.contains("del")===true)
     {
-      const tbl=closest(tgt, 'table');
-      if(typeof tbl==='object')
+      const tbl=tgt.closest("table");
+      if(typeof tbl==="object")
       {
-        console.log(tbl.id, closest(tgt, 'tr').id);
+        console.log(tgt.closest("tr").id);
+        user_confirm(`Delete the event for`);
       }
     }
   }
@@ -404,14 +406,14 @@ function setFooter(type)
   {
     let foot=tbl.createTFoot(0);
     let nr=foot.insertRow(0);
-    let td=document.createElement('td');
+    let td=document.createElement("td");
     td.classList.add("icon");
-    let el=document.createElement('i');
+    let el=document.createElement("i");
     el.classList.add("add");
     el.addEventListener("click", eventHandler);
     td.appendChild(el);
     nr.appendChild(td);
-    td=document.createElement('td');
+    td=document.createElement("td");
     td.colSpan=11;
     nr.appendChild(td);
   }
@@ -427,3 +429,16 @@ function page_onload()
   fetchSchedule("weekly", 0);
 }
 
+/**
+ *
+ * @param {String} msg
+ * @returns {Boolean}
+ */
+function user_confirm(msg)
+{
+  let retVal=false;
+
+  var Val=confirm("Do you want to continue ?");
+
+  return retVal;
+}
