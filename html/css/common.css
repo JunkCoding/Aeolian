@@ -304,9 +304,6 @@ pre {
 .form-input[type=button] {
   font-weight: 300;
   -webkit-touch-callout: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   text-align: center;
   text-decoration: none !important;
   line-height: 28px;
@@ -1216,18 +1213,22 @@ table > tfoot:not(:empty) ~ :last-child > tr:last-of-type {
   display: inline-flex;
   margin: 12px 0px 0px 0px;
 }
-input.sta_test {
+input.sta_test,
+input.reload {
   background-color: #1c70a9;
   margin: 8px 0px 0px 8px;
 }
-input.sta_test:hover {
+input.sta_test:hover,
+input.reload:hover {
   background-color: #2b95db;
 }
-input.sta_save {
+input.sta_save,
+input.save {
   background-color: #0c770c;
   margin: 8px 0px 0px 8px;
 }
-input.sta_save:hover {
+input.sta_save:hover,
+input.save:hover {
   background-color: #15b215;
 }
 input.scan_start {
@@ -1357,9 +1358,9 @@ input[type=submit]:active {
   border-radius: 10px;
   min-width: 120px;
   font-size: 14px;
-  height: 22px;
-  min-height: 22px;
-  line-height: 16px;
+  height: 21px;
+  min-height: 21px;
+  line-height: 19px;
 }
 
 /*

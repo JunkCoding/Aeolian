@@ -37,28 +37,44 @@ function clone_row(tbl, id)
 }
 /**
  *
- * @param {*} type
- * @param {*} jsonData
+ * @param {*} jsonSource The table type (ie. Annual or Weekly schedules)
+ * @param {*} jsonData The JSON data with which to fill the table
+ * @param {Number} pos Current position in our list of fetched items
  * @returns
  */
-function fillTable(type, jsonData)
+function fillTable(jsonSource, jsonData, pos)
 {
-  /** @type  {Object} tbl */
-  let tbl=_(type);
-
-  /* Check it is the right data */
-  if(jsonData.sched!==type)
+  /** @jsonSource  {Object} tbl */
+  let tbl=_(jsonSource);
+  if(tbl==undefined)
   {
     return;
   }
 
-  // Remove the old and introduce the new
-  /** @type  {Object} ntbdy */
-  const ntbdy=document.createElement("tbody");
-  /** @type  {Object} otbdy */
-  const otbdy=document.querySelector(`#${tbl.id} > tbody`);
-  otbdy.parentNode.replaceChild(ntbdy, otbdy);
+  /* Check it is the right data */
+  if(jsonData.sched!==jsonSource)
+  {
+    return;
+  }
 
+  /* If we are on the first row, reset the tbody as we are probably doing a reload of data */
+  if(pos===0)
+  {
+    // Remove the old and introduce the new
+    /** @type  {Object} ntbdy */
+    const ntbdy=document.createElement("tbody");
+    /** @type  {Object} otbdy */
+    const otbdy=document.querySelector(`#${tbl.id} > tbody`);
+    otbdy.parentNode.replaceChild(ntbdy, otbdy);
+    /* Disable 'save' button as we have fresh content */
+    let btn=_(`${jsonSource}_save`);
+    if(btn instanceof HTMLInputElement)
+    {
+      btn.disabled=true;
+    }
+  }
+
+  /* Iterate through our list of items */
   let l=jsonData.items.length;
   for(var i=0; i < l; i++)
   {
@@ -116,19 +132,19 @@ function fillTable(type, jsonData)
 
   if(jsonData.next>0)
   {
-    fetchData(jsonData.next);
+    fetchData(jsonSource, jsonData.next);
   }
 }
 /**
  *
- * @param {*} type
+ * @param {*} jsonSource
  * @param {*} start
  */
-async function fetchSchedule(type, start)
+async function fetchSchedule(jsonSource, start)
 {
   /***** For POST which is not implemented :-) *****/
   /*const json={
-    schedule: type,
+    schedule: jsonSource,
     start: start
   };*/
   // request options
@@ -141,12 +157,12 @@ async function fetchSchedule(type, start)
     }
   };
 
-  const url=`schedule.json?schedule=${type}&start=${start}`;
+  const url=`schedule.json?schedule=${jsonSource}&start=${start}`;
   const response=await fetch(url, options).catch(handleError);
   const data=await response.json();
   if(data.noerr===true)
   {
-    fillTable(type, data);
+    fillTable(jsonSource, data, start);
   }
 }
 /**
@@ -168,7 +184,7 @@ async function fetchData(JSONSource, start)
   const data=await response.json();
   if(data.noerr===true)
   {
-    fillTable(JSONSource, data);
+    fillTable(JSONSource, data, start);
   }
 }
 function extend_sharedSel(jsonStr)
@@ -288,7 +304,6 @@ function replace_month(el, month)
  *
  * @param {Object} _this
  * @param {Object} event
- * @returns {Promise<boolean>}
  */
 function changeHandler(_this, event)
 {
@@ -355,8 +370,6 @@ function changeHandler(_this, event)
       }
     }
   }
-  /* Return false if we want to stop the change happening */
-  return retVal;
 }
 function eventHandler(event)
 {
@@ -382,7 +395,6 @@ function eventHandler(event)
       if(typeof tbl==="object")
       {
         console.log(tgt.closest("tr").id);
-        user_confirm(`Delete the event for`);
       }
     }
   }
@@ -418,6 +430,29 @@ function setFooter(type)
     nr.appendChild(td);
   }
 }
+/**
+ *
+ * @param {String} which
+ */
+function save_schedule(which)
+{
+  openBusyMesg("Saving...");
+  closeBusyMesg();
+}
+/**
+ *
+ * @param {String} which
+ */
+function reload_schedule(which)
+{
+  openBusyMesg("Reloading...");
+  fetchSchedule(which, 0);
+  closeBusyMesg();
+}
+function toggleFlag(obj)
+{
+  console.log(obj);
+}
 function page_onload()
 {
   set_background();
@@ -427,18 +462,4 @@ function page_onload()
   setFooter("annual");
   fetchSchedule("annual", 0);
   fetchSchedule("weekly", 0);
-}
-
-/**
- *
- * @param {String} msg
- * @returns {Boolean}
- */
-function user_confirm(msg)
-{
-  let retVal=false;
-
-  var Val=confirm("Do you want to continue ?");
-
-  return retVal;
 }

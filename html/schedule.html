@@ -164,8 +164,8 @@
       </table>
     </div>
     <div class="btn_group">
-      <div class="submit"><input type="submit" class="schedule" id="weekly_save" value="Save" onclick="" disabled></div>
-      <div class="submit"><input type="submit" class="schedule" id="weekly_reload" value="Reload" onclick=""></div>
+      <div class="submit"><input type="submit" class="save" id="weekly_save" value="Save" onclick="save_schedule('weekly')"></div>
+      <div class="submit"><input type="submit" class="reload" id="weekly_reload" value="Reload" onclick="reload_schedule('weekly')"></div>
     </div>
     <div class="schedule" data-title="Annual Events">
       <h2>Annual Events</h2>
@@ -212,8 +212,8 @@
       </table>
     </div>
     <div class="btn_group">
-      <div class="submit"><input type="submit" class="schedule" id="annual_save" value="Save" onclick=""></div>
-      <div class="submit"><input type="submit" class="schedule" id="annual_reload" value="Reload" onclick=""></div>
+      <div class="submit"><input type="submit" class="save" id="annual_save" value="Save" onclick="save_schedule('annual')"></div>
+      <div class="submit"><input type="submit" class="reload" id="annual_reload" value="Reload" onclick="reload_schedule('annual')"></div>
     </div>
   </div>
 </body>
