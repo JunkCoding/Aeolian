@@ -54,6 +54,7 @@
 .row-header {
   box-shadow: 0 0 0 1px var(--def-col-border);
   vertical-align: bottom;
+  padding-bottom: 6px;
 }
 
 .table-header-rotated th.rotate-45 > div {
@@ -102,7 +103,8 @@
 .table-striped-row > tbody > tr:nth-of-type(even) {
   background-color: #a91616b8;
 }
-
+/* For hiding deleted rows when a pending save is active */
+.deleted,
 /* For hiding surplus days in requisite months */
 .February * .feb,
 .noleap * .noleap,

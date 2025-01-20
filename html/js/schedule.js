@@ -405,7 +405,13 @@ function eventHandler(event)
       const tbl=tgt.closest("table");
       if(typeof tbl==="object")
       {
-        console.log(tgt.closest("tr").id);
+        let tr=tgt.closest("tr");
+        if(tr!=undefined)
+        {
+          /* This is way too easy, something has to go wrong */
+          tr.classList.add("deleted");
+          enable_button(closest(tgt, "table").id, true);
+        }
       }
     }
   }
@@ -456,6 +462,20 @@ function save_schedule(which)
     for(let i=0; i<tbrl; i++)
     {
       const divs=tbl.tBodies[0].rows[i].querySelectorAll("td");
+      const json={
+        sched: which,
+        mode: 1,
+        N: i,
+        D: divs[1].childNodes[1].dataset.value,
+        SH: divs[2].childNodes[1].childNodes[0].value,
+        SM: divs[2].childNodes[1].childNodes[2].value,
+        EH: divs[3].childNodes[1].childNodes[0].value,
+        EM: divs[3].childNodes[1].childNodes[2].value,
+        Th: divs[4].childNodes[1].dataset.value,
+        Br: divs[5].childNodes[1].dataset.value,
+        Fl: (divs[6].childNodes[1].childNodes[1].checked&&EVENT_DEFAULT)+(divs[7].childNodes[1].childNodes[1].checked&&EVENT_LIGHTSOFF)+(divs[8].childNodes[1].childNodes[1].checked&&EVENT_AUTONOMOUS)+(divs[9].childNodes[1].childNodes[1].checked&&EVENT_DEFAULT)
+      };
+      console.log(JSON.stringify(json));
     }
   }
   closeBusyMesg();
@@ -484,7 +504,7 @@ async function page_onload()
   await fetchMenuItems("theme", 0);
   /* Sometimes, we complete the loading of the annual/weekly before the menu items have been
      added to the layout, causing minor display issues */
-  await sleep(40);
+  await sleep(25);
   fetchSchedule("annual", 0);
   fetchSchedule("weekly", 0);
 }

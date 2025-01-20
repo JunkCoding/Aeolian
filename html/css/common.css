@@ -4,7 +4,7 @@
   --def-col-fg: #fff;
   --def-col-bg: #1a1616f0;
   --def-col-border: #b90101e5;
-  --def-col-input: #e9d6fd;
+  --def-col-input: #00db9d;
   --def-col-shadow: #000;
 
   --def-col-fg-tr: #fff;
@@ -157,14 +157,12 @@ p {
   display: block;
 }
 
-h1,
 h2,
 h3 {
   font-weight: var(--font-weight-def);
-  margin: 15px 0px 15px 8px;
+  margin: 15px 0px 14px 8px;
   display: block;
 }
-
 h4,
 h5,
 h6 {
@@ -179,6 +177,8 @@ small {
 }
 
 h1 {
+  /*margin: 8px 0px 0px 8px;*/
+  padding: 8px 0px 30px 8px;
   font-size: 1.8em;
   font-weight: var(--font-weight-bld);
 }
@@ -1217,7 +1217,7 @@ table > tfoot:not(:empty) ~ :last-child > tr:last-of-type {
 }
 .btn_group {
   display: inline-flex;
-  margin: 12px 0px 0px 0px;
+  margin: 14px 0px 8px 0px;
 }
 input.sta_test,
 input.reload {
@@ -1277,60 +1277,6 @@ input.setboot {
 input.setboot:hover {
   background-color: #ca21b4;
 }
-/*
-input.upload:disabled {
-  background-color: grey;
-  border: 1px solid black;
-  pointer-events: none;
-}*/
-/*********************************/
-
-/* ------ */
-/* make default radio 'invisible' */
-/*
-.radio_tick input[type=radio] {
-  position: absolute;
-  opacity: 0;
-  height: 24px;
-  width: 24px;
-}
-.radio_tick input[type=radio]:checked {
-  background-color: var(--def-col-bg);
-}
-*/
-/* make new radio outer circle */
-/*
-input[type=radio]:before {
-  content: " ";
-  display: inline-block;
-  position: relative;
-  width: 0.8em;
-  height: 0.8em;
-  border-radius: 80%;
-  border: 1px solid greeenyellow;
-  background-color: var(--def-col-bg);
-}
-*/
-/* change colour of radio outer circle when checked */
-/*
-input[type=radio]:checked:before {
-  border-color: red;
-}
-*/
-/* make new radio inner circle when checked */
-/*
-input[type=radio]:checked:after {
-  content: "";
-  display: block;
-  position: absolute;
-  width: 0.65em;
-  height: 0.65em;
-  border-radius: 70%;
-  top: 0.4em;
-  left: 0.13em;
-  background: Red;
-}
-*/
 /* ------ */
 #run_cmd {
   background-color: var(--def-col-bg);
@@ -1366,7 +1312,7 @@ input[type=submit]:active {
   font-size: 14px;
   height: 21px;
   min-height: 21px;
-  line-height: 20px;
+  line-height: 19px;
 }
 
 /*
