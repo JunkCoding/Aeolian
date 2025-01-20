@@ -37,6 +37,19 @@ function clone_row(tbl, id)
 }
 /**
  *
+ * @param {string} button Name of the button without '_save' suffix.
+ * @param {boolean} state Whether to set the button as enabled=true or disabled=false
+ */
+function enable_button(button, state)
+{
+  let btn=_(`${button}_save`);
+  if(btn instanceof HTMLInputElement)
+  {
+    btn.disabled=!state;
+  }
+}
+/**
+ *
  * @param {*} jsonSource The table type (ie. Annual or Weekly schedules)
  * @param {*} jsonData The JSON data with which to fill the table
  * @param {Number} pos Current position in our list of fetched items
@@ -67,11 +80,7 @@ function fillTable(jsonSource, jsonData, pos)
     const otbdy=document.querySelector(`#${tbl.id} > tbody`);
     otbdy.parentNode.replaceChild(ntbdy, otbdy);
     /* Disable 'save' button as we have fresh content */
-    let btn=_(`${jsonSource}_save`);
-    if(btn instanceof HTMLInputElement)
-    {
-      btn.disabled=true;
-    }
+    enable_button(jsonSource, false);
   }
 
   /* Iterate through our list of items */
@@ -370,6 +379,8 @@ function changeHandler(_this, event)
       }
     }
   }
+  /* Matt, don't delete this again, you wally! */
+  return retVal;
 }
 function eventHandler(event)
 {
@@ -437,6 +448,16 @@ function setFooter(type)
 function save_schedule(which)
 {
   openBusyMesg("Saving...");
+  enable_button(which, false);
+  let tbl=_(which);
+  if(tbl instanceof HTMLTableElement)
+  {
+    let tbrl=tbl.tBodies[0].rows.length;
+    for(let i=0; i<tbrl; i++)
+    {
+      const divs=tbl.tBodies[0].rows[i].querySelectorAll("td");
+    }
+  }
   closeBusyMesg();
 }
 /**
@@ -452,14 +473,18 @@ function reload_schedule(which)
 function toggleFlag(obj)
 {
   console.log(obj);
+  enable_button(closest(obj, "table").id, true);
 }
-function page_onload()
+async function page_onload()
 {
   set_background();
   extend_sharedSel(jsonBri);
-  fetchMenuItems("theme", 0);
   setFooter("weekly");
   setFooter("annual");
+  await fetchMenuItems("theme", 0);
+  /* Sometimes, we complete the loading of the annual/weekly before the menu items have been
+     added to the layout, causing minor display issues */
+  await sleep(40);
   fetchSchedule("annual", 0);
   fetchSchedule("weekly", 0);
 }

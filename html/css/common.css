@@ -24,8 +24,10 @@
   --dd-col-lu-fg: #fff;
   --dd-col-li-bg: #4d0b05f5;
   --dd-col-li-fg: #fff;
-  --dd-col-lu-sb: #250000;
-  --dd-col-lu-th: #999;
+
+  /*  #605090 #907090; */
+  --dd-col-lu-sb: #907090;
+  --dd-col-lu-th: #605090;
 
   --tickbox-col-border-def: #004cffad;
   --tickbox-col-border-sel: #8e24aa;
@@ -55,31 +57,33 @@
   --navbar-col-fg: #e1dede;
   --navbar-col-hover: #ff9800e0;
   --navbar-col-active: #d50000;
+
+  --font-weight-min: 100;
+  --font-weight-def: 300;
+  --font-weight-ddl: 400;
+  --font-weight-hdr: 100;
+  --font-weight-bld: 900;
 }
-/*no worky
-.main {
-  border-image: linear-gradient(to right, #3acfd5 0%, #3a4ed5 100%) 1;
-  border-radius: 5px;
-  border-width: 4px;
-  border-style: solid;
-  padding: 5px;
-}*/
+@font-face {
+  font-family: "Alatsi Regular";
+  font-style: normal;
+  font-weight: var(--font-weight-def);
+  font-display: swap;
+  src: url("/fonts/Alatsi-Regular.ttf") format("truetype");
+}
 body {
-  font: 100%/17px 'Helvetica Neue', helvetica, arial, sans-serif;
-  font-size: 1em;
-  font-weight: 300;
-  font-family: sans-serif;
-  line-height: 1.40;
+  background-color: #04040A;
+  -webkit-user-select: none;user-select: none;
+  font-family: "Alatsi Regular";
+  font: 100%/17px "Alatsi Regular";
   min-height: 100vh;
   color: var(--def-col-fg);
-  /*text-shadow: 0 0 5px;*/
 }
 html,
 body,
 svg {
   height: 100%;
 }
-
 .noclip {
   /* Prevent background color leak outs */
   -webkit-background-clip: padding-box;
@@ -123,7 +127,7 @@ h6 {
 .alert a,
 a {
   text-decoration: none;
-  font-weight: 400;
+  font-weight: var(--font-weight-def);
 }
 
 blockquote {
@@ -149,14 +153,14 @@ p {
 
 .alert {
   margin: 15px 0px;
-  font-weight: normal;
+  font-weight: var(--font-weight-def);
   display: block;
 }
 
 h1,
 h2,
 h3 {
-  font-weight: normal;
+  font-weight: var(--font-weight-def);
   margin: 15px 0px 15px 8px;
   display: block;
 }
@@ -164,7 +168,7 @@ h3 {
 h4,
 h5,
 h6 {
-  font-weight: normal;
+  font-weight: var(--font-weight-def);
   margin: 10px 0px 0px 12px;
   display: block;
 }
@@ -176,7 +180,7 @@ small {
 
 h1 {
   font-size: 1.8em;
-  font-weight: bold;
+  font-weight: var(--font-weight-bld);
 }
 
 h2 {
@@ -225,7 +229,7 @@ h6 {
 code,
 pre {
   font-size: .9em;
-  font-weight: 300;
+  font-weight: var(--font-weight-def);
   border-radius: 5px;
   background-color: var(--def-col-bg);
 }
@@ -255,7 +259,7 @@ pre {
   outline: 0;
   box-sizing: border-box;
   margin: 0 5px 20px;
-  font-weight: 300;
+  font-weight: var(--font-weight-def);
   display: inline-block;
   transition: all .3s;
   height: 40px;
@@ -302,7 +306,7 @@ pre {
 
 .form-input[type=submit],
 .form-input[type=button] {
-  font-weight: 300;
+  font-weight: var(--font-weight-def);
   -webkit-touch-callout: none;
   text-align: center;
   text-decoration: none !important;
@@ -326,7 +330,7 @@ pre {
   outline: 0;
   box-sizing: border-box;
   margin: 0 5px 20px;
-  font-weight: 300;
+  font-weight: var(--font-weight-def);
   color: #a0a0a0;
 }
 
@@ -458,8 +462,8 @@ pre {
   display: flex;
   justify-content: center;
   list-style-type: none;
-  margin-top: 8px;
-  margin-bottom: 20px;
+  margin-top: 12px;
+  margin-bottom: 12px;
   padding: 0px 0px;
   overflow: hidden;
   min-width: 900px;
@@ -469,14 +473,15 @@ pre {
 .navbar a {
   float: left;
   display: block;
-  font-size: 16px;
+  font-size: 17px;
   text-align: center;
+  font-weight: var(--font-weight-bld);
   color: var(--navbar-col-fg);
   -webkit-text-decoration: none;
   background-color: var(--navbar-col-bg);
   border: 1px solid var(--navbar-col-border);
   text-decoration: none;
-  padding: 0.1em;
+  padding: 0.2em;
   width: 5.6em;
 }
 
@@ -694,7 +699,7 @@ input[class="off"]:focus+svg {
   font-size: 14px;
   color: white;
   font-family: Trebuchet, Arial, sans-serif;
-  font-weight: bold;
+  font-weight: var(--font-weight-bld);
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -752,6 +757,7 @@ input[class="off"]:focus+svg {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  user-select: none;;
 }
 
 .onoffswitch-checkbox {
@@ -784,7 +790,7 @@ input[class="off"]:focus+svg {
   font-size: 12px;
   color: white;
   font-family: Trebuchet, Arial, sans-serif;
-  font-weight: bold;
+  font-weight: var(--font-weight-bld);
   box-sizing: border-box;
 }
 
@@ -1010,14 +1016,14 @@ table {
   thead th {
     padding: 1px 2px 1px 8px;
     font-size: 17px;
-    font-weight: 400;
+    font-weight: var(--font-weight-hdr);
   }
   tr td,
   tbody td,
   thead td {
     font-size:16px;
-    font-weight: lighter;
-    font-style: italic;
+    font-weight: var(--font-weight-def);
+    /*font-style: italic;*/
   }
   .nopadding {
     padding: 0px 6px 0px;
@@ -1170,8 +1176,8 @@ table {
     color: var(--def-col-input);
     border: 0;
     font-size: 15px;
-    font-style: italic;
-    font-weight: 100;
+    /*font-style: italic;*/
+    font-weight: var(--font-weight-def);
     width:100%;
     max-width: 300px;
   }
@@ -1360,7 +1366,7 @@ input[type=submit]:active {
   font-size: 14px;
   height: 21px;
   min-height: 21px;
-  line-height: 19px;
+  line-height: 20px;
 }
 
 /*
@@ -1401,7 +1407,7 @@ div#fw-selector {
   cursor: pointer;
   width: 110px;
   height: 22px;
-  line-height:18px;
+  line-height: 19px;
 }
 
 div#fw-selector:hover {
@@ -1472,32 +1478,33 @@ span#fw-details {
 .table-row {
   display: flex;
   display: -webkit-flex;
-  flex-direction: row;
   -webkit-flex-direction: row;
-  flex-wrap: no-wrap;
+  flex-direction: row;
   -webkit-flex-wrap: no-wrap;
+  flex-wrap: no-wrap;
   padding-left: 15px;
 }
 
 .wrapper {
   display: flex;
   display: -webkit-flex;
-  flex-direction: row;
   -webkit-flex-direction: row;
+  flex-direction: row;
 }
 
 .column {
-  flex-grow: 0;
   -webkit-flex-grow: 0;
-  flex-shrink: 0;
+  flex-grow: 0;
   -webkit-flex-shrink: 0;
+  flex-shrink: 0;
   vertical-align: top;
   margin: 0px 4px 0px 0px;
 }
 
 .zone_hdr {
-  /*font-weight: bold;*/
+  /*font-weight: var(--font-weight-bold);*/
   color: var(--def-col-fg);
+  line-height: 24px;
   width: 82px;
 }
 
@@ -1518,7 +1525,7 @@ span#fw-details {
 
 .table-row.header {
   background-color: var(--def-col-bg);
-  font-weight: bold;
+  font-weight: var(--font-weight-bld);
   padding-top: 1px;
   padding-bottom: 1px;
 }
@@ -1533,7 +1540,7 @@ span#fw-details {
   display: inline;
   padding: .2em .6em .3em;
   font-size:15x;
-  font-weight: 700;
+  font-weight: var(--font-weight-bld);
   line-height: 1;
   color: var(--def-col-fg);;
   text-align: center;
@@ -1605,13 +1612,17 @@ span#fw-details {
   color: greenyellow;
 }
 /*********************************************************************************/
-ul::-webkit-scrollbar-thumb {
+.dropdown-menu::-webkit-scrollbar-thumb {
   background-color: var(--dd-col-lu-th);
 }
-
-ul::-webkit-scrollbar {
+.dropdown-menu::-webkit-scrollbar {
   background-color: var(--dd-col-lu-sb);
   width: 7px;
+}
+.dropdown-menu {
+  overflow: hidden;
+  scrollbar-color: var(--dd-col-lu-th) var(--dd-col-lu-sb);
+  scrollbar-width: thin;
 }
 .dropdown-container {
   position: relative;
@@ -1624,7 +1635,7 @@ ul::-webkit-scrollbar {
   font-size: 15px;
   padding-left: 4px;
   border-radius: 4px;
-  font-weight: 400;
+  font-weight: var(--font-weight-ddl);
   cursor: pointer;
   position: relative;
   transition: all ease-in-out 0.3s;
@@ -1644,24 +1655,25 @@ ul::-webkit-scrollbar {
     z-index: 2;
 
     ul {
+      background-color: var(--dd-col-li-bg);
       clip-path: inset(0 round 9px);
       max-height: 220px;
       overflow-x: hidden;
       overflow-y: scroll;
-      padding: 2px 0px 2px 0px;
+      padding-bottom: 2px;
+      padding-top: 2px;
       list-style: none;
-      padding: 0;
       margin: 0;
       z-index: 1;
     }
     li {
       background-color: var(--dd-col-li-bg);
       color: var(--dd-col-li-fg);
-      padding: 1px 0px 1px 10px;
+      padding: 3px 0px 5px 8px;
       cursor: pointer;
       font-size: 16px;
-      font-weight: lighter;
-      font-style: italic;
+      font-weight: var(--font-weight-min);
+      /*font-style: italic;*/
     }
     li:hover {
       background-color: var(--dd-col-bg-hl);
@@ -1863,6 +1875,7 @@ input:focus-within {
 input[type="range"] {
   /* To remove default styles appplied by webkit browsers */
   -webkit-appearance: none;
+  appearance: none;
   width: 14em;
   background: transparent;
   position: relative;

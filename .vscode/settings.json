@@ -114,7 +114,7 @@
   "idf.gitPathWin": "E:\\VSCode\\esp\\v5.3.1\\tools\\tools\\idf-git\\2.39.2\\cmd\\git.exe",
   "editor.fontSize": 11,
   "workbench.startupEditor": "none",
-  "scm.inputFontSize": 10,
+  "scm.inputFontSize": 11,
   "markdown.preview.fontSize": 11,
   "editor.minimap.sectionHeaderFontSize": 11,
   "editor.fontFamily": "Consolas",

@@ -14,8 +14,8 @@
 #define     STACKSIZE_MQTT_BROKER     3072
 #define     STACKSIZE_SCHEDULER       4096
 #define     STACKSIZE_SNTP            4096
-#define     STACKSIZE_STATS           3072
-#define     STACKSIZE_WSS             4096
+#define     STACKSIZE_STATS           2048
+#define     STACKSIZE_WSS             3072
 #define     STACKSIZE_TEST_STA        3072
 
 // Task names

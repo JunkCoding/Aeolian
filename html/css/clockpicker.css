@@ -30,7 +30,7 @@
   height: 28px;
   color: #eee;
   font-size: 15px;
-  font-weight: bold;
+  font-weight: var(--font-weight-def);
   cursor:pointer;
   z-index:0;
 }
