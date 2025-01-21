@@ -461,20 +461,49 @@ function save_schedule(which)
     let tbrl=tbl.tBodies[0].rows.length;
     for(let i=0; i<tbrl; i++)
     {
-      const divs=tbl.tBodies[0].rows[i].querySelectorAll("td");
-      const json={
+      const row=tbl.tBodies[0].rows[i];
+      const divs=row.querySelectorAll("td");
+      let next=i+1;
+      let item;
+      let json={
         sched: which,
-        mode: 1,
-        N: i,
-        D: divs[1].childNodes[1].dataset.value,
-        SH: divs[2].childNodes[1].childNodes[0].value,
-        SM: divs[2].childNodes[1].childNodes[2].value,
-        EH: divs[3].childNodes[1].childNodes[0].value,
-        EM: divs[3].childNodes[1].childNodes[2].value,
-        Th: divs[4].childNodes[1].dataset.value,
-        Br: divs[5].childNodes[1].dataset.value,
-        Fl: (divs[6].childNodes[1].childNodes[1].checked&&EVENT_DEFAULT)+(divs[7].childNodes[1].childNodes[1].checked&&EVENT_LIGHTSOFF)+(divs[8].childNodes[1].childNodes[1].checked&&EVENT_AUTONOMOUS)+(divs[9].childNodes[1].childNodes[1].checked&&EVENT_DEFAULT)
+        mode: (row.classList.contains("deleted")? 2:1),
+        next: (next===tbrl? 0:next),
+        items: []
       };
+      /* ToDo: Really tempted to remove the duplication. */
+      if(which==="weekly")
+      {
+        item={
+          N: i,
+          D: divs[1].childNodes[1].dataset.value,
+          SH: divs[2].childNodes[1].childNodes[0].value,
+          SM: divs[2].childNodes[1].childNodes[2].value,
+          EH: divs[3].childNodes[1].childNodes[0].value,
+          EM: divs[3].childNodes[1].childNodes[2].value,
+          Th: divs[4].childNodes[1].dataset.value,
+          Br: divs[5].childNodes[1].dataset.value,
+          Fl: (divs[6].childNodes[1].childNodes[1].checked&&EVENT_DEFAULT)+(divs[7].childNodes[1].childNodes[1].checked&&EVENT_LIGHTSOFF)+(divs[8].childNodes[1].childNodes[1].checked&&EVENT_AUTONOMOUS)+(divs[9].childNodes[1].childNodes[1].checked&&EVENT_DEFAULT)
+        };
+      }
+      else// if(which==="annual")
+      {
+        item={
+          N: i,
+          M: divs[1].childNodes[1].dataset.value,
+          sd: divs[2].childNodes[1].dataset.value,
+          ed: divs[3].childNodes[1].dataset.value,
+          SH: divs[4].childNodes[1].childNodes[0].value,
+          SM: divs[4].childNodes[1].childNodes[2].value,
+          EH: divs[5].childNodes[1].childNodes[0].value,
+          EM: divs[5].childNodes[1].childNodes[2].value,
+          Th: divs[6].childNodes[1].dataset.value,
+          Br: divs[7].childNodes[1].dataset.value,
+          Fl: (divs[8].childNodes[1].childNodes[1].checked&&EVENT_DEFAULT)+(divs[9].childNodes[1].childNodes[1].checked&&EVENT_LIGHTSOFF)+(divs[10].childNodes[1].childNodes[1].checked&&EVENT_AUTONOMOUS)+(divs[11].childNodes[1].childNodes[1].checked&&EVENT_DEFAULT)
+        };
+      }
+      json.items.push(item);
+
       console.log(JSON.stringify(json));
     }
   }
