@@ -467,7 +467,7 @@ function save_schedule(which)
       let item;
       let json={
         sched: which,
-        mode: (row.classList.contains("deleted")? 2:1),
+        mode: (row.classList.contains("deleted")? 2:(row.classList.contains("new")? 3:1)),
         next: (next===tbrl? 0:next),
         items: []
       };

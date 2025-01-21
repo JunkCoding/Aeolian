@@ -507,10 +507,17 @@ pre {
   background-color: var(--navbar-col-bg);
   border: 1px solid var(--navbar-col-border);
   text-decoration: none;
-  padding: 0.2em;
+  padding: 0.23em;
   width: 5.6em;
 }
-
+.navbar a:first-child {
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+.navbar a:last-child {
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
 .navbar a:hover:not(.active) {
   background-color: var(--navbar-col-hover);
 }
