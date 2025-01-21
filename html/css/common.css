@@ -1603,7 +1603,7 @@ span#fw-details {
     ul {
       background-color: var(--dd-col-li-bg);
       clip-path: inset(0 round 9px);
-      max-height: 220px;
+      max-height: 228px; /* Check edge clip when adjusting */
       overflow-x: hidden;
       overflow-y: scroll;
       padding-bottom: 2px;
@@ -1729,10 +1729,7 @@ span.help {
   background: var(--pref-col-bg);
   border: 1px solid var(--pref-col-border);
   border-radius: 15px;
-  padding-left: 15px;
-  padding-right: 15px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  padding: 6px 15px 6px 15px;
 }
 
 /* ------ */

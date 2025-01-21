@@ -169,13 +169,8 @@ function createRowForAp (row, ap, hasFocus)
   input.name = "ssid";
   input.value = ap.ssid;
   input.addEventListener("change", function () { updateSelAP(ap.bssid, ap.ssid); });
-  /*if(document.getElementById("sta_ssid").value == ap.ssid) input.checked = "1";*/
-  /*
-  if (hasFocus)
-  {
-    input.checked = "1";
-  }*/
-  input.id = "opt-" + ap.ssid;
+  if(hasFocus){input.checked=true;}
+  input.id="opt-"+ap.ssid;
   radio.appendChild(input);
   row.appendChild(radio);
 
@@ -383,30 +378,45 @@ function toggleScan ()
     btn.value = "Scan Stop";
   }
 }
-
-async function staAwaitResults (el)
+/**
+ *
+ * @param {Number} cmd
+ */
+async function send_sta_cmd(cmd)
 {
-  let pwd_el = document.getElementById("sta_password");
-  let sid_el = document.getElementById("sta_ssid");
+  let pwd_el=document.getElementById("sta_password");
+  let sid_el=document.getElementById("sta_ssid");
 
-  openBusyMesg("Waiting...");
+  if(!(pwd_el&&sid_el)||!(pwd_el instanceof HTMLInputElement&&sid_el instanceof HTMLInputElement))
+  {
+    return;
+  }
 
-  const json = {
-    command: "2",
+  const json={
+    command: cmd,
     sta_ssid: sid_el.value,
     sta_password: baseEncode(pwd_el.value),
-    sta_bssid: (fixedAP ? selAP.bssid : "")
+    sta_bssid: (fixedAP? selAP.bssid:"")
   };
+
   // request options
-  const options = {
+  const options={
     method: "POST",
     body: JSON.stringify(json),
     headers: {
       "Content-Type": "application/json"
     }
   };
-  const url = "/wifi/cfgsta";
-  const response = await fetch(url, options).catch(handleError);
+
+  const url="/wifi/cfgsta";
+
+  return await fetch(url, options).catch(handleError);
+}
+
+async function staAwaitResults ()
+{
+  openBusyMesg("Waiting...");
+  const response=await send_sta_cmd(2);
   const data = await response.json();
   if (data.noerr === true)
   {
@@ -427,36 +437,17 @@ async function staAwaitResults (el)
   }
   // If not timeout, keep trying
   await sleep(500);
-  await staAwaitResults(el);
+  await staAwaitResults();
 }
 async function staTestConfig (el)
 {
-  let pwd_el = document.getElementById("sta_password");
-  let sid_el = document.getElementById("sta_ssid");
-
   openBusyMesg("Testing...");
-
-  const json = {
-    command: "1",
-    sta_ssid: sid_el.value,
-    sta_password: baseEncode(pwd_el.value),
-    sta_bssid: (fixedAP ? selAP.bssid : "")
-  };
-  // request options
-  const options = {
-    method: "POST",
-    body: JSON.stringify(json),
-    headers: {
-      "Content-Type": "application/json"
-    }
-  };
-  const url = "/wifi/cfgsta";
-  const response = await fetch(url, options).catch(handleError);
+  const response=await send_sta_cmd(1);
   const data = await response.json();
   if (data.noerr === true)
   {
     await sleep(1500);
-    await staAwaitResults(el);
+    await staAwaitResults();
   }
   else
   {
@@ -465,32 +456,13 @@ async function staTestConfig (el)
 }
 async function staSaveConfig (el)
 {
-  let pwd_el = document.getElementById("sta_password");
-  let sid_el = document.getElementById("sta_ssid");
-
   openBusyMesg("Saving...");
-
-  const json = {
-    command: "3",
-    sta_ssid: sid_el.value,
-    sta_password: baseEncode(pwd_el.value),
-    sta_bssid: (fixedAP ? selAP.bssid : "")
-  };
-  // request options
-  const options = {
-    method: "POST",
-    body: JSON.stringify(json),
-    headers: {
-      "Content-Type": "application/json"
-    }
-  };
-  const url = "/wifi/cfgsta";
-  const response = await fetch(url, options).catch(handleError);
+  const response=await send_sta_cmd(3);
   const data = await response.json();
   if (data.noerr === true)
   {
     await sleep(1500);
-    await staAwaitResults(el);
+    await staAwaitResults();
   }
   closeBusyMesg();
 }
