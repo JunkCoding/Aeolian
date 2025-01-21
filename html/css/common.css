@@ -492,12 +492,6 @@ pre {
 .navbar a.active {
   background-color: var(--navbar-col-active);
 }
-
-/*
-@media screen and (max-width: 600px) {
-  ul.navbar li.right, ul.navbar li { float: none; }
-}
-*/
 .navbar .icon {
   display: none;
 }
@@ -1600,7 +1594,7 @@ span#fw-details {
     background-color: var(--men-bg-col);
     z-index: 2;
 
-    ul {
+    ul,ol {
       background-color: var(--dd-col-li-bg);
       clip-path: inset(0 round 9px);
       max-height: 228px; /* Check edge clip when adjusting */
@@ -1626,7 +1620,8 @@ span#fw-details {
       color: var(--dd-col-fg-hl);
     }
   }
-  ul::before {
+  ul::before,
+  ol::before {
     content: "";
     pointer-events: none;
     position: absolute;

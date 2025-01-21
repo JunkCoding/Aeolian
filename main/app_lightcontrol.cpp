@@ -414,7 +414,12 @@ IRAM_ATTR void set_pm(bool switch_on)
   }
 }
 #endif /* CONFIG_PM_ENABLE */
-
+// **********************************************************************
+// **********************************************************************
+static int tSortById (const void *a, const void *b)
+{
+  return (int)((const themes_t *)a)->themeIdentifier - (int)((const themes_t *)b)->themeIdentifier;
+}
 // **********************************************************************
 // Initialise the LED display task
 // **********************************************************************
@@ -422,6 +427,9 @@ IRAM_ATTR void set_pm(bool switch_on)
 esp_err_t lights_init(void)
 {
   esp_err_t err = ESP_OK;
+
+    // Sort themese by their numeric ID
+  qsort (themes, NUM_THEMES, sizeof(themes_t), tSortById);
 
   // Initialise the LED system
   // *****************************************
