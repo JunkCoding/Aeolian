@@ -59,23 +59,47 @@
   --navbar-col-active: #d50000;
 
   --font-weight-min: 100;
-  --font-weight-def: 300;
+  --font-weight-def: 100;
   --font-weight-ddl: 400;
   --font-weight-hdr: 100;
   --font-weight-bld: 900;
 }
-@font-face {
+/*
+@font-face { // Really like, but size is prohibitive
   font-family: "Alatsi Regular";
   font-style: normal;
   font-weight: var(--font-weight-def);
   font-display: swap;
   src: url("/fonts/Alatsi-Regular.ttf") format("truetype");
+}*/
+@font-face { /* 60's style */
+  font-family: "Spicy Rice Regular";
+  font-style: normal;
+  font-weight: var(--font-weight-def);
+  font-display: swap;
+  src: url("/fonts/Spicy Rice-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Viga Regular";
+  font-style: normal;
+  font-weight: var(--font-weight-def);
+  font-display: swap;
+  src: url("/fonts/Viga-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Almendra Italic";
+  font-style: normal;
+  font-weight: var(--font-weight-def);
+  font-display: swap;
+  src: url("/fonts/Almendra-Italic.ttf") format("truetype");
 }
 body {
   background-color: #04040A;
   -webkit-user-select: none;user-select: none;
-  font-family: "Alatsi Regular";
-  font: 100%/17px "Alatsi Regular";
+  /*font-family: "Alatsi Regular";
+  font: 100%/17px "Alatsi Regular";*/
+  font-family: "Viga Regular";
+  font: 100%/17px "Viga Regular";
   min-height: 100vh;
   color: var(--def-col-fg);
 }
@@ -172,8 +196,10 @@ h6 {
 }
 
 small {
+  font-family: "Almendra Italic";
+  font: 95%/12px "Almendra Italic";
   color: #bb4700;
-  font-size: .55em;
+  /*font-size: .55em;*/
 }
 
 h1 {
